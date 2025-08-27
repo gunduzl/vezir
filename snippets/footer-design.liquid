@@ -1,0 +1,181 @@
+{% liquid
+  assign show_follow_on_shop = false
+  if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop
+    assign show_follow_on_shop = true
+  endif
+%}
+<div class="m-footer--bottom m-footer--bottom-{{ section.settings.design }} m-gradient m-color-{{ section.settings.footer_bottom_color_scheme }}">
+  <div class="{{ container }}">
+    <div class="m-footer--bottom-inner m:flex m:flex-col xl:m:flex-row m:justify-between m:items-end">
+      {% case section.settings.design %}
+        {% when 'footer-1' %}
+          {% if section.settings.copyright != blank %}
+            <div class="m-footer--bottom-left m:flex-none m:text-left m:w-full xl:m:text-left">
+              <span class="m-footer__copyright">{{ section.settings.copyright }}</span>
+              {%- if show_follow_on_shop -%}
+                <div class="m-follow-on-shop">
+                  {% comment %} TODO: enable theme-check once `login_button` is accepted as valid filter {% endcomment %}
+                  {% # theme-check-disable %}
+                  {{ shop | login_button: action: 'follow' }}
+                  {% # theme-check-enable %}
+                </div>
+              {%- endif -%}
+            </div>
+          {% endif %}
+          <div class="m-footer--bottom-right m:w-full m:flex-col lg:m:flex-row m:flex m:flex-wrap xl:m:justify-end">
+            {% if section.settings.show_currency_selector or section.settings.show_language_selector %}
+              <div class="m-footer--currency-language m:display-flex">
+                {% liquid
+                  if section.settings.show_country_selector
+                    render 'country-selector', pos: 'top'
+                  endif
+                  if section.settings.show_currency_selector
+                    render 'currency-switcher', pos: 'top'
+                  endif
+                  if section.settings.show_language_selector
+                    render 'language-switcher', pos: 'top'
+                  endif
+                %}
+              </div>
+            {% endif %}
+            {% if section.settings.show_social_links %}
+              {% render 'social-media-links' %}
+            {% endif %}
+            {% if section.settings.show_payment_icons %}
+              {% render 'payment-icons', section: section %}
+            {% endif %}
+            {% if section.settings.footer_bottom_menu != blank %}
+              {% assign menu = section.settings.footer_bottom_menu %}
+              <ul class="m-footer--bottom-menu m-link-lists m-link-lists--inline xl:m:justify-end{% if section.settings.show_menu_item_divider %} show-menu-item-divider{% endif %}">
+                {% for link in linklists[menu].links %}
+                  <li class="m-footer--bottom-menu-item m-link-lists--item">
+                    <a class="m-link" href="{{ link.url }}">{{ link.title }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% when 'footer-2' %}
+          {% if section.settings.show_payment_icons %}
+            <div class="m-footer--bottom-left m:w-full m:flex-1 xl:m:w-auto{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% render 'payment-icons', section: section %}
+            </div>
+          {% endif %}
+
+          {% if section.settings.copyright != blank %}
+            <div class="m-footer--bottom-center m:flex-1 m:text-left xl:m:text-center xl:m:w-auto m:w-full{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              <span class="m-footer__copyright">{{ section.settings.copyright }}</span>
+              {%- if show_follow_on_shop -%}
+                <div class="m-follow-on-shop">
+                  {% comment %} TODO: enable theme-check once `login_button` is accepted as valid filter {% endcomment %}
+                  {% # theme-check-disable %}
+                  {{ shop | login_button: action: 'follow' }}
+                  {% # theme-check-enable %}
+                </div>
+              {%- endif -%}
+            </div>
+          {% endif %}
+          {% if section.settings.show_social_links
+            or section.settings.show_currency_selector
+            or section.settings.show_language_selector
+            or section.settings.footer_bottom_menu
+            or section.settings.show_country_selector
+          %}
+            <div class="m-footer--bottom-right m:flex-1 m:flex m:flex-wrap m:items-left m:justify-left xl:m:w-auto m:w-full xl:m:justify-end m:flex-col md:m:flex-row{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% if section.settings.show_social_links %}
+                {% render 'social-media-links', extra_classes: 'justify-center md:justify-end' %}
+              {% endif %}
+              {% if section.settings.show_currency_selector
+                or section.settings.show_language_selector
+                or section.settings.show_country_selector
+              %}
+                <div class="m-footer--currency-language m:display-flex">
+                  {% liquid
+                    if section.settings.show_country_selector
+                      render 'country-selector', pos: 'top'
+                    endif
+
+                    if section.settings.show_currency_selector
+                      render 'currency-switcher', pos: 'top'
+                    endif
+
+                    if section.settings.show_language_selector
+                      render 'language-switcher', pos: 'top'
+                    endif
+                  %}
+                </div>
+              {% endif %}
+              {% if section.settings.footer_bottom_menu != blank %}
+                {% assign menu = section.settings.footer_bottom_menu %}
+                <ul class="m-footer--bottom-menu m-link-lists m-link-lists--inline{% if section.settings.show_menu_item_divider %} show-menu-item-divider{% endif %}">
+                  {% for link in linklists[menu].links %}
+                    <li class="m-footer--bottom-menu-item m-link-lists--item">
+                      <a class="m-link" href="{{ link.url }}">{{ link.title }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% when 'footer-3' %}
+          {% if section.settings.show_social_links
+            or section.settings.show_currency_selector
+            or section.settings.show_language_selector
+          %}
+            <div class="m-footer--bottom-left m:flex-1 m:flex-col m:display-flex m:flex-wrap m:items-left m:justify-left xl:m:justify-start xl:m:w-auto m:w-full{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% if section.settings.show_social_links %}
+                {% render 'social-media-links' %}
+              {% endif %}
+              <div class="m-footer--currency-language m:display-flex">
+                {% liquid
+                  if section.settings.show_country_selector
+                    render 'country-selector', pos: 'top'
+                  endif
+
+                  if section.settings.show_currency_selector
+                    render 'currency-switcher', pos: 'top'
+                  endif
+
+                  if section.settings.show_language_selector
+                    render 'language-switcher', pos: 'top'
+                  endif
+                %}
+              </div>
+            </div>
+          {% endif %}
+          {% if section.settings.copyright != blank %}
+            <div class="m-footer--bottom-center m:flex-1 xl:m:text-center xl:m:w-auto m:w-full{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              <span class="m-footer__copyright">{{ section.settings.copyright }}</span>
+              {%- if show_follow_on_shop -%}
+                <div class="m-follow-on-shop">
+                  {% comment %} TODO: enable theme-check once `login_button` is accepted as valid filter {% endcomment %}
+                  {% # theme-check-disable %}
+                  {{ shop | login_button: action: 'follow' }}
+                  {% # theme-check-enable %}
+                </div>
+              {%- endif -%}
+            </div>
+          {% endif %}
+          {% if section.settings.show_payment_icons or section.settings.footer_bottom_menu %}
+            <div class="m-footer--bottom-right m:flex-1 m:display-flex m:flex-col m:justify-center xl:m:justify-end xl:m:w-auto m:w-full{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% if section.settings.show_payment_icons %}
+                {% render 'payment-icons', section: section, classes: 'xl:m:justify-end' %}
+              {% endif %}
+              {% if section.settings.footer_bottom_menu != blank %}
+                {% assign menu = section.settings.footer_bottom_menu %}
+                <ul class="m-footer--bottom-menu m-link-lists m-link-lists--inline{% if section.settings.show_menu_item_divider %} show-menu-item-divider{% endif %}">
+                  {% for link in linklists[menu].links %}
+                    <li class="m-footer--bottom-menu-item m-link-lists--item">
+                      <a class="m-link" href="{{ link.url }}">{{ link.title }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% else %}
+
+      {% endcase %}
+    </div>
+  </div>
+</div>

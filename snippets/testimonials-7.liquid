@@ -1,0 +1,79 @@
+{% liquid
+  assign color_scheme_inherit = false
+  if section.settings.item_color_scheme == section.settings.color_scheme
+    assign color_scheme_inherit = true
+  endif
+%}
+
+<div class="m-testimonials__inner">
+  <div class="swiper-container swiper--equal-height">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div
+          class="swiper-slide"
+          {{ block.shopify_attributes }}
+          data-index="{{ forloop.index0 }}"
+        >
+          <div
+            class="m-testimonial{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}{% if color_scheme_inherit %} color-scheme-inherit{% endif %}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: {{ forloop.index }};"
+            {% endif %}
+          >
+            <div class="m-testimonial__wrapper m:flex-col lg:m:flex-row m-gradient m-color-{{ section.settings.item_color_scheme }}{% unless color_scheme_inherit %} m:blocks-radius{% endunless %}">
+              {% if block.settings.image != blank %}
+                <a
+                  href="{{ block.settings.image_link | default: '#' }}"
+                  class="m-testimonial__image md:m:block{% if color_scheme_inherit %} m:blocks-radius{% endif %}"
+                >
+                  {% render 'responsive-image', image: block.settings.image, image_class: 'm:w-full m:h-full' %}
+                </a>
+              {% endif %}
+              <div class="m-testimonial__content">
+                <div class="m-testimonial__info">
+                  {% if block.settings.title != blank %}
+                    <h3 class="m-testimonial__title h5 m:font-medium">{{ block.settings.title }}</h3>
+                  {% endif %}
+                  {% if section.settings.show_stars %}
+                    <div class="m-stars">
+                      {%- for i in (1..5) -%}
+                        <span class="m-star">{%- render 'icon', name: 'star-solid', size: 'small' -%}</span>
+                      {%- endfor -%}
+                    </div>
+                  {% endif %}
+                  {% if block.settings.description != blank %}
+                    <div class="m-testimonial__description rte h4">{{ block.settings.description }}</div>
+                  {% endif %}
+                </div>
+                {% if block.settings.product != blank or block.settings.footer != blank %}
+                  <div class="m-testimonial__footer">
+                    {%- assign product = block.settings.product -%}
+                    {% if block.settings.footer != blank %}
+                      <div class="m-testimonial__author h6 m:font-medium">{{ block.settings.footer }}</div>
+                    {% endif %}
+                    {% if block.settings.product != blank %}
+                      <a
+                        class="m-testimonial__product"
+                        href="{{ product.url }}"
+                        target="_blank"
+                      >
+                        {{ product.title }}
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% render 'slider-controls',
+  show_nav: section.settings.show_navigation,
+  show_pagination: section.settings.show_pagination,
+  absolute: true,
+  container: section.settings.container
+%}

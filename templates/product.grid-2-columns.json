@@ -1,0 +1,425 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumb": {
+      "type": "breadcrumb",
+      "settings": {
+        "container": "container",
+        "text_alignment": "center",
+        "hide_current": false,
+        "hide_on_mb": false,
+        "animations": "inherit"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "badge_ChqgGj": {
+          "type": "badge",
+          "settings": {}
+        },
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_saving": false,
+            "sale_badge_type": "percentage"
+          }
+        },
+        "inventory_status_VhWXH4": {
+          "type": "inventory_status",
+          "settings": {
+            "show_indicator_bar": true,
+            "normal_text": "",
+            "low_text": "<p>- Hurry! Limited stock left.</p>",
+            "outofstock_text": "",
+            "backordered_text": "<p>Backordered</p>"
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "size_title": "Size"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_atc_button": true,
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {
+            "show_atcp": true,
+            "show_ask_a_question": true,
+            "show_social": true
+          }
+        },
+        "shipping_VBJFtx": {
+          "type": "shipping",
+          "settings": {
+            "show_delivery_times": true,
+            "deliver_text": "Estimated Delivery:",
+            "deliver_days": "7",
+            "date_format": "%b %d",
+            "show_shipping_text": true,
+            "shipping_text": "<p><strong>Free Shipping & Returns: </strong>On all orders over $75</p>"
+          }
+        },
+        "trust_badge_NyBMd4": {
+          "type": "trust_badge",
+          "settings": {
+            "trust_badges_text": "<p>Guarantee safe & secure checkout</p>",
+            "trust_badges_image_width": "60%",
+            "position": "below"
+          }
+        }
+      },
+      "block_order": [
+        "badge_ChqgGj",
+        "title",
+        "price",
+        "inventory_status_VhWXH4",
+        "variant_picker",
+        "buy_buttons",
+        "addons",
+        "shipping_VBJFtx",
+        "trust_badge_NyBMd4"
+      ],
+      "settings": {
+        "container": "container-fluid",
+        "layout": "layout-3",
+        "show_atwl": true,
+        "enable_history_state": true,
+        "enable_variant_group_images": false,
+        "disable_selected_variant_default": false,
+        "show_featured_media": true,
+        "show_zoom_button": true,
+        "enable_video_autoplay": false,
+        "show_nav_media_mobile": true,
+        "show_pagination_mobile": false,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
+        "enable_dynamic_checkout": false,
+        "sticky_atc_compare": false
+      }
+    },
+    "product-details-tabs": {
+      "type": "product-details-tabs",
+      "blocks": {
+        "description": {
+          "type": "description",
+          "settings": {
+            "header": "Product description"
+          }
+        },
+        "tab": {
+          "type": "tab",
+          "settings": {
+            "header": "Shipping & Return",
+            "content": "<p>Shipping cost is based on weight. Just add products to your cart and use the Shipping Calculator to see the shipping price.</p><p>We want you to be 100% satisfied with your purchase. Items can be returned or exchanged within 30 days of delivery.</p>",
+            "content_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "description",
+        "tab"
+      ],
+      "custom_css": [
+        ".m-tabs__header {justify-content: flex-start;}"
+      ],
+      "settings": {
+        "container": "container",
+        "color_scheme": "",
+        "default_open": true,
+        "padding_top": 0,
+        "padding_bottom": 50,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "image_with_text_q7mwUN": {
+      "type": "image-with-text",
+      "custom_css": [
+        ".container-full {padding: 0;}",
+        "@media (min-width: 768px) {.m-content-box {padding-left: 15px; }}",
+        "@media (min-width: 1280px) {.m-content-box {--offset-margin: calc((100vw - var(--fluid-container-width)) / 2); padding-left: max(var(--fluid-container-offset), var(--offset-margin)); padding-right: 50px; }}",
+        "@media (min-width: 1536px) {.m-content-box {padding-right: 145px; }}",
+        "@media (max-width: 1191px) {br {display: none; }}",
+        "@media (max-width: 767px) {.m-content-box {padding: 0 15px 30px; }}"
+      ],
+      "settings": {
+        "heading": "",
+        "heading_size": "h3",
+        "subheading": "",
+        "container": "w-full",
+        "color_scheme": "footer",
+        "item_gap": 0,
+        "item_gap_mobile": 30,
+        "layout": "right",
+        "image_column_size": "6",
+        "image_overlap": false,
+        "show_image_reverse": false,
+        "hover_effect": false,
+        "image_animation": "none",
+        "link": "",
+        "link_2": "",
+        "second_image_offset_top": 10,
+        "title": "We are proudly Australian",
+        "sub_title": "Our Products",
+        "text": "<p>This piece features a cord collar, button-front closure, and two front pockets<br/> in durable organic cotton canvas.  <br/></p><p>Did You Know? Organic cotton uses crop rotation, cover crops, and organic<br/> fertilizers instead of toxic chemical fertilizers or pesticides—which means<br/> cleaner water, lower water usage, lower pesticide use, healthier soil, and a <br/>safer working environment for cotton farmers, compared to conventional.</p>",
+        "text_size": "medium",
+        "content_alignment": "left",
+        "button_label": "",
+        "button_link": "",
+        "button_style": "m-button--link",
+        "button_size": "",
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "image_with_text_GwjQnM": {
+      "type": "image-with-text",
+      "custom_css": [
+        ".container-full {padding: 0;}",
+        "@media (min-width: 768px) {.m-content-box {padding-right: 15px; padding-left: 50px; }}",
+        "@media (min-width: 1280px) {.m-content-box {--offset-margin: calc((100vw - var(--fluid-container-width)) / 2); padding-right: max(var(--fluid-container-offset), var(--offset-margin)); padding-left: 50px; }}",
+        "@media (min-width: 1536px) {.m-content-box {padding-left: 145px; }}",
+        "@media (max-width: 1191px) {br {display: none; }}",
+        "@media (max-width: 767px) {.m-content-box {padding: 0 15px 40px; }}"
+      ],
+      "settings": {
+        "heading": "",
+        "heading_size": "h3",
+        "subheading": "",
+        "container": "w-full",
+        "color_scheme": "footer",
+        "item_gap": 0,
+        "item_gap_mobile": 30,
+        "layout": "left",
+        "image_column_size": "6",
+        "image_overlap": false,
+        "show_image_reverse": false,
+        "hover_effect": false,
+        "image_animation": "none",
+        "link": "",
+        "link_2": "",
+        "second_image_offset_top": 10,
+        "title": "Organic cotton uses crop rotation, cover crops",
+        "sub_title": "We're Good Performers",
+        "text": "<p>This piece features a cord collar, button-front closure, and two front pockets<br/> in durable organic cotton canvas.  <br/></p><p>Did You Know? Organic cotton uses crop rotation, cover crops, and organic<br/> fertilizers instead of toxic chemical fertilizers or pesticides—which means<br/> cleaner water, lower water usage, lower pesticide use, healthier soil, and a <br/>safer working environment for cotton farmers, compared to conventional.</p>",
+        "text_size": "medium",
+        "content_alignment": "left",
+        "button_label": "",
+        "button_link": "",
+        "button_style": "m-button--link",
+        "button_size": "",
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "press_BbxDFT": {
+      "type": "press",
+      "blocks": {
+        "news_ErrXBG": {
+          "type": "news",
+          "settings": {
+            "title": "<p>\"Super class, cute, comfortable. You can wear them with just about anything.\"</p>",
+            "image_width": "150px"
+          }
+        },
+        "news_6AN4bt": {
+          "type": "news",
+          "settings": {
+            "title": "<p>“We’re confident that this store will be <br/>the next big thing in its industry.”</p>",
+            "image_width": "150px"
+          }
+        },
+        "news_rKU6i3": {
+          "type": "news",
+          "settings": {
+            "title": "<p>\"Super class, cute, comfortable. You can wear them with just about anything.\"</p>",
+            "image_width": "150px"
+          }
+        }
+      },
+      "block_order": [
+        "news_ErrXBG",
+        "news_6AN4bt",
+        "news_rKU6i3"
+      ],
+      "custom_css": [
+        ".m-section__heading {font-size: 18px;}",
+        "@media (max-width: 767px) {.m-press__title {font-size: 25px; }}"
+      ],
+      "settings": {
+        "heading": "Featured by Press",
+        "heading_size": "h3",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container-fluid",
+        "color_scheme": "dark",
+        "show_divider": false,
+        "autoplay": false,
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "container": "container-fluid",
+        "color_scheme": "",
+        "remove_params": false,
+        "heading": "You Might Also Like",
+        "heading_size": "h3",
+        "text_align": "center",
+        "limit": 8,
+        "columns": 5,
+        "column_gap": 30,
+        "enable_slider": true,
+        "use_scroll_mobile": true,
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "recent-viewed-products": {
+      "type": "recent-viewed-products",
+      "settings": {
+        "container": "container-fluid",
+        "color_scheme": "",
+        "heading": "Recently Viewed Products",
+        "heading_size": "h3",
+        "text_align": "center",
+        "limit": 8,
+        "columns": 5,
+        "column_gap": 30,
+        "pcard_layout": "",
+        "pcard_image_ratio": "",
+        "show_vendor": false,
+        "hide_title": false,
+        "enable_slider": true,
+        "show_pagination": false,
+        "show_navigation": false,
+        "mobile_disable_slider": false,
+        "use_scroll_mobile": true,
+        "item_gap_mobile": 16,
+        "padding_top": 0,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "icon_box_9UtNky": {
+      "type": "icon-box",
+      "blocks": {
+        "iconbox_pJbJGA": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "100 Days Return",
+            "description": "<p>Enjoy a seamless shopping experience, facilitated<br/> by our complimentary shipping.</p>",
+            "link": "",
+            "button_label": "Learn more [arrow]",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        },
+        "iconbox_RW46nE": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Lifetime Warranty",
+            "description": "<p>Our dedicated team provides timely assistance, <br/>committed to addressing your queries.</p>",
+            "link": "",
+            "button_label": "Learn more [arrow]",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        },
+        "iconbox_EiwgTg": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Customers Services",
+            "description": "<p>Invest in our activewear with absolute confidence, backed by our 30-day satisfaction guarantee.</p>",
+            "link": "",
+            "button_label": "Learn more [arrow]",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        }
+      },
+      "block_order": [
+        "iconbox_pJbJGA",
+        "iconbox_RW46nE",
+        "iconbox_EiwgTg"
+      ],
+      "disabled": true,
+      "custom_css": [
+        ".m-icon-box__heading {font-weight: 400;}"
+      ],
+      "settings": {
+        "container": "container",
+        "color_scheme": "",
+        "heading": "Why Minimog?",
+        "heading_size": "h3",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "item_per_row": 3,
+        "item_gap": 30,
+        "item_gap_mobile": 10,
+        "card_style": "vertical",
+        "image_max_width": "70px",
+        "content_alignment": "center",
+        "hover_effect": "scaling-up",
+        "enable_slider": false,
+        "show_pagination": false,
+        "show_navigation": false,
+        "use_scroll_mobile": true,
+        "use_grid_column_mb": false,
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    }
+  },
+  "order": [
+    "breadcrumb",
+    "main",
+    "product-details-tabs",
+    "image_with_text_q7mwUN",
+    "image_with_text_GwjQnM",
+    "press_BbxDFT",
+    "product-recommendations",
+    "recent-viewed-products",
+    "icon_box_9UtNky"
+  ]
+}

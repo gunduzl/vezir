@@ -1,0 +1,105 @@
+{{ 'component-newsletter.css' | asset_url | stylesheet_tag }}
+
+{% comment %}
+  Accepts:
+  - style: {String} Accepted value: bordered/minimal (optional)
+  - button_style: {String} Button style (optional)
+  - button_type: {String} Accepted value: text/icon (optional)
+  - has_icon: {Boolean} Show letter icon (optional)
+  - show_agreement: {Boolean} (optional)
+  - agree_text: {String} (optional)
+  - placeholder: {String} (optional)
+  - button_label: {String} (optional)
+  - extra_classes: {String} Extra classes (optional)
+
+  Usage:
+  {% render 'newsletter-form',
+    style: 'bordered'
+    button_type: 'text'
+    show_agreement: true
+    agree_text: ''
+  %}
+{% endcomment %}
+
+{% liquid
+  assign formId = 'ContactSubscribe-' | append: custom_id
+  assign button_type = button_type | default: 'text'
+  assign button_style = button_style | default: 'm-button--blank'
+%}
+
+<div class="m-newsletter-form m-newsletter-form--{{ style | default: 'bordered' }} {{ extra_classes }}">
+  {% form 'customer', id: formId %}
+    {%- capture success_message -%}
+      {{ 'general.newsletter_form.confirmation' | t }}
+    {%- endcapture -%}
+    {% render 'form__error', form: form %}
+    {% render 'form__success', form: form, success_message: success_message %}
+    <input type="hidden" name="contact[tags]" value="newsletter">
+    <div class="m-newsletter-form__wrapper{% if style == 'bordered' %} m-newsletter-form__button-{{ button_position | default: 'inline' }}{% endif %}">
+      <div class="m-newsletter-form__input-wrapper m:display-flex m:w-full m:relative">
+        {% if has_icon %}
+          <span class="m-newsletter-form__icon">
+            <svg
+              class="m-svg-icon"
+              fill="currentColor"
+              stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+            >
+              <path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"></path>
+            </svg>
+          </span>
+        {% endif %}
+        <input
+          type="email"
+          name="contact[email]"
+          id="{{ formId }}-email"
+          value="{% if customer.email != blank %}{{ customer.email }}{% endif %}"
+          placeholder="{{ placeholder }}"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="off"
+          spellcheck="false"
+          class="form-field m-newsletter-form__input{% if has_icon %} form-field--input__icon{% endif %}"
+        >
+      </div>
+      <button
+        type="submit"
+        name="commit"
+        class="m-newsletter-form__button m-newsletter-form__button--{{ button_type }} m-button {{ button_style }}"
+        aria-label="{{ button_label | default: 'Subscribe' }}"
+      >
+        {% if button_type == 'icon' %}
+          <svg class="m-svg-icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M218.101 38.101L198.302 57.9c-4.686 4.686-4.686 12.284 0 16.971L353.432 230H12c-6.627 0-12 5.373-12 12v28c0 6.627 5.373 12 12 12h341.432l-155.13 155.13c-4.686 4.686-4.686 12.284 0 16.971l19.799 19.799c4.686 4.686 12.284 4.686 16.971 0l209.414-209.414c4.686-4.686 4.686-12.284 0-16.971L235.071 38.101c-4.686-4.687-12.284-4.687-16.97 0z"/>
+          </svg>
+        {% else %}
+          <span>{{ button_label | default: 'Subscribe' }}</span>
+        {% endif %}
+      </button>
+    </div>
+    {% if show_agreement and agree_text %}
+      <div class="m-newsletter-form__agreement-text">
+        <div class="m-terms-conditons">
+          <label class="form-field--checkbox">
+            <input type="checkbox" name="agree_terms" value="yes" required>
+            <span class="form-field--checkbox__label">{{ agree_text }}</span>
+            <span class="form-field--checkbox__icon">
+              <svg
+                class="m-svg-icon--medium"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
+                fill="none"
+                viewBox="0 0 20 20"
+              >
+                <path d="M18.5 1.5H1.5L1.5 18.5H18.5V1.5ZM1.5 0.5C0.947715 0.5 0.5 0.947715 0.5 1.5V18.5C0.5 19.0523 0.947715 19.5 1.5 19.5H18.5C19.0523 19.5 19.5 19.0523 19.5 18.5V1.5C19.5 0.947715 19.0523 0.5 18.5 0.5H1.5Z" fill-rule="evenodd" fill="currentColor"/>
+                <path d="M14.9975 6.09084C15.201 6.27746 15.2147 6.59375 15.0281 6.79728L8.91631 13.4627C8.82231 13.5652 8.68987 13.6239 8.55079 13.6247C8.41172 13.6256 8.27857 13.5684 8.18335 13.4671L4.99513 10.0731C4.80606 9.87179 4.81596 9.55536 5.01723 9.3663C5.21849 9.17723 5.53492 9.18713 5.72399 9.3884L8.54335 12.3897L14.291 6.12145C14.4776 5.91791 14.7939 5.90421 14.9975 6.09084Z" fill="currentColor"/>
+              </svg>
+            </span>
+          </label>
+        </div>
+      </div>
+    {% endif %}
+  {% endform %}
+</div>

@@ -1,0 +1,385 @@
+{% comment %}
+  Renders a product form
+
+  Accepts:
+  - section_id: {String} Identifier of the section (required)
+  - product: {Object} Product Liquid object (required)
+  - current_variant: {String} Current (required)
+  - enable_dynamic_checkout: {Boolean} Show the dynamic checkout button (optional)
+  - show_quantity_selector: {Boolean} Show the quantity selector (optional)
+  - show_instant_quantity: {Boolean} Show instant quantity buttons after submitting the form (optional)
+
+  Usage:
+  {% render 'product-form',
+    section_id: section.id,
+    product: product,
+    current_variant: product.selected_or_first_available_variant,
+    enable_dynamic_checkout: section.settings.enable_dynamic_checkout,
+    show_quantity_selector: section.settings.show_quantity_selector,
+  %}
+{% endcomment %}
+
+{%- liquid
+  assign variant_id = product.selected_or_first_available_variant.id
+  assign selected_variant_id = ''
+  unless section.settings.show_featured_media
+    assign selected_variant_id = product.selected_variant.id
+  endunless
+
+  if enable_card_button == null
+    assign enable_card_button = true
+  endif
+
+  assign variant_available = true
+  if product.selected_or_first_available_variant.available == false or quantity_rule_soldout or product.selected_or_first_available_variant == null
+    assign variant_available = false
+  endif
+-%}
+<div class="main-product__block main-product__block-variant_picker">
+  {% render 'product-variant-picker',
+    product: product,
+    section: section,
+    update_browser_history: false,
+    product_form_id: product_form_id
+  %}
+</div>
+<div class="main-product__block main-product__block-buy_buttons">
+  <product-form class="m-product-form m:w-full">
+    {%- form 'product',
+      product,
+      id: product_form_id,
+      data-product-id: product.id,
+      class: product_form_class,
+      novalidate: 'novalidate',
+      data-type: 'add-to-cart-form',
+      data-product-id: product.id,
+      data-product-handle: product.handle,
+      data-dynamic-checkout: enable_dynamic_checkout
+    -%}
+      <input
+        type="hidden"
+        name="id"
+        value="{{ variant_id }}"
+        data-selected-variant="{{ selected_variant_id }}"
+        disabled
+      >
+
+      {% if product.quantity_price_breaks_configured? and show_quantity_selector == true %}
+        <div
+          id="QuantityForm-{{ section.id }}"
+          class="m-quantity-price-breaks m:display-grid"
+        >
+          {%- assign cart_qty = cart | item_count_for_variant: product.selected_or_first_available_variant.id -%}
+
+          <div class="m-quantity-price-breaks__wrapper m:display-grid">
+            <div class="m-quantity-price-breaks__input m:display-grid">
+              <label class="m-product-option--label" for="Quantity-{{ section.id }}">
+                <span class="m:font-bold">{{ 'products.product.quantity' | t }}</span>
+                <span
+                  id="QuantityRulesCart-{{ section.id }}"
+                  class="quantity__rules-cart{% if cart_qty == 0 %} m:hidden{% endif %} m:relative m:inline-flex m:items-center"
+                >
+                  <span class="m-spinner-icon">
+                    <svg
+                      class="animate-spin m-svg-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                  <span class="quantity-cart m:font-bold">
+                    (
+                    {%- render 'new-locale',
+                      key: 'products.product.quantity_in_cart_html',
+                      param: '{{ quantity }}',
+                      value: cart_qty
+                    -%}
+                    )
+                  </span>
+                </span>
+              </label>
+              <div class="m:display-flex m:items-center m:gap-4">
+                {% render 'product-qty-input',
+                  product_form_id: product_form_id,
+                  product: product,
+                  section_id: section_id
+                %}
+
+                {%- if product.quantity_price_breaks_configured? -%}
+                  {%- liquid
+                    assign volume_pricing_array = product.selected_or_first_available_variant.quantity_price_breaks | sort: 'quantity' | reverse
+                    assign current_qty_for_volume_pricing = cart_qty | plus: product.selected_or_first_available_variant.quantity_rule.min
+                    if cart_qty > 0
+                      assign current_qty_for_volume_pricing = cart_qty | plus: product.selected_or_first_available_variant.quantity_rule.increment
+                    endif
+                    assign variant_price_compare = product.selected_or_first_available_variant.compare_at_price
+                  -%}
+                  <price-per-item
+                    id="PricePerItem-{{ section.id }}"
+                    class="m:display-flex m:flex-wrap m:items-center m:gap-2"
+                    data-section-id="{{ section.id }}"
+                    data-product-id="{{ product.id }}"
+                    data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                  >
+                    {%- if variant_price_compare -%}
+                      <span class="m:visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                      <span class="m:inline-flex m:items-center h-auto m:relative">
+                        {%- liquid
+                          if settings.currency_code_enabled
+                            echo variant_price_compare | money_with_currency
+                          else
+                            echo variant_price_compare | money
+                          endif
+                        -%}
+                      </span>
+                      <span class="m:visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+                    {%- endif -%}
+                    {%- if product.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
+                      {%- if current_qty_for_volume_pricing < volume_pricing_array.last.minimum_quantity -%}
+                        {%- liquid
+                          if settings.currency_code_enabled
+                            assign variant_price = product.selected_or_first_available_variant.price | money_with_currency
+                          else
+                            assign variant_price = product.selected_or_first_available_variant.price | money
+                          endif
+                        -%}
+                        <span class="price-per-item--current price__regular m:whitespace-nowrap">
+                          {%- render 'new-locale',
+                            key: 'products.product.volume_pricing.price_at_each_html',
+                            param: '{{ price }}',
+                            value: variant_price
+                          -%}
+                        </span>
+                      {%- else -%}
+                        {%- for price_break in volume_pricing_array -%}
+                          {%- if current_qty_for_volume_pricing >= price_break.minimum_quantity -%}
+                            {%- liquid
+                              if settings.currency_code_enabled
+                                assign price_break_price = price_break.price | money_with_currency
+                              else
+                                assign price_break_price = price_break.price | money
+                              endif
+                            -%}
+                            <span class="price-per-item--current price__regular m:whitespace-nowrap">
+                              {%- render 'new-locale',
+                                key: 'products.product.volume_pricing.price_at_each_html',
+                                param: '{{ price }}',
+                                value: price_break_price
+                              -%}
+                            </span>
+                            {%- break -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                      {%- endif -%}
+                    {%- else -%}
+                      <span class="price-per-item--current price__regular m:whitespace-nowrap">
+                        {%- liquid
+                          if settings.currency_code_enabled
+                            assign variant_price = product.selected_or_first_available_variant.price | money_with_currency
+                          else
+                            assign variant_price = product.selected_or_first_available_variant.price | money
+                          endif
+                        -%}
+                        {%- render 'new-locale',
+                          key: 'products.product.volume_pricing.price_at_each_html',
+                          param: '{{ price }}',
+                          value: variant_price
+                        -%}
+                      </span>
+                    {%- endif -%}
+                  </price-per-item>
+                {%- endif -%}
+              </div>
+            </div>
+
+            <div
+              class="quantity__rules"
+              id="QuantityRules-{{ section.id }}"
+            >
+              {%- if product.selected_or_first_available_variant.quantity_rule.increment > 1 -%}
+                <span class="divider">
+                  {%- render 'new-locale',
+                    key: 'products.product.quantity_multiples_of',
+                    param: '{{ quantity }}',
+                    value: product.selected_or_first_available_variant.quantity_rule.increment
+                  -%}
+                </span>
+              {%- endif -%}
+              {%- if product.selected_or_first_available_variant.quantity_rule.min > 1 -%}
+                <span class="divider">
+                  {%- render 'new-locale',
+                    key: 'products.product.quantity_minimum_of',
+                    param: '{{ quantity }}',
+                    value: product.selected_or_first_available_variant.quantity_rule.min
+                  -%}
+                </span>
+              {%- endif -%}
+              {%- if product.selected_or_first_available_variant.quantity_rule.max != null -%}
+                <span class="divider m:font-medium">
+                  {%- render 'new-locale',
+                    key: 'products.product.quantity_maximum_of',
+                    param: '{{ quantity }}',
+                    value: product.selected_or_first_available_variant.quantity_rule.max
+                  -%}
+                </span>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- if product.quantity_price_breaks_configured? -%}
+            <volume-pricing
+              class="volume-pricing m:block parent-display m:blocks-radius-md"
+              id="Volume-{{ section.id }}"
+            >
+              {%- if product.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
+                <span class="caption block">
+                  {%- render 'new-locale', key: 'products.product.volume_pricing.title' -%}
+                </span>
+                <ul class="list-unstyled volume-pricing__list">
+                  <li class="volume-pricing__item m:blocks-radius-md">
+                    <span>{{ product.selected_or_first_available_variant.quantity_rule.min }}+</span>
+                    {%- liquid
+                      if settings.currency_code_enabled
+                        assign price = product.selected_or_first_available_variant.price | money_with_currency
+                      else
+                        assign price = product.selected_or_first_available_variant.price | money
+                      endif
+                    -%}
+                    {%- capture price_at_each -%}
+                        {%- render 'new-locale',
+                          key: 'products.product.volume_pricing.price_at_each',
+                          param: '{{ price }}',
+                          value: price
+                        -%}
+                      {%- endcapture -%}
+                    <span data-text="{{ price_at_each | strip_html }}">
+                      {%- render 'new-locale',
+                        key: 'products.product.volume_pricing.each_html',
+                        param: '{{ money }}',
+                        value: price
+                      -%}
+                    </span>
+                  </li>
+                  {%- for price_break in product.selected_or_first_available_variant.quantity_price_breaks -%}
+                    {%- liquid
+                      if settings.currency_code_enabled
+                        assign price_break_price = price_break.price | money_with_currency
+                      else
+                        assign price_break_price = price_break.price | money
+                      endif
+                    -%}
+                    <li class="volume-pricing__item m:blocks-radius-md{% if forloop.index >= 3 %} show-more-item m:hidden{% endif %}">
+                      <span>
+                        {{- price_break.minimum_quantity -}}
+                        <span aria-hidden="true">+</span></span
+                      >
+                      {%- capture price_at_each -%}
+                          {%- render 'new-locale',
+                            key: 'products.product.volume_pricing.price_at_each',
+                            param: '{{ price }}',
+                            value: price_break_price
+                          -%}
+                        {%- endcapture -%}
+                      <span data-text="{{ price_at_each | strip_html }}">
+                        {%- render 'new-locale',
+                          key: 'products.product.volume_pricing.each_html',
+                          param: '{{ money }}',
+                          value: price_break_price
+                        -%}
+                      </span>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+                {%- if product.selected_or_first_available_variant.quantity_price_breaks.size >= 3 -%}
+                  <show-more-button>
+                    <button
+                      class="button-show-more btn--link"
+                      id="Show-More-{{ section.id }}"
+                      type="button"
+                    >
+                      <span class="label-show-more label-text">
+                        <span aria-hidden="true">+ </span>
+                        {%- render 'new-locale', key: 'products.facets.show_more' %}
+                      </span>
+                    </button>
+                  </show-more-button>
+                {%- endif -%}
+              {%- endif -%}
+            </volume-pricing>
+          {%- endif -%}
+        </div>
+      {% endif %}
+
+      <div class="m-product-form--wrapper m:display-flex m:flex-wrap m:items-end" id="QuantityForm-{{ section.id }}">
+        {% if show_quantity_selector == true and product.quantity_price_breaks_configured? != true %}
+          <div class="m-product-form--input">
+            <label class="m-product-option--label">
+              {{ 'products.product.quantity' | t }}
+            </label>
+            {% render 'product-qty-input', product_form_id: product_form_id, product: product, section_id: section_id %}
+          </div>
+        {% endif %}
+        {% if enable_card_button %}
+          {% liquid
+            assign btn_class = 'm-button--primary'
+            if enable_dynamic_checkout
+              assign btn_class = 'm-button--secondary'
+            endif
+          %}
+          <button
+            id="ProductSubmitButton-{{ section.id }}"
+            type="submit"
+            name="add"
+            class="m-add-to-cart m-spinner-button m-button {{ btn_class }}"
+            data-atc-text="{{ 'products.product.add_to_cart' | t }}"
+            {% unless variant_available %}
+              disabled
+            {% endunless %}
+          >
+            <span class="m-spinner-icon">
+              <svg
+                class="animate-spin m-svg-icon--medium"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            <span class="m-add-to-cart--text">
+              {% if product.selected_or_first_available_variant.available %}
+                {{ 'products.product.add_to_cart' | t }}
+              {% else %}
+                {{ 'products.product.sold_out' | t }}
+              {% endif %}
+            </span>
+          </button>
+        {% endif %}
+        {% liquid
+          assign show_terms = false
+          if settings.agree_text != blank and settings.show_agree_on_product
+            render 'agree-terms-checkbox'
+            assign show_terms = true
+          endif
+        %}
+        {% if enable_dynamic_checkout %}
+          <div
+            class="m-product-dynamic-checkout buy-one-click show-add-to-cart"
+            {% if show_terms %}
+              data-terms-action disabled
+            {% endif %}
+          >
+            {{ form | payment_button }}
+          </div>
+        {% endif %}
+      </div>
+      {% unless template == 'quickview' %}
+        <div class="m-product-form-message"></div>
+      {% endunless %}
+    {%- endform -%}
+  </product-form>
+</div>

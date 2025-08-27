@@ -1,0 +1,82 @@
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+%}
+
+<div class="m-section m-product-reviews">
+  <div class="{{ container }}">
+    {%- assign default_heading = 'products.product.product_reviews_heading' | t -%}
+    <div class="m-section__header m:text-left">
+      <h2 class="m-section__heading h3{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">{{ section.settings.heading | default: default_heading }}</h2>
+    </div>
+    {% render 'product-reviews-app__snippet', custom_liquid: section.settings.custom_liquid %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product reviews",
+  "enabled_on": {
+    "templates": [
+      "product"
+    ]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Requirements",
+      "info": "This section requires a product reviews app to work. Such as Shopify product reviews, Growave, Judge.me, Loox"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container",
+          "label": "Fixed width"
+        },
+        {
+          "value": "container-fluid",
+          "label": "Stretched width"
+        },
+        {
+          "value": "container-narrow",
+          "label": "Narrow width"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Reviews",
+      "placeholder": "Reviews"
+    },
+    {
+      "type": "header",
+      "content": "Other review app"
+    },
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "Custom liquid",
+      "info": "Paste the liquid code of the app review here"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product reviews"
+    }
+  ]
+}
+{% endschema %}

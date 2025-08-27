@@ -1,0 +1,603 @@
+{{ 'hero.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign show_overlay = section.settings.show_overlay
+  assign hero_height = section.settings.hero_size
+
+  if hero_height == 'adapt'
+    assign aspect_ratio = section.settings.video_ratio | default: 2.333
+    assign aspect_ratio_mobile = section.settings.video_ratio | default: 1.778
+  endif
+
+  assign content_positions = section.settings.content_position | split: ' '
+  assign text_horizontal_alignment = content_positions.first
+  assign text_vertical_alignment = content_positions.last | strip
+  assign text_size = section.settings.text_size
+  assign image_link = section.settings.image_link
+
+  assign content_container = 'container-fluid'
+  if section.settings.content_in_container == true
+    assign content_container = 'container'
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign text_color = section.settings.text_color
+
+  assign heading_color = ''
+  assign desc_color = 'm:text-color-subtext'
+  if text_color != 'inherit'
+    assign heading_color = heading_color | append: 'm:text-' | append: text_color
+    assign desc_color = 'm:text-' | append: text_color
+  endif
+
+  assign sub_text_size = 'h6'
+  assign heading_text_size = 'h2'
+  if text_size == 'large'
+    assign sub_text_size = 'h5'
+    assign heading_text_size = 'h1'
+  endif
+
+  assign classes = 'm-section m-hero-section'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+%}
+
+{%- capture main_classes -%}
+ m-hero m-hero--video m:block m-hero--{{ section.settings.hero_size }}
+{% if image_link != blank %} m-hero--has-link{% endif %}
+{% if section.settings.mb_image != blank %} m-hero__mobile-no-overlay{% endif %}
+{% if show_overlay %} m-hero--has-overlay{% endif %}
+{% unless section.settings.use_content_above %} m-hero--content-stack{% endunless %}
+{%- endcapture -%}
+
+<section
+  id="m-hero-section-{{ section.id }}"
+  class="{{ classes }}"
+  data-section-type="hero"
+  data-section-id="{{ section.id }}"
+>
+  <div class="{{ container }}">
+    <div id="m-hero-{{ section.id }}" class="{{ main_classes | strip_newlines }}">
+      {% liquid
+        assign data_type = 'mp4'
+        assign video_url = section.settings.shopify_video
+        assign placeholder_video = 'https://cdn.shopify.com/videos/c/o/v/fbb140fd46e3429eba459e1549dbbe38.mp4'
+
+        if section.settings.video_type == 'shopify' and video_url == blank
+          assign video_url = placeholder_video
+        endif
+        case section.settings.video_type
+          when 'external'
+            assign video_url = section.settings.video_url
+            if section.settings.video_url.type == 'youtube'
+              assign data_type = 'youtube'
+            else
+              assign data_type = 'vimeo'
+            endif
+        endcase
+      %}
+      {% unless video_url == blank %}
+        <div
+          class="m-hero__bg{% if container != 'container-full' %} m:blocks-radius{% endif %}"
+          {%- if hero_height == 'adapt' -%}
+            style="--aspect-ratio: {{ aspect_ratio }};--aspect-ratio-mobile: {{ aspect_ratio_mobile }}"
+          {% endif %}
+        >
+          <m-video-component
+            class="m-video__bg"
+            data-init="false"
+            data-type="{{ data_type }}"
+            data-video-id="{{ section.settings.video_url.id }}"
+          >
+            {% if section.settings.video_type == 'shopify' and video_url != blank %}
+              {% if section.settings.shopify_video != blank %}
+                {{-
+                  section.settings.shopify_video
+                  | video_tag:
+                    playsinline: true,
+                    muted: true,
+                    autoplay: true,
+                    loop: true,
+                    controls: false,
+                    preload: 'none',
+                    image_size: '800x'
+                -}}
+              {% else %}
+                <video src="{{ video_url }}" playsinline autoplay muted loop></video>
+              {% endif %}
+            {% endif %}
+          </m-video-component>
+        </div>
+      {% endunless %}
+
+      <div class="m-hero__inner m-hero__inner--{{ text_vertical_alignment }}-{{ text_horizontal_alignment }} {{ content_container }}">
+        <div class="m-hero__content m-hero__content--size-{{ text_size }} m:text-{{ section.settings.text_alignment }}">
+          {% if section.settings.subtitle != blank %}
+            <span class="m-hero__subtitle {{ sub_text_size }} m:text-{{ text_color }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {{- section.settings.subtitle -}}
+            </span>
+          {% endif %}
+          {% if section.settings.title != blank %}
+            <h3 class="m-hero__title {{ heading_text_size }} {{ heading_color }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {{ section.settings.title }}
+            </h3>
+          {% endif %}
+          {% if section.settings.text != blank %}
+            <div class="m-hero__text rte {{ sub_text_size }} {{ desc_color }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {{ section.settings.text }}
+            </div>
+          {% endif %}
+          {% if section.settings.button_label != blank or section.settings.button_label_2 != blank %}
+            <div class="m-hero__btn m:justify-{{ section.settings.text_alignment | replace: 'left', 'start' | replace: 'right', 'end' }} m:items-center{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% if section.settings.button_label != blank %}
+                <a
+                  href="{{ section.settings.button_link }}"
+                  class="m-button {{ section.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size }}"
+                >
+                  {{- section.settings.button_label -}}
+                </a>
+              {% endif %}
+              {% if section.settings.button_label_2 != blank %}
+                <a
+                  href="{{ section.settings.button_link_2 }}"
+                  class="m-button {{ section.settings.button_style_2 }} {{ section.settings.button_size_2 }}"
+                >
+                  {{- section.settings.button_label_2 -}}
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Video hero",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/JGILIb)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "w-full",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "hero_size",
+      "label": "Section height",
+      "default": "adapt",
+      "options": [
+        {
+          "label": "Adapt to video ratio",
+          "value": "adapt"
+        },
+        {
+          "label": "Small",
+          "value": "small"
+        },
+        {
+          "label": "Medium",
+          "value": "medium"
+        },
+        {
+          "label": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "video_ratio",
+      "label": "Video ratio",
+      "options": [
+        {
+          "value": "1/1",
+          "label": "1:1"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        },
+        {
+          "value": "21/9",
+          "label": "21:9"
+        }
+      ],
+      "default": "21/9",
+      "info": "Work when section height is 'Adapt to video ratio'"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show overlay",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Video settings"
+    },
+    {
+      "type": "select",
+      "id": "video_type",
+      "label": "Video type",
+      "default": "shopify",
+      "options": [
+        {
+          "value": "shopify",
+          "label": "Shopify hosted"
+        },
+        {
+          "value": "external",
+          "label": "External"
+        }
+      ]
+    },
+    {
+      "type": "video",
+      "id": "shopify_video",
+      "label": "Shopify hosted"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "accept": ["youtube", "vimeo"],
+      "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
+      "label": "External video url"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "content_in_container",
+      "label": "Content in container box",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content position",
+      "default": "center middle",
+      "options": [
+        {
+          "label": "Top left",
+          "value": "left top"
+        },
+        {
+          "label": "Top center",
+          "value": "center top"
+        },
+        {
+          "label": "Top right",
+          "value": "right top"
+        },
+        {
+          "label": "Middle left",
+          "value": "left middle"
+        },
+        {
+          "label": "Middle center",
+          "value": "center middle"
+        },
+        {
+          "label": "Middle right",
+          "value": "right middle"
+        },
+        {
+          "label": "Bottom left",
+          "value": "left bottom"
+        },
+        {
+          "label": "Bottom center",
+          "value": "center bottom"
+        },
+        {
+          "label": "Bottom right",
+          "value": "right bottom"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Content alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_size",
+      "label": "Text size",
+      "default": "medium",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "medium"
+        },
+        {
+          "label": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text color",
+      "info": "Work when contents above image",
+      "options": [
+        {
+          "label": "Dark",
+          "value": "black"
+        },
+        {
+          "label": "Light",
+          "value": "white"
+        },
+        {
+          "value": "inherit",
+          "label": "Inherit"
+        }
+      ],
+      "default": "white"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "default": "Image with text overlay"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subheading",
+      "placeholder": "New Arrivals"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Use overlay text to give your customers insight into your brand. Select imagery and text that relates to your style and story.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Button 1"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Button 2"
+    },
+    {
+      "type": "text",
+      "id": "button_label_2",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_link_2",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_2",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size_2",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_content_above",
+      "label": "Use content above image",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Advanced settings"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video hero",
+      "category": "Image"
+    }
+  ]
+}
+{% endschema %}

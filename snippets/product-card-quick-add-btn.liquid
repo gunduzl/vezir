@@ -1,0 +1,106 @@
+{%- liquid
+  if product.available
+    assign variant_id = product.first_available_variant.id
+  else
+    assign variant_id = product.selected_or_first_available_variant.id
+  endif
+  assign selected_variant_id = ''
+  if section.settings.change_product_variant_on_fitlering
+    assign variant_id = product.selected_or_first_available_variant.id
+    assign selected_variant_id = product.selected_variant.id
+  endif
+
+  assign button_style = button_style | default: 'secondary'
+
+  assign selected_variant = product.selected_or_first_available_variant
+  assign has_qty_rules = false
+  if selected_variant.quantity_rule.increment > 1 or selected_variant.quantity_rule.min > 1 or selected_variant.quantity_rule.max != null and selected_variant
+    assign has_qty_rules = true
+  endif
+-%}
+{% capture aria_label %}
+{% if product.available %}
+  {{ quick_add_text | default: atc_text }}
+{% else %}
+  {{ 'products.product.sold_out' | t }}
+{% endif %}
+{% endcapture %}
+{%- if settings.show_cart_button -%}
+  <div class="m-product-card__action-wrapper">
+    {%- if product.has_only_default_variant and has_qty_rules == false -%}
+      <product-form class="m-product-form m:w-full" data-product-id="{{ product.id }}">
+        {%- form 'product',
+          product,
+          id: product_form_id,
+          class: 'product-card-form',
+          data-product-id: product.id,
+          novalidate: 'novalidate'
+        -%}
+          <input hidden name="id" required value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}">
+          {%- liquid
+            assign atc_text = 'products.product.add_to_cart' | t
+          -%}
+          <button
+            class="m-add-to-cart m-spinner-button m:w-full m-button m-button--{{ button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }}"
+            name="add"
+            {% if variant.available == false %}
+              disabled
+            {% endif %}
+            aria-label="{{- aria_label -}}"
+          >
+            <span class="m-spinner-icon">
+              <svg
+                class="animate-spin m-svg-icon--medium"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            <span class="m-add-to-cart--text" data-atc-text>
+              {%- if product.available -%}
+                {{ quick_add_text | default: atc_text }}
+              {%- else -%}
+                {{ 'products.product.sold_out' | t }}
+              {%- endif -%}
+            </span>
+          </button>
+        {%- endform -%}
+      </product-form>
+    {% else %}
+      {% if settings.select_option_button_action == 'popup' %}
+        <input hidden name="id" required value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}">
+        <button
+          class="m-product-form m:w-full m-product-quickview-button m-spinner-button m-button m-button--{{ button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }}"
+          data-product-url="{{ product.url }}"
+          data-product-id="{{ product.id }}"
+          data-product-handle="{{ product.handle }}"
+        >
+          <span class="m-spinner-icon">
+            <svg
+              class="animate-spin m-svg-icon--medium"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+          <span>{{- quick_add_text -}}</span>
+        </button>
+      {% else %}
+        <input hidden name="id" required value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}">
+        <a
+          class="m-product-form m:w-full m-button m-button--{{ button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }}"
+          href="{{ product.url }}"
+          data-product-id="{{ product.id }}"
+        >
+          <span>{{- quick_add_text -}}</span>
+        </a>
+      {% endif %}
+    {% endif %}
+  </div>
+{%- endif -%}

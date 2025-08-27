@@ -1,0 +1,291 @@
+{% liquid
+  assign main_menu = section.settings.main_menu
+  assign mobile_menu = section.settings.mobile_menu
+
+  if mobile_menu == blank
+    assign menu = main_menu
+  else
+    assign menu = mobile_menu
+  endif
+%}
+<div id="m-menu-drawer" class="m-menu-drawer">
+  <div class="m-menu-drawer__backdrop"></div>
+  <div class="m-menu-drawer__wrapper">
+    <div class="m-menu-drawer__content">
+      <ul class="m-menu-drawer__navigation m-menu-mobile">
+        {% for link in linklists[menu].links %}
+          {% liquid
+            assign title_handle = link.title | handleize
+            assign has_mega_item = false
+          %}
+          {% for block in section.blocks %}
+            {% liquid
+              assign menu_title = block.settings.heading | handleize
+
+              if menu_title == blank or menu_title != title_handle
+                continue
+              endif
+            %}
+            {% if menu_title == title_handle %}
+              {% liquid
+                assign has_mega_item = true
+              %}
+              {% case block.type %}
+                {% when 'banner' %}
+                  {% capture block_type %}
+                    {% if block.settings.banner_image != blank %}
+                      {% liquid
+                        assign banner_class = 'm-mega-banner' | append: ' m-mega-banner--' | append: block.settings.banner_style
+  
+                        assign banner_link = block.settings.banner_link
+                        assign banner_title = block.settings.banner_title
+                        assign banner_desc = block.settings.banner_desc
+                        assign banner_button_text = block.settings.banner_button_text
+  
+                        if banner_title == blank and banner_desc == blank and banner_button_text == blank
+                          assign banner_class = banner_class | append: ' m-mega-banner--no-content'
+                        endif
+  
+                      %}
+                      <div class="{{ banner_class }}">
+                        {% if banner_link != blank %}
+                          <a href="{{ banner_link }}" class="m-hidden-link"><span class="m:visually-hidden">{{ banner_title | default: shop.name }}</span></a>
+                        {% endif %}
+                        <div class="m-mega-banner__image m:blocks-radius-md">
+                          {% render 'responsive-image', image: block.settings.banner_image, sizes: '500px' %}
+                        </div>
+                        <div class="m-mega-banner__inner">
+                          <div class="m-mega-banner__conntent">
+                            <h4 class="m-mega-banner__title m:text-black">{{ banner_title }}</h4>
+                            <p class="m-mega-banner__description">{{ banner_desc }}</p>
+                          </div>
+                          {% if banner_link != blank and banner_button_text != blank %}
+                            <a href="{{ banner_link }}" class="m-mega-banner__button m:text-black m-button m-button--link">{{ banner_button_text }}</a>
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% endcapture %}
+                {% when 'bloglist' %}
+                  {% capture block_type %}
+                      {% if block.settings.blog != blank %}
+                        <div class="m-mega-blog-list m-mixed-layout m-mixed-layout--mobile-scroll" style="--column-gap: 16px" data-id="{{ block.id }}">
+                          {% assign blog = blogs[block.settings.blog] %}
+                          <ul class="m-mega-blog-list__wrapper m-mixed-layout__inner">
+                            {% for article in blog.articles limit: 3 %}
+                              <li class="m:column m:w-6/12">
+                                <a href="{{ article.url }}" class="m-mega-article-card__image m:w-full m:blocks-radius-md m:block">
+                                  {% render 'responsive-image',
+                                    image: article.image,
+                                    aspect_ratio: '16/9',
+                                  %}
+                                </a>
+                                <div class="m-mega-article-card__content">
+                                  {% if article.tags != blank %}
+                                    <span class="m-mega-article-card__tag">{{ article.tags[0] }}</span>
+                                  {% endif %}
+                                  <a href="{{ article.url }}" class="m-mega-article-card__title">{{ article.title }}</a>
+                                </div>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                        </div>
+                      {% endif %}
+                    {% endcapture %}
+                {% when 'product-list' %}
+                  {% assign collection = block.settings.collection %}
+                  {% if collection != blank %}
+                    {% capture block_type %}
+                      <div class="m-megamenu-mobile__products m-mixed-layout m-mixed-layout--mobile-scroll" style="--column-gap: 16px" data-id="{{ block.id }}">
+                        {%- assign collection = collections[block.settings.collection] -%}
+                        <div class="m-mixed-layout__inner">
+                          {% for product in collection.products limit: block.settings.limit %}
+                          {%- assign image_ratio = product.featured_image.aspect_ratio | default: '1/1' -%}
+                            <div class="m:column m:w-1/2">
+                              <div class="m-product-card m-product-card--style-1">
+                                <div class="m-product-card__media">
+                                  <a class="m-product-card__link m:block m:w-full" href="{{ product.url }}" aria-label="{{ product.title | default: forloop.index }}">
+                                    <div class="m-product-card__main-image">
+                                      {% render 'responsive-image',
+                                        image: product.featured_image,
+                                        aspect_ratio: image_ratio,
+                                        sizes: '400px'
+                                      %}
+                                    </div>
+                                  </a>
+                                </div>
+                                <div class="m-product-card__content m:text-left">
+                                  <div class="m-product-card__info">
+                                    <h3 class="m-product-card__title">
+                                      <a href="{{ product.url }}" class="m-product-card__name">
+                                        {{ product.title }}
+                                      </a>
+                                    </h3>
+                                    <div class="m-product-card__price">
+                                      {% render 'product-prices', product: product, is_product_card: true %}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endcapture %}
+                  {% endif %}
+                {% when 'collection-list' %}
+                  {% liquid
+                    assign collection_ids = 'collection_1,collection_2,collection_3,collection_4,collection_5,collection_6' | split: ','
+                    assign content_empty = true
+
+                    for collection_id in collection_ids
+                      if block.settings[collection_id] != blank
+                        assign content_empty = false
+                      endif
+                    endfor
+                  %}
+                  {% capture block_type %}
+                    {% unless content_empty %}
+                      {{ 'component-collection-card.css' | asset_url | stylesheet_tag }}
+                      <div class="m-megamenu-mobile__collections m-mixed-layout m-mixed-layout--mobile-scroll" style="--column-gap: 16px" data-id="{{ block.id }}">
+                        <div class="m-mixed-layout__inner">
+                          {% for collection_id in collection_ids %}
+                            {% liquid
+                              if block.settings[collection_id] == blank
+                                continue
+                              endif
+                              assign collection_handle = block.settings[collection_id]
+                              assign collection = collections[collection_handle]
+                              assign collection_image = collection.image
+                              assign image_id = 'image_' | append: forloop.index
+
+                              if block.settings[image_id] != blank
+                                assign collection_image = block.settings[image_id]
+                              endif
+
+                              assign all_products_count = collection.all_products_count
+                            %}
+                            <div class="m:column m:w-6/12">
+                              <div class="m-collection-card m-collection-card--standard m-collection-card--hover-scaling-up">
+                                <div class="m-collection-card__inner">
+                                  <a href="{{ collection.url | default: "#" }}" class="m-collection-card__image m:block m:w-full m:blocks-radius-md">
+                                    {% if collection_image != blank %}
+                                      {% render 'responsive-image', image: collection_image, image_class: 'm:w-full', aspect_ratio: aspect_ratio %}
+                                    {% else %}
+                                      <div style="--aspect-ratio: 1/1;">
+                                        {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+                                        {{ 'collection-' | append: current | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full m:object-cover' }}
+                                      </div>
+                                    {% endif %}
+                                  </a>
+                                  <div class="m-collection-card__info m:text-left">
+                                    <h3 class="m-collection-card__title">
+                                      <a href="{{ collection.url | default: "#" }}" class="m-collection-card__link m:block">
+                                        {{ title | default: collection.title }}
+                                        <sup>{{ all_products_count }}</sup>
+                                      </a>
+                                    </h3>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endunless %}
+                  {% endcapture %}
+                {% when 'custom_html' %}
+                  {% capture block_type %}
+                    {% if block.settings.html != blank %}
+                      <div class="m-mega-html m:text-black">
+                        {{ block.settings.html }}
+                      </div>
+                    {% endif %}
+                  {% endcapture %}
+                {% else %}
+                  {%- capture block_type -%}
+                  {%- endcapture -%}
+              {% endcase %}
+            {% endif %}
+          {% endfor %}
+          {% if link.links != blank %}
+            <li class="m-menu-mobile__item" data-url="{{ link.url }}" data-index="{{ forloop.index0 }}">
+              <a
+                href="{{ link.url }}"
+                class="m-menu-mobile__link"
+                {% if link.url contains '#' %}
+                  data-toggle-submenu="1"
+                {% endif %}
+              >
+                <span>{{ link.title }}</span>
+              </a>
+              <span class="m-menu-mobile__toggle-button" data-toggle-submenu="1">
+                <svg fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512">
+                  <path d="M17.525 36.465l-7.071 7.07c-4.686 4.686-4.686 12.284 0 16.971L205.947 256 10.454 451.494c-4.686 4.686-4.686 12.284 0 16.971l7.071 7.07c4.686 4.686 12.284 4.686 16.97 0l211.051-211.05c4.686-4.686 4.686-12.284 0-16.971L34.495 36.465c-4.686-4.687-12.284-4.687-16.97 0z"/>
+                </svg>
+              </span>
+              <div class="m-megamenu-mobile m-megamenu-mobile--level-1">
+                <div class="m-megamenu-mobile__wrapper">
+                  <button class="m-menu-mobile__back-button" data-level="1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 17">
+                      <path fill="currentColor" d="M8.12109 15.9141c-.21093.1875-.41015.1875-.59765 0L.175781 8.53125c-.210937-.1875-.210937-.375 0-.5625L7.52344.585938c.1875-.1875.38672-.1875.59765 0l.70313.703122c.1875.1875.1875.38672 0 .59766L3.375 7.33594h11.9883c.2812 0 .4219.14062.4219.42187v.98438c0 .28125-.1407.42187-.4219.42187H3.375l5.44922 5.44924c.1875.2109.1875.4101 0 .5976l-.70313.7032z"/>
+                    </svg>
+                    <span>{{ link.title }}</span>
+                  </button>
+                  <ul class="m-submenu-mobile">
+                    {% for child in link.links %}
+                      <li class="m-menu-mobile__item" data-url="{{ link.url }}">
+                        <a
+                          href="{{ child.url }}"
+                          class="m-menu-mobile__link"
+                          {% if child.url contains '#' %}
+                            data-toggle-submenu="2"
+                          {% endif %}
+                        >
+                          <span>{{ child.title }}</span>
+                        </a>
+                        {% if child.links != blank %}
+                          <span class="m-menu-mobile__toggle-button" data-toggle-submenu="2">
+                            <svg
+                              fill="currentColor"
+                              stroke="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 256 512"
+                            >
+                              <path d="M17.525 36.465l-7.071 7.07c-4.686 4.686-4.686 12.284 0 16.971L205.947 256 10.454 451.494c-4.686 4.686-4.686 12.284 0 16.971l7.071 7.07c4.686 4.686 12.284 4.686 16.97 0l211.051-211.05c4.686-4.686 4.686-12.284 0-16.971L34.495 36.465c-4.686-4.687-12.284-4.687-16.97 0z"/>
+                            </svg>
+                          </span>
+                          <div class="m-megamenu-mobile m-megamenu-mobile--level-2">
+                            <div class="m-megamenu-mobile__wrapper">
+                              <button class="m-menu-mobile__back-button" data-level="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 17">
+                                  <path fill="currentColor" d="M8.12109 15.9141c-.21093.1875-.41015.1875-.59765 0L.175781 8.53125c-.210937-.1875-.210937-.375 0-.5625L7.52344.585938c.1875-.1875.38672-.1875.59765 0l.70313.703122c.1875.1875.1875.38672 0 .59766L3.375 7.33594h11.9883c.2812 0 .4219.14062.4219.42187v.98438c0 .28125-.1407.42187-.4219.42187H3.375l5.44922 5.44924c.1875.2109.1875.4101 0 .5976l-.70313.7032z"/>
+                                </svg>
+                                <span>{{ child.title }}</span>
+                              </button>
+                              <ul class="m-submenu-mobile">
+                                {% render 'mega-menu-link' for child.links as link %}
+                              </ul>
+                            </div>
+                          </div>
+                        {% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                  {% if has_mega_item == true and block_type != blank %}
+                    <div class="m-megamenu-mobile__block">
+                      {{ block_type }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </li>
+          {% else %}
+            {% render 'mega-menu-link' with link as link, has_mega_item: has_mega_item, block_type: block_type %}
+          {% endif %}
+        {% endfor %}
+      </ul>
+      {% render 'mega-menu-customer', section: section %}
+    </div>
+  </div>
+</div>

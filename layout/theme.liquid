@@ -1,0 +1,229 @@
+<!doctype html>
+<html class="no-js{% if settings.page_transition %} m:overflow-hidden{% endif %}" 
+      lang="{{ request.locale.iso_code }}" 
+      data-template="{{ template.name }}" 
+      {% if enable_rtl %} dir="rtl" {% endif %}>
+  <head>
+    <!-- Google Verification Tag -->
+    <meta name="google-site-verification" content="i3WW8Vhc99yGm1xipmYiN0Ry4uHkfvFCffhnvQVvoJw" />
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function(w,d,s,l,i) {
+        w[l] = w[l] || [];
+        w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'}); 
+        var f = d.getElementsByTagName(s)[0], 
+            j = d.createElement(s), 
+            dl = l != 'dataLayer' ? '&l=' + l : ''; 
+        j.async = true; 
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl; 
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-P3R5XN32');
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="{{ settings.color_primary }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+
+    {% if settings.use_favicon and settings.favicon != blank %}
+      <link rel="icon" href="{{ settings.favicon | image_url: width: 32, height: 32 }}" type="image/png">
+    {% endif %}
+
+    <title>
+      {{ page_title }}
+      {% if current_tags %}
+        {% assign meta_tags = current_tags | join: ', ' %} – {{ 'general.meta.tags' | t: tags: meta_tags }} 
+      {% endif %}
+      {% if current_page != 1 %} – {{ 'general.meta.page' | t: page: current_page }}{% endif %}
+      {% unless page_title contains shop.name %} – {{ shop.name }}{% endunless %}
+    </title>
+
+    {% if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {% endif %}
+
+    {% liquid
+      render 'social-meta-tags'
+      render 'font-face'
+      render 'critical-css'
+      echo 'main.css' | asset_url | stylesheet_tag: preload: true
+      render 'style-tags'
+    %}
+
+    <script src="{{ 'vendor.js' | asset_url }}" defer></script>
+    <script src="{{ 'theme-global.js' | asset_url }}" defer></script>
+    {% if settings.animations != 'none' %}
+      <script src="{{ 'animations.js' | asset_url }}" defer></script>
+    {% endif %}
+    {% if request.design_mode %}
+      <script src="{{ 'theme-editor.js' | asset_url }}" defer></script>
+    {% endif %}
+
+    {{ content_for_header }}
+
+    <script>
+      document.documentElement.classList.replace('no-js', 'js');
+      if (Shopify.designMode) document.documentElement.classList.add('shopify-design-mode');
+    </script>
+
+    {% render 'theme-data' %}
+    {% render 'custom-code-head' %}
+    {% render 'foxify-head' %}
+    {% render 'shogun-head' %}
+
+    <!-- AOS CSS -->
+    {{ 'aos.css' | asset_url | stylesheet_tag }}
+
+    <style>
+      /* Mobil sayfa büyümesini engelle */
+      html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+      }
+
+      /* Mobil ürün görsel düzeltmesi */
+      @media screen and (max-width: 768px) {
+        * {
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        .container, .page-width, .wrapper {
+          max-width: 100% !important;
+          overflow-x: hidden !important;
+        }
+        .product__media img,
+        .product-gallery img,
+        .m-product-media img {
+          width: 100% !important;
+          height: auto !important;
+          object-fit: contain !important;
+          display: block;
+          margin: 0 auto;
+          transform: none !important;
+        }
+        .product__media:first-child img,
+        .m-product-media:first-child img {
+          max-height: 350px !important;
+        }
+        .product-gallery,
+        .product__media,
+        .m-product-media {
+          overflow: hidden;
+          text-align: center;
+        }
+      }
+
+      /* Gölge, outline ve tap highlight kaldırma */
+      * {
+        outline: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-focus-ring-color: transparent !important;
+        -moz-outline: none !important;
+      }
+
+      *:focus, *:active, *:hover {
+        outline: none !important;
+        box-shadow: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+
+      /* Tüm ürün elementleri için */
+      .product-item, .product-card, .m-product-item, .product__media,
+      .product-item *, .product-card *, .m-product-item *, .product__media * {
+        outline: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+
+      /* Ürün etkileşimlerinde outline ve box-shadow kaldırma */
+      .product-item:hover, .product-card:hover, .m-product-item:hover,
+      .product-item:focus, .product-card:focus, .m-product-item:focus,
+      .product-item:active, .product-card:active, .m-product-item:active {
+        outline: none !important;
+        box-shadow: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+
+      /* Pseudo elementleri kaldır */
+      .product-item::before, .product-item::after,
+      .product-card::before, .product-card::after,
+      .m-product-item::before, .m-product-item::after,
+      .product__media::before, .product__media::after {
+        display: none !important;
+        content: none !important;
+      }
+
+      /* Link'ler için */
+      a, button {
+        -webkit-tap-highlight-color: transparent !important;
+        outline: none !important;
+      }
+    </style>
+
+  </head>
+
+  <body id="m-theme" class="{{ body_classes }}" 
+        {% if template.name == 'product' and product %} data-product-id="{{ product.id }}"{% endif %}>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P3R5XN32" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager -->
+
+    {% liquid
+      render 'page-transition'
+      render 'scroll-top-button'
+      sections 'header-group'
+    %}
+
+    <main role="main" id="MainContent">{{ content_for_layout }}</main>
+
+    {% liquid
+      sections 'footer-group'
+      render 'script-tags'
+      render 'cookie-banner'
+      render 'custom-code-body'
+    %}
+
+    <!-- JS files -->
+    <script src="{{ 'product-quick-view.js' | asset_url }}" defer></script>
+    <script src="{{ 'wishlist.js' | asset_url }}" defer></script>
+    <script src="{{ 'compare-product.js' | asset_url }}" defer></script>
+
+    {% if settings.enable_predictive_search %}
+      <script src="{{ 'predictive-search.js' | asset_url }}" defer></script>
+    {% endif %}
+    {% if linklists['gift-wrapping'].links != blank and linklists['gift-wrapping'].links.first.type == 'product_link' %}
+      <script src="{{ 'gift-wrapping.js' | asset_url }}" defer></script>
+    {% endif %}
+    {% if settings.show_swatch_option %}
+      <script src="{{ 'product-card-swatch.js' | asset_url }}" defer></script>
+    {% endif %}
+    {% if settings.enable_cart_drawer and template != 'cart' %}
+      {% render 'cart-drawer' %}
+    {% endif %}
+
+    {% render 'foxify-footer' %}
+    {% sections "foxify-footer-group" %}
+
+    <!-- AOS JS -->
+    <script src="{{ 'aos.js' | asset_url }}" defer></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof AOS !== 'undefined') {
+          AOS.init();
+        } else {
+          // AOS henüz yüklenmemişse, yüklenene kadar bekle
+          const checkAOS = setInterval(function() {
+            if (typeof AOS !== 'undefined') {
+              AOS.init();
+              clearInterval(checkAOS);
+            }
+          }, 100);
+        }
+      });
+    </script>
+  </body>
+</html>

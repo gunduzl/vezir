@@ -1,0 +1,119 @@
+<script>
+  window.addEventListener('load', function () {
+    window.__sfWindowLoaded = true;
+  });
+
+  var fader = document.querySelector('.m-page-transition');
+  function __fadeInPage() {
+    if (!window.AnimationEvent || !fader) return;
+
+    let ignore_beforeunload = false;
+
+    document.querySelectorAll('a[href^=mailto], a[href^=tel]').forEach((link) => {
+      link.addEventListener('click', () => {
+        ignore_beforeunload = true;
+      });
+    });
+
+    // Page transition
+    window.addEventListener('beforeunload', () => {
+      if (!ignore_beforeunload) fader.classList.add('fade-in');
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+      document.documentElement.classList.remove('m:overflow-hidden');
+      document.body.classList.remove('m:overflow-hidden');
+
+      // fader.classList.remove('fade-in')
+      setTimeout(() => {
+        fader.classList.add('fade-out');
+      }, 300);
+
+      document.dispatchEvent(new CustomEvent('page:loaded'));
+    });
+    window.addEventListener('pageshow', (event) => {
+      // Removes unload class when returning to page via history
+      if (event.persisted) {
+        fader.classList.remove('fade-in');
+        // fader.classList.add('fade-out')
+      }
+    });
+  }
+  __fadeInPage();
+
+  // Lazyload background image
+  function addIntersectionObserver(classSelector, newClass = '') {
+    let lazyImages = [].slice.call(document.getElementsByClassName(classSelector));
+    if ('IntersectionObserver' in window) {
+      let lazyImageObserver = new IntersectionObserver(function (entries, observer) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            let lazyImage = entry.target;
+            lazyImage.classList.remove(classSelector);
+            newClass && lazyImage.classList.remove(newClass);
+            lazyImageObserver.unobserve(lazyImage);
+          }
+        });
+      });
+
+      lazyImages.forEach(function (lazyImage) {
+        lazyImageObserver.observe(lazyImage);
+      });
+    }
+  }
+  function handleBackgroundImageLazyload() {
+    return addIntersectionObserver('m-bg-lazy');
+  }
+
+  handleBackgroundImageLazyload();
+  document.addEventListener('shopify:section:load', () => {
+    handleBackgroundImageLazyload();
+  });
+
+  // Init scroll top
+  function __scrollToTop(element, callback) {
+    if (!element) element = document.querySelector('#scroll-to-top-target');
+    element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (callback) callback();
+  }
+
+  function __initScrollTop() {
+    const scrollTopButton = document.querySelector('#scroll-to-top-button');
+    if (scrollTopButton) {
+      scrollTopButton.addEventListener('click', () => __scrollToTop());
+      window.addEventListener('scroll', function () {
+        const method = window.scrollY > 100 ? 'add' : 'remove';
+        scrollTopButton.classList[method]('is-show');
+      });
+    }
+  }
+
+  // Init terms checkbox
+  function __initTermsCheckbox() {
+    addEventDelegate({
+      selector: '.m-terms-conditons [name="agree_terms"]',
+      event: 'change',
+      handler: (e, target) => {
+        let button = target.closest('.m-terms-conditons').nextElementSibling;
+        while (button) {
+          if (button.hasAttribute('data-terms-action')) {
+            break;
+          }
+
+          button = button.nextElementSibling;
+        }
+        if (button && button.hasAttributes('data-terms-action')) {
+          if (target.checked) {
+            button.removeAttribute('disabled');
+          } else {
+            button.setAttribute('disabled', true);
+          }
+        }
+      },
+    });
+  }
+
+  window.addEventListener('load', () => {
+    __initScrollTop();
+    __initTermsCheckbox();
+  });
+</script>

@@ -1,0 +1,184 @@
+<style>
+  html {
+    font-size: calc(var(--font-base-size, 16) * 1px);
+    -webkit-font-smoothing: antialiased;
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-stack-body);
+    font-weight: var(--font-weight-body);
+    font-style: var(--font-style-body);
+    color: rgb(var(--color-foreground));
+    font-size: calc(var(--font-base-size, 16) * 1px);
+    line-height: calc(var(--base-line-height) * 1px);
+    background-color: rgb(var(--color-background));
+    position: relative;
+    min-height: 100%;
+  }
+
+  body,
+  html {
+    overflow-x: clip;
+  }
+
+  html.prevent-scroll,
+  html.prevent-scroll body {
+    height: auto;
+    overflow: hidden !important;
+  }
+
+  html.prevent-scroll {
+    padding-right: var(--m-scrollbar-width);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-stack-header);
+    font-weight: var(--font-weight-header);
+    font-style: var(--font-style-header);
+    color: rgb(var(--color-heading));
+    line-height: normal;
+    letter-spacing: var(--heading-letter-spacing);
+  }
+  h1,
+  .h1 {
+    font-size: calc(((var(--font-h1-mobile)) / (var(--font-base-size))) * 1rem);
+    line-height: 1.278;
+  }
+
+  h2,
+  .h2 {
+    font-size: calc(((var(--font-h2-mobile)) / (var(--font-base-size))) * 1rem);
+    line-height: 1.267;
+  }
+
+  h3,
+  .h3 {
+    font-size: calc(((var(--font-h3-mobile)) / (var(--font-base-size))) * 1rem);
+    line-height: 1.36;
+  }
+
+  h4,
+  .h4 {
+    font-size: calc(((var(--font-h4-mobile)) / (var(--font-base-size))) * 1rem);
+    line-height: 1.4;
+  }
+
+  h5,
+  .h5 {
+    font-size: calc(((var(--font-h5-mobile)) / (var(--font-base-size))) * 1rem);
+    line-height: 1.5;
+  }
+
+  h6,
+  .h6 {
+    font-size: calc(((var(--font-h6-mobile)) / (var(--font-base-size))) * 1rem);
+    line-height: 1.5;
+  }
+
+  @media only screen and (min-width: 768px) {
+    .h1,
+    h1 {
+      font-size: calc(((var(--font-h1-tablet)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.238;
+    }
+    .h2,
+    h2 {
+      font-size: calc(((var(--font-h2-tablet)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.235;
+    }
+    h3,
+    .h3 {
+      font-size: calc(((var(--font-h3-tablet)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.36;
+    }
+    h4,
+    .h4 {
+      font-size: calc(((var(--font-h4-tablet)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.4;
+    }
+  }
+
+  @media only screen and (min-width: 1280px) {
+    .h1,
+    h1 {
+      font-size: calc(((var(--font-h1-desktop)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.167;
+    }
+    .h2,
+    h2 {
+      font-size: calc(((var(--font-h2-desktop)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.238;
+    }
+    h3,
+    .h3 {
+      font-size: calc(((var(--font-h3-desktop)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.278;
+    }
+    h4,
+    .h4 {
+      font-size: calc(((var(--font-h4-desktop)) / (var(--font-base-size))) * 1rem);
+      line-height: 1.333;
+    }
+    h5,
+    .h5 {
+      font-size: calc(((var(--font-h5-desktop)) / (var(--font-base-size))) * 1rem);
+    }
+    h6,
+    .h6 {
+      font-size: calc(((var(--font-h6-desktop)) / (var(--font-base-size))) * 1rem);
+    }
+  }
+  [style*='--aspect-ratio'] {
+    position: relative;
+    overflow: hidden;
+  }
+  [style*='--aspect-ratio']:before {
+    display: block;
+    width: 100%;
+    content: '';
+    height: 0px;
+  }
+  [style*='--aspect-ratio'] > *:first-child {
+    top: 0;
+    left: 0;
+    right: 0;
+    position: absolute !important;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+  [style*='--aspect-ratio']:before {
+    padding-top: calc(100% / (0.0001 + var(--aspect-ratio, 16/9)));
+  }
+  @media (max-width: 767px) {
+    [style*='--aspect-ratio']:before {
+      padding-top: calc(100% / (0.0001 + var(--aspect-ratio-mobile, var(--aspect-ratio, 16/9))));
+    }
+  }
+  .swiper-wrapper {
+    display: flex;
+  }
+  .swiper-container:not(.swiper-container-initialized) .swiper-slide {
+    width: calc(100% / var(--items, 1));
+    flex: 0 0 auto;
+  }
+  @media (max-width: 1023px) {
+    .swiper-container:not(.swiper-container-initialized) .swiper-slide {
+      min-width: 40vw;
+      flex: 0 0 auto;
+    }
+  }
+  @media (max-width: 767px) {
+    .swiper-container:not(.swiper-container-initialized) .swiper-slide {
+      min-width: 66vw;
+      flex: 0 0 auto;
+    }
+  }
+</style>

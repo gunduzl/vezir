@@ -1,0 +1,87 @@
+<div class="m-testimonials__inner m:flex-col md:m:flex-row">
+  <div class="m-testimonials__tabs m-tabs m:w-full md:m:w-1/2{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+    {% for block in section.blocks %}
+      <div
+        class="m-tab-content"
+        {% if animated %}
+          data-cascade
+          style="--animation-order: {{ forloop.index }};"
+        {% endif %}
+      >
+        {% if block.settings.image == blank %}
+          {{ 'image' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full m:blocks-radius' }}
+        {% else %}
+          <a
+            href="{{ block.settings.image_link | default: '#' }}"
+            class="m-testimonials__image m:block m:blocks-radius"
+          >
+            {% render 'responsive-image', image: block.settings.image, image_class: 'm:w-full m:h-full' %}
+          </a>
+        {% endif %}
+
+        {% if block.settings.image_text != blank %}
+          <div class="m-testimonials__image-text m:hidden md:m:block">
+            {{ block.settings.image_text }}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="m-testimonials__list m:w-full md:m:w-1/2">
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        {% for block in section.blocks %}
+          <div class="swiper-slide" {{ block.shopify_attributes }} data-index="{{ forloop.index0 }}">
+            <div class="m-testimonials__content">
+              <div
+                class="m-testimonial{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                {% if animated %}
+                  data-cascade
+                  style="--animation-order: {{ forloop.index }};"
+                {% endif %}
+              >
+                {% if block.settings.title != blank %}
+                  <h3 class="m-testimonials__title h5 m:font-medium">{{ block.settings.title }}</h3>
+                {% endif %}
+                {% if section.settings.show_stars %}
+                  <div class="m-stars">
+                    {%- for i in (1..5) -%}
+                      <span class="m-star">{%- render 'icon', name: 'star-solid', size: 'small' -%}</span>
+                    {%- endfor -%}
+                  </div>
+                {% endif %}
+                {% if block.settings.description != blank %}
+                  <div class="m-testimonials__description rte h3">{{ block.settings.description }}</div>
+                {% endif %}
+              </div>
+              {% if block.settings.product != blank or block.settings.footer != blank %}
+                <div class="m-testimonials__footer{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+                  {%- assign product = block.settings.product -%}
+                  {% if block.settings.footer != blank %}
+                    <div class="m-testimonials__author h6 m:font-medium">{{ block.settings.footer }}</div>
+                  {% endif %}
+                  {% if block.settings.product != blank %}
+                    <a
+                      class="m-testimonials__product"
+                      href="{{ product.url }}"
+                      target="_blank"
+                    >
+                      {{ product.title }}
+                    </a>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% render 'slider-controls',
+      show_nav: section.settings.show_navigation,
+      show_pagination: section.settings.show_pagination,
+      position: 'bottom-left',
+      container: container_class,
+      pagination_type: 'fraction'
+    %}
+  </div>
+</div>

@@ -1,0 +1,587 @@
+{{ 'hero.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign show_overlay = section.settings.show_overlay
+  assign parallax = section.settings.parallax
+
+  assign content_positions = section.settings.content_position | split: ' '
+  assign text_horizontal_alignment = content_positions.first
+  assign text_vertical_alignment = content_positions.last | strip
+  assign text_size = section.settings.text_size
+  assign image_link = section.settings.image_link
+
+  assign content_container = 'container-fluid'
+  if section.settings.content_in_container == true
+    assign content_container = 'container'
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign sub_text_size = 'h6'
+  assign heading_text_size = 'h2'
+  if text_size == 'large'
+    assign sub_text_size = 'h5'
+    assign heading_text_size = 'h1'
+  endif
+
+  assign text_color = section.settings.text_color
+
+  assign classes = 'm-section m-hero-section'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+
+  assign heading_color = ''
+  assign desc_color = 'm:text-color-subtext'
+  if text_color != 'inherit'
+    assign heading_color = heading_color | append: 'm:text-' | append: text_color
+    assign desc_color = 'm:text-' | append: text_color
+  endif
+
+  assign background_image = section.settings.image
+  assign background_image_mobile = section.settings.mb_image
+  if background_image_mobile == blank
+    assign background_image_mobile = background_image
+  endif
+
+  if section.settings.hero_size == 'adapt'
+    assign aspect_ratio = background_image.aspect_ratio | default: 2.333
+    assign aspect_ratio_mobile = background_image_mobile.aspect_ratio | default: 1
+  endif
+
+  assign color_scheme_default = settings.color_schemes | first
+  assign color_scheme_inherit = false
+  if section.settings.color_scheme == color_scheme_default
+    assign color_scheme_inherit = true
+  endif
+%}
+<style>
+  #m-hero-section-{{ section.id }} {
+    {% if section.settings.hero_size == 'adapt' %}--aspect-ratio: {{ aspect_ratio }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }};{% endif %}
+  }
+</style>
+
+{% if parallax %}
+  <script src="{{ 'parallax.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+
+{%- capture main_classes -%}
+  m-hero m-hero--{{ section.settings.hero_size }}
+  m-gradient m-color-{{ section.settings.color_scheme }}
+{% if image_link != blank %} m-hero--has-link{% endif %}
+{% if section.settings.mb_image != blank %} m-hero__mobile-no-overlay{% endif %}
+{% if show_overlay %} m-hero--has-overlay{% endif %}
+{% unless section.settings.use_content_above %} m-hero--content-stack{% endunless %}
+{% if animated and section.settings.enable_bg_zoom_effect %} m:overflow-hidden m-scroll-trigger animate--zoom-fade{% endif %}
+{%- endcapture -%}
+
+<section
+  id="m-hero-section-{{ section.id }}"
+  class="{{ classes }}"
+  data-section-type="hero"
+  data-section-id="{{ section.id }}"
+>
+  <div class="{{ container }}">
+    <div id="m-hero-{{ section.id }}" class="{{ main_classes | strip_newlines }}">
+      {% liquid
+        assign loading = 'lazy'
+        assign fetchpriority = 'low'
+        if section.index < 2 or section.settings.enable_preload_image
+          assign loading = 'eager'
+          assign fetchpriority = 'high'
+        endif
+      %}
+      <m-parallax
+        class="m-parallax m-hero__bg m:block{% if container != 'container-full' %} m:blocks-radius{% endif %}"
+        data-enable-parallax="{{ parallax }}"
+        data-direction="{{ section.settings.parallax_direction }}"
+      >
+        <div class="m-parallax__wrapper m-image m:relative m:w-full m:h-full">
+          <div class="m-parallax__image m-media m:h-full">
+            {% if background_image == blank %}
+              {% liquid
+                assign placeholder_svg_tag = 'm-placeholder-svg m:w-full m:h-full'
+                if section.settings.mb_image != blank
+                  assign placeholder_svg_tag = placeholder_svg_tag | append: ' m:hidden md:m:block'
+                endif
+              %}
+              {{ 'lifestyle-2' | placeholder_svg_tag: placeholder_svg_tag }}
+            {% endif %}
+            {% if background_image != blank or section.settings.mb_image != blank %}
+              <picture class="media-wrapper m:block m:w-full m:h-full{% if background_image == blank %} md:m:hidden{% endif %}">
+                {%- if section.settings.mb_image != blank -%}
+                  <source
+                    media="(max-width: 767px)"
+                    srcset="{{ section.settings.mb_image | image_url: width: '400x' }} 400w, {{ section.settings.mb_image | image_url: width: '600x' }} 600w, {{ section.settings.mb_image | image_url: width: '800x' }} 800w, {{ section.settings.mb_image | image_url: width: '1000x' }} 1000w"
+                    width="{{ section.settings.mb_image.width }}"
+                    height="{{ section.settings.mb_image.height }}"
+                  >
+                {%- endif %}
+                {% liquid
+                  if background_image == blank
+                    assign background_image = section.settings.mb_image
+                  endif
+                  assign image_height = background_image.width | divided_by: background_image.aspect_ratio | round
+                %}
+                {{
+                  background_image
+                  | image_url: width: 3200
+                  | image_tag:
+                    loading: loading,
+                    fetchpriority: fetchpriority,
+                    width: background_image.width,
+                    height: image_height,
+                    sizes: '100vw',
+                    widths: '300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200',
+                    alt: background_image.alt
+                }}
+              </picture>
+            {%- endif %}
+          </div>
+        </div>
+      </m-parallax>
+
+      {% if image_link != blank %}
+        <a href="{{ image_link }}" class="m-hidden-link"></a>
+      {% endif %}
+
+      <div class="m-hero__inner m-hero__inner--{{ text_vertical_alignment }}-{{ text_horizontal_alignment }} {{ content_container }}{% if color_scheme_inherit %} color-scheme-inherit{% endif %}">
+        <div class="m-hero__content m:text-{{ section.settings.text_alignment_mobile }} md:m:text-{{ section.settings.text_alignment }} m-text--{{ text_color }}">
+          {% if section.settings.subtitle != blank %}
+            <span class="m-hero__subtitle {{ sub_text_size }}{% if text_color != 'inherit' %} m:text-{{ text_color }}{% endif %}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {{- section.settings.subtitle -}}
+            </span>
+          {% endif %}
+          {% if section.settings.title != blank %}
+            <h2 class="m-hero__title {{ heading_text_size }} {{ heading_color }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {{ section.settings.title }}
+            </h2>
+          {% endif %}
+          {% if section.settings.text != blank %}
+            <div class="m-hero__text rte {{ sub_text_size }} {{ desc_color }} {% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {{ section.settings.text }}
+            </div>
+          {% endif %}
+          {% if section.settings.button_label != blank %}
+            <div class="m-hero__btn m:justify-{{ section.settings.text_alignment_mobile | replace: 'left', 'start' | replace: 'right', 'end' }} md:m:justify-{{ section.settings.text_alignment | replace: 'left', 'start' | replace: 'right', 'end' }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              <a
+                href="{{ section.settings.button_link }}"
+                class="m-button {{ section.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size }}"
+              >
+                {{- section.settings.button_label -}}
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Image with text overlay",
+  "class": "shopify-section-hero",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "w-full",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "hero_size",
+      "label": "Section height",
+      "default": "adapt",
+      "options": [
+        {
+          "label": "Adapt to image",
+          "value": "adapt"
+        },
+        {
+          "label": "Small",
+          "value": "small"
+        },
+        {
+          "label": "Medium",
+          "value": "medium"
+        },
+        {
+          "label": "Large",
+          "value": "large"
+        },
+        {
+          "label": "Full-screen",
+          "value": "fullscreen"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show overlay",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Background settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "image_link",
+      "label": "Image link"
+    },
+    {
+      "type": "checkbox",
+      "id": "parallax",
+      "label": "Parallax effect",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "parallax_direction",
+      "label": "Parallax direction",
+      "default": "vertical",
+      "options": [
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "zoom",
+          "label": "Zoom"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "content_in_container",
+      "label": "Content in container box",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content position",
+      "default": "center middle",
+      "options": [
+        {
+          "label": "Top left",
+          "value": "left top"
+        },
+        {
+          "label": "Top center",
+          "value": "center top"
+        },
+        {
+          "label": "Top right",
+          "value": "right top"
+        },
+        {
+          "label": "Middle left",
+          "value": "left middle"
+        },
+        {
+          "label": "Middle center",
+          "value": "center middle"
+        },
+        {
+          "label": "Middle right",
+          "value": "right middle"
+        },
+        {
+          "label": "Bottom left",
+          "value": "left bottom"
+        },
+        {
+          "label": "Bottom center",
+          "value": "center bottom"
+        },
+        {
+          "label": "Bottom right",
+          "value": "right bottom"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Content alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_size",
+      "label": "Text size",
+      "default": "medium",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "medium"
+        },
+        {
+          "label": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text color",
+      "info": "Work when contents above image",
+      "options": [
+        {
+          "label": "Dark",
+          "value": "black"
+        },
+        {
+          "label": "Light",
+          "value": "white"
+        },
+        {
+          "value": "inherit",
+          "label": "Inherit"
+        }
+      ],
+      "default": "white"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "default": "Image with text overlay"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subheading",
+      "placeholder": "New Arrivals"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Use overlay text to give your customers insight into your brand. Select imagery and text that relates to your style and story.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment_mobile",
+      "label": "Content alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "mb_image",
+      "label": "Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_content_above",
+      "label": "Use content above image",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Advanced settings"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bg_zoom_effect",
+      "label": "Enable background zoom effect",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_preload_image",
+      "label": "Enable preload image",
+      "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image with text overlay",
+      "category": "Image"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,427 @@
+{{ 'hotspots-image.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'hotspots-image.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign lazy_load = 'lazy'
+  assign fetchpriority_mode = 'auto'
+
+  if section.index < 2 or section.settings.enable_preload_image
+    assign fetchpriority_mode = 'high'
+    assign lazy_load = 'eager'
+  endif
+
+  assign image = section.settings.image
+  assign image_aspect_ratio = image.aspect_ratio | default: 2.333
+
+  assign mobile_image = section.settings.mobile_image
+  if mobile_image == blank
+    assign mobile_image = section.settings.image
+  endif
+  assign mobile_image_aspect_ratio = mobile_image.aspect_ratio | default: 1
+%}
+<style>
+  #m-custom-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+<section
+  id="m-custom-{{ section.id }}"
+  class="m-section m-hotspots-image{% if section.settings.custom_class != blank %} {{ section.settings.custom_class }}{% endif %}"
+>
+  <div class="{{ section.settings.container }} m-section-my m-section-py">
+    <div class="m-hotspots-image__wrapper m:block m:relative">
+      <div
+        class="m-hotspots-image__media m:blocks-radius{% if animated and section.settings.enable_bg_zoom_effect %} m:overflow-hidden m-scroll-trigger animate--zoom-fade{% endif %}"
+        style="--aspect-ratio: {{ image_aspect_ratio }}; --aspect-ratio-mobile: {{ mobile_image_aspect_ratio }};"
+      >
+        <div class="m-media">
+          {% if image == blank %}
+            {% liquid
+              assign placeholder_svg_tag = 'm-placeholder-svg m-placeholder-svg--no-border m:object-cover m:w-full m:h-full'
+              if section.settings.mobile_image != blank
+                assign placeholder_svg_tag = placeholder_svg_tag | append: ' m:hidden md:m:block'
+              endif
+            %}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full' }}
+          {% endif %}
+          {% if image != blank or section.settings.mobile_image != blank %}
+            <picture class="m-media__wrapper m:block m:w-full m:h-full{% if image == blank %} md:m:hidden{% endif %}">
+              {%- if section.settings.mobile_image != blank -%}
+                <source
+                  media="(max-width: 767px)"
+                  srcset="{{ section.settings.mobile_image | image_url: width: '400x' }} 400w, {{ section.settings.mobile_image | image_url: width: '600x' }} 600w, {{ section.settings.mobile_image | image_url: width: '800x' }} 800w, {{ section.settings.mobile_image | image_url: width: '1000x' }} 1000w"
+                  width="{{ section.settings.mobile_image.width }}"
+                  height="{{ section.settings.mobile_image.height }}"
+                >
+              {%- endif %}
+              {% liquid
+                if image == blank
+                  assign image = section.settings.mobile_image
+                endif
+                assign image_height = image.width | divided_by: image.aspect_ratio | round
+              %}
+              {{
+                image
+                | image_url: width: 3200
+                | image_tag:
+                  loading: lazy_load,
+                  fetchpriority: fetchpriority_mode,
+                  width: image.width,
+                  sizes: '100vw',
+                  height: image_height,
+                  widths: '300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200',
+                  alt: image.alt
+              }}
+            </picture>
+          {%- endif %}
+        </div>
+      </div>
+      {% for block in section.blocks %}
+        {% liquid
+          assign top = block.settings.top
+          assign left = block.settings.left
+          assign m_top = block.settings.m_top
+          assign m_left = block.settings.m_left
+
+          assign classes = 'm-hotspot__card m-richtext'
+          assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+        %}
+        <m-hotspot
+          class="m-hotspot m:block"
+          style="--pos-x: {{ left }}%; --pos-y: {{ top }}%;{% if section.settings.mobile_image != blank %} --pos-x-mobile: {{ m_left }}%; --pos-y-mobile: {{ m_top }}%;{% endif %}"
+          data-id="{{ block.id }}"
+          data-index="{{ forloop.index0 }}"
+        >
+          <div class="m-hotspot__icon">
+            <div class="m-hotspot__icon-main">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 8H13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 2.5V13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="m-hotspot__icon-point"></div>
+          </div>
+          <div
+            class="{{ classes }}"
+            {% if section.settings.image_max_width != blank %}
+              style="--image-width: {{ section.settings.image_max_width }}px;"
+            {% endif %}
+          >
+            {% if block.settings.image != blank %}
+              <div class="m-richtext__image">
+                {% render 'responsive-image',
+                  image: block.settings.image,
+                  wrapper_class: 'm:w-full',
+                  image_class: 'm:w-full'
+                %}
+              </div>
+            {% endif %}
+            {% if block.settings.heading != blank %}
+              <h2 class="m-richtext__title {{ section.settings.heading_size }}">{{ block.settings.heading }}</h2>
+            {% endif %}
+            {% if block.settings.text != blank %}
+              <div class="m-richtext__description rte">
+                {{ block.settings.text }}
+              </div>
+            {% endif %}
+          </div>
+        </m-hotspot>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Hotspots image",
+  "class": "shopify-section-hotspots-image",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/c6PiHN)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "container-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile Image"
+    },
+    {
+      "type": "header",
+      "content": "Hotspot settings"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Image width",
+      "min": 24,
+      "max": 120,
+      "unit": "px",
+      "step": 2,
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h4",
+      "options": [
+        {
+          "value": "h5",
+          "label": "Extra small"
+        },
+        {
+          "value": "h4",
+          "label": "Small"
+        },
+        {
+          "value": "h3",
+          "label": "Medium"
+        },
+        {
+          "value": "h2",
+          "label": "Large"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bg_zoom_effect",
+      "label": "Enable background zoom effect.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_preload_image",
+      "label": "Enable preload image",
+      "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "hotspot",
+      "name": "Hotspot",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Position"
+        },
+        {
+          "type": "range",
+          "id": "top",
+          "label": "Vertical position",
+          "min": 10,
+          "max": 90,
+          "unit": "%",
+          "step": 1,
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "left",
+          "label": "Horizontal position",
+          "min": 10,
+          "max": 90,
+          "unit": "%",
+          "step": 1,
+          "default": 48
+        },
+        {
+          "type": "range",
+          "id": "m_top",
+          "label": "Vertical position (Mobile image)",
+          "min": 10,
+          "max": 90,
+          "unit": "%",
+          "step": 1,
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "m_left",
+          "label": "Horizontal position (Mobile image)",
+          "min": 10,
+          "max": 90,
+          "unit": "%",
+          "step": 1,
+          "default": 48
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Talk about your brand"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Pair text with an image to focus on your chosen product, collection, or blog post.<br> Add details on availability, style, or even provide a review.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hotspots image",
+      "category": "Lookbook",
+      "blocks": [
+        {
+          "type": "hotspot",
+          "settings": {
+            "top": 30,
+            "left": 48,
+            "m_top": 13,
+            "m_left": 66
+          }
+        },
+        {
+          "type": "hotspot",
+          "settings": {
+            "top": 75,
+            "left": 40,
+            "m_top": 45,
+            "m_left": 75
+          }
+        },
+        {
+          "type": "hotspot",
+          "settings": {
+            "top": 60,
+            "left": 64,
+            "m_top": 80,
+            "m_left": 32
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

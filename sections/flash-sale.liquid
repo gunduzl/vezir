@@ -1,0 +1,50 @@
+{{ 'component-countdown-timer.css' | asset_url | stylesheet_tag }}
+{% style %}
+  .foxkit-flashsale.style-2 {
+    background: #fdefee;
+    padding: 30px 0;
+  }
+  .foxkit-flashsale.style-1 {
+    padding: 2rem 0;
+  }
+{% endstyle %} 
+
+<div
+  class="foxkit-flashsale m:hidden"
+  data-section-type="foxkit-flashsale"
+  data-section-id="{{ section.id }}"
+  data-collection-id="{{ collection.id }}"
+>
+  <div class="container">
+    <div
+      class="m:hidden"
+      data-days="{{ 'general.time.days' | t }}"
+      data-hrs="{{ 'general.time.hrs' | t }}"
+      data-mins="{{ 'general.time.mins' | t }}"
+      data-secs="{{ 'general.time.secs' | t }}"
+      data-now="{{ 'now' | date: '%Y/%m/%d %k:%M:00%z (%Z)' }}"
+      data-foxkit-countdown-timer
+    ></div>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "[FoxKit] - 🔥 Flash sale",
+  "enabled_on": {
+    "templates": [
+      "collection"
+    ]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Config your flash sale in [FoxKit Coundown timer](https://foxkit.app/countdown-timer)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "[FoxKit] - 🔥 Flash sale"
+    }
+  ]
+}
+{% endschema %}

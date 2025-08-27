@@ -1,0 +1,719 @@
+{{ 'footer.css' | asset_url | stylesheet_tag }}
+{%- if section.settings.show_currency_selector
+  or section.settings.show_country_selector
+  or section.settings.show_language_selector
+-%}
+  <script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+<m-footer class="m-footer m:block" data-section-type="footer" data-section-id="{{ section.id }}">
+  {% render 'footer-blocks',
+    blocks: section.blocks,
+    bordered: section.settings.bordered,
+    container: section.settings.container
+  %}
+  {% render 'footer-design', container: section.settings.container %}
+</m-footer>
+<script src="{{ 'footer.js' | asset_url }}" defer="defer"></script>
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/abZ4Ot)"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "footer"
+    },
+    {
+      "type": "select",
+      "id": "design",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "footer-1",
+          "label": "Layout 1"
+        },
+        {
+          "value": "footer-2",
+          "label": "Layout 2"
+        },
+        {
+          "value": "footer-3",
+          "label": "Layout 3"
+        }
+      ],
+      "default": "footer-1"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "container-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "bordered",
+      "label": "Block bordered",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "copyright",
+      "label": "Copyright text",
+      "default": "&copy; minimog 2021"
+    },
+    {
+      "type": "header",
+      "content": "Addons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_country_selector",
+      "label": "Show country/region selector",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_currency_selector",
+      "label": "Show currency selector",
+      "default": false,
+      "info": "[Watch tutorial](https://foxecom.link/TsDtIw)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_language_selector",
+      "label": "Show language selector",
+      "default": false,
+      "info": "[Watch tutorial](https://foxecom.link/eBEvt2)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social_links",
+      "label": "Show social icons",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Follow on Shop",
+      "info": "Display follow button for your storefront on the Shop app. [Learn more](https://help.shopify.com/manual/online-store/themes/customizing-themes/follow-on-shop)"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_follow_on_shop",
+      "default": true,
+      "label": "Enable Follow on Shop"
+    },
+    {
+      "type": "header",
+      "content": "Payment methods"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show payment icons",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "image_custom_payment",
+      "label": "Payment icons by image",
+      "info": "Leave blank to use icons by Payment methods"
+    },
+    {
+      "type": "number",
+      "id": "payment_icons_width",
+      "label": "Image width (px)",
+      "default": 300
+    },
+    {
+      "type": "header",
+      "content": "Footer bottom"
+    },
+    {
+      "type": "color_scheme",
+      "id": "footer_bottom_color_scheme",
+      "label": "Color scheme",
+      "default": "footer"
+    },
+    {
+      "type": "link_list",
+      "id": "footer_bottom_menu",
+      "label": "Menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_menu_item_divider",
+      "label": "Show menu item divider"
+    }
+  ],
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Footer menu",
+          "default": "main-menu"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Service",
+          "info": "Leave blank to use menu title"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "25%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "order_first",
+          "label": "Order first",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "open_default",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "our_store",
+      "name": "About",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Our store"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Find a location nearest you.</p>"
+        },
+        {
+          "type": "header",
+          "content": "Contact information",
+          "info": "Go to \"Theme settings > Store contact\" to update these information."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_email",
+          "label": "Show email",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_phone",
+          "label": "Show phone number",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_socials_link",
+          "label": "Show social icons",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "25%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "order_first",
+          "label": "Order first",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "open_default",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Subscribe"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Enter your email below to be the first to know about new collections and product launches."
+        },
+        {
+          "type": "text",
+          "id": "email_placeholder",
+          "label": "Email placeholder",
+          "default": "Enter your email"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_icon_input",
+          "label": "Show icon input",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "info": "Leave it blank to use icon"
+        },
+        {
+          "type": "select",
+          "id": "button_position",
+          "label": "Button position",
+          "options": [
+            {
+              "value": "inline",
+              "label": "Same line input field"
+            },
+            {
+              "value": "below",
+              "label": "Under input field"
+            }
+          ],
+          "default": "inline",
+          "info": "Only work with bordered form style"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--blank",
+              "label": "Plain button"
+            }
+          ],
+          "default": "m-button--blank"
+        },
+        {
+          "type": "select",
+          "id": "form_style",
+          "label": "Form style",
+          "default": "bordered",
+          "options": [
+            {
+              "value": "bordered",
+              "label": "Bordered"
+            },
+            {
+              "value": "minimal",
+              "label": "Minimal"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "show_social",
+          "label": "Show social link",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_agree_checkbox",
+          "label": "Show \"Terms & conditions\" checkbox",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "25%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "order_first",
+          "label": "Order first",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "open_default",
+          "label": "Open by default",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "custom_text",
+      "name": "Custom content",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Custom text"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_max",
+          "label": "Image max-width (px)",
+          "default": "200px"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Content",
+          "default": "<p>Enter your email below to be the first to know about new collections and product launches.</p>"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "25%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "order_first",
+          "label": "Order first",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "open_default",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "custom_html",
+      "name": "Custom HTML",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Custom text"
+        },
+        {
+          "type": "liquid",
+          "id": "html",
+          "label": "HTML",
+          "info": "Liquid code supported"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "25%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "order_first",
+          "label": "Order first",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "open_default",
+          "label": "Open by default",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "spacing",
+      "name": "Spacing",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Use this block to make a spacing between columns"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "25%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "20%",
+              "label": "20%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

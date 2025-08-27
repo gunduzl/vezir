@@ -1,0 +1,140 @@
+{% liquid
+  assign container = section.settings.container
+%}
+{%- style -%}
+  .m-section-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+  .m-divider-section {
+    width: 100%;
+    border-bottom: {{ section.settings.divider_height }}px {{ section.settings.divider_style }} rgb(var(--color-border));
+  }
+{%- endstyle -%}
+<section
+  id="m-section-{{ section.id }}"
+  class="m-section-{{ section.id }} m-gradient m-color-{{ section.settings.color_scheme }}"
+>
+  <div class="{{ container }} m-section-py">
+    {% if section.settings.show_divider_line %}
+      <div class="m-divider-section"></div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Empty space",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider_line",
+      "label": "Show divider line",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "divider_style",
+      "label": "Divider style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        },
+        {
+          "value": "double",
+          "label": "Double"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "label": "Divider height",
+      "id": "divider_height",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Empty space"
+    }
+  ]
+}
+{% endschema %}

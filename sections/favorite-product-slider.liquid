@@ -1,0 +1,466 @@
+{{ 'favorite-product-slider.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'favorite-product-slider.js' | asset_url }}" defer="defer"></script>
+{%- liquid
+  assign product = section.settings.featured_product
+  assign section_onboarding = false
+  assign totalMedia = product.media.size
+
+  if product == empty
+    assign section_onboarding = true
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign text_color = section.settings.text_color
+  assign heading_color = ''
+  assign desc_color = 'm:text-color-subtext'
+  if text_color != 'inherit'
+    assign heading_color = heading_color | append: 'm:text-' | append: text_color
+    assign desc_color = 'm:text-' | append: text_color
+  endif
+
+  assign classes = 'm-section m-favorite-product-slider'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+-%}
+
+<style>
+  #favorite-product-slider--{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+<section
+  id="favorite-product-slider--{{ section.id }}"
+  class="{{ classes }}"
+  data-section-type="favorite-product-slider"
+  data-section-id="{{ section.id }}"
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    <favorite-product-slider
+      class="m:flex m:flex-wrap md:m:flex-nowrap m:items-center"
+      data-media-size="{{ totalMedia }}"
+    >
+      <div class="m-favorite-product-slider__images m:w-full md:m:w-1/2">
+        <div class="m-favorite-product-slider__images-wrapper">
+          <div class="swiper-container">
+            <div class="swiper-wrapper">
+              {% unless section_onboarding %}
+                {% for media in product.media %}
+                  <div
+                    class="swiper-slide m:overflow-hidden media-type-{{ media.media_type }}"
+                    data-index="{{ forloop.index0 }}"
+                    data-media-type="{{ media.media_type }}"
+                    data-media-id="{{ media.id }}"
+                    data-aspect-ratio="{{ media.aspect_ratio | default: '1' }}"
+                  >
+                    {% render 'product-thumbnail',
+                      media: media,
+                      index: forloop.index0,
+                      autoplay: true,
+                      loop: true,
+                      product: product,
+                    %}
+                  </div>
+                {% endfor %}
+              {% else %}
+                {% for i in (1..3) %}
+                  {%- assign product_name = 'product-' | append: i -%}
+                  <div class="swiper-slide">
+                    <div class="m:blocks-radius" style="--aspect-ratio: 1/1;">
+                      {{ product_name | placeholder_svg_tag: 'm-placeholder-svg m:object-cover m:w-full m:h-full' }}
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endunless %}
+            </div>
+            <!-- End .swiper-wrapper -->
+          </div>
+          <!-- End .swiper-container -->
+          {% render 'slider-controls',
+            absolute: false,
+            position: 'bottom-center',
+            show_pagination: true,
+            show_nav: true,
+            pagination_type: 'fraction',
+            extra_classes: 'md:m:hidden'
+          %}
+        </div>
+      </div>
+      <div class="m-favorite-product-slider__info m:w-full md:m:w-1/2 m:flex m:flex-col">
+        <div class="m-favorite-product-slider__details m:text-{{ section.settings.header_alignment }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+          {% if section.settings.subheading != blank %}
+            <p class="m-favorite-product-slider__subheading m:text-{{ text_color }}">
+              {{ section.settings.subheading }}
+            </p>
+          {% endif %}
+          <h2 class="m-favorite-product-slider__heading {{ heading_color }}">
+            {% if section.settings.heading != blank %}
+              {{ section.settings.heading }}
+            {% else %}
+              {{ product.title }}
+            {% endif %}
+          </h2>
+          {% if section.settings.description != blank %}
+            <div class="m-favorite-product-slider__description {{ desc_color }}">
+              {{ section.settings.description }}
+            </div>
+          {% endif %}
+          {% if section.settings.button_label != blank %}
+            <a
+              href="{{ section.settings.button_link | default: "#" }}"
+              class="m-button {{ section.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size }}"
+            >
+              {{- section.settings.button_label -}}
+            </a>
+          {% endif %}
+        </div>
+        <!-- End .m-favorite-product-slider__details -->
+
+        <div
+          class="m-favorite-product-slider__thumbs{% if totalMedia == 2 %} m-favorite-product-slider__thumbs-col-1{% endif %} m:hidden md:m:block"
+          data-enable-slider="{% if section_onboarding == true or totalMedia > 2 %}true{% else %}false{% endif %}"
+        >
+          <div class="swiper-container">
+            <div class="swiper-wrapper">
+              {% unless section_onboarding %}
+                {% if totalMedia > 1 %}
+                  {% assign aspect_ratio = product.media[0].preview_image.aspect_ratio | default: 1 %}
+                  {% for media in product.media %}
+                    <div class="swiper-slide media-type-{{ media.media_type }}">
+                      <div
+                        class="m-product-media{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %} m:blocks-radius"
+                        data-media-id="{{ media.id }}"
+                        {% if animated %}
+                          data-cascade
+                          style="--animation-order: {{ forloop.index }};"
+                        {% endif %}
+                      >
+                        <responsive-image
+                          class="m-image"
+                          style="--aspect-ratio: {{ aspect_ratio | default: media.preview_image.aspect_ratio }}"
+                        >
+                          <img
+                            srcset="
+                              {% if media.preview_image.width >= 493 %}{{ media.preview_image | image_url: width: 493 }} 493w,{% endif %}
+                              {% if media.preview_image.width >= 600 %}{{ media.preview_image | image_url: width: 600 }} 600w,{% endif %}
+                              {% if media.preview_image.width >= 713 %}{{ media.preview_image | image_url: width: 713 }} 713w,{% endif %}
+                              {% if media.preview_image.width >= 823 %}{{ media.preview_image | image_url: width: 823 }} 823w,{% endif %}
+                              {% if media.preview_image.width >= 990 %}{{ media.preview_image | image_url: width: 990 }} 990w,{% endif %}
+                              {% if media.preview_image.width >= 1100 %}{{ media.preview_image | image_url: width: 1100 }} 1100w,{% endif %}
+                              {% if media.preview_image.width >= 1206 %}{{ media.preview_image | image_url: width: 1206 }} 1206w,{% endif %}
+                              {% if media.preview_image.width >= 1346 %}{{ media.preview_image | image_url: width: 1346 }} 1346w,{% endif %}
+                              {% if media.preview_image.width >= 1426 %}{{ media.preview_image | image_url: width: 1426 }} 1426w,{% endif %}
+                              {% if media.preview_image.width >= 1646 %}{{ media.preview_image | image_url: width: 1646 }} 1646w,{% endif %}
+                              {% if media.preview_image.width >= 1946 %}{{ media.preview_image | image_url: width: 1946 }} 1946w,{% endif %}
+                              {{ media.preview_image | image_url }} {{ media.preview_image.width }}w
+                            "
+                            src="{{ media | image_url: width: 1946 }}"
+                            sizes="(min-width: {{ settings.container_width }}px) {{ settings.container_width | minus: 100 | times: 0.55 | round }}px, (min-width: 990px) calc({{ 0.55 | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)"
+                            loading="lazy"
+                            fetchpriority="high"
+                            width="1000"
+                            height="{{ 1000 | divided_by: media.preview_image.aspect_ratio | ceil }}"
+                            alt="{{ media.preview_image.alt | escape }}"
+                          >
+                        </responsive-image>
+                        {% if media.media_type contains 'video' %}
+                          <div class="m-product-media--slider__thumbnail-icon">
+                            <svg
+                              class="m-svg-icon"
+                              fill="currentColor"
+                              stroke="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 576 512"
+                            >
+                              <path d="M543.9 96c-6.2 0-12.5 1.8-18.2 5.7L416 171.6v-59.8c0-26.4-23.2-47.8-51.8-47.8H51.8C23.2 64 0 85.4 0 111.8v288.4C0 426.6 23.2 448 51.8 448h312.4c28.6 0 51.8-21.4 51.8-47.8v-59.8l109.6 69.9c5.7 4 12.1 5.7 18.2 5.7 16.6 0 32.1-13 32.1-31.5v-257c.1-18.5-15.4-31.5-32-31.5zM384 400.2c0 8.6-9.1 15.8-19.8 15.8H51.8c-10.7 0-19.8-7.2-19.8-15.8V111.8c0-8.6 9.1-15.8 19.8-15.8h312.4c10.7 0 19.8 7.2 19.8 15.8v288.4zm160-15.7l-1.2-1.3L416 302.4v-92.9L544 128v256.5z"/>
+                            </svg>
+                          </div>
+                        {% endif %}
+                        {% if media.media_type == 'model' %}
+                          <div class="m-product-media--slider__thumbnail-icon">
+                            <svg
+                              class="m-svg-icon"
+                              fill="currentColor"
+                              stroke="currentColor"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 512 512"
+                            >
+                              <path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 34.2l224 84v.3l-224 97.1-224-97.1v-.3l224-84zM32 153.4l208 90.1v224.7l-208-104V153.4zm240 314.8V243.5l208-90.1v210.9L272 468.2z"/>
+                            </svg>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% else %}
+                {% for i in (1..3) %}
+                  <div class="swiper-slide">
+                    <div
+                      class="{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %} m:blocks-radius"
+                      style="--aspect-ratio: 1/1;{% if animated %}--animation-order: {{ forloop.index }};{% endif %}"
+                      {% if animated %}
+                        data-cascade
+                      {% endif %}
+                    >
+                      {% capture current %}{% cycle 1, 2, 3 %}{% endcapture %}
+                      {{ 'product-' | append: current | placeholder_svg_tag: 'm-placeholder-svg' }}
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endunless %}
+            </div>
+            <!-- End .swiper-wrapper -->
+          </div>
+          <!-- End .swiper-container -->
+          {% liquid
+            assign extra_classes = ''
+            unless totalMedia > 1 or section_onboarding
+              assign extra_classes = 'm:hidden'
+            endunless
+          %}
+          {% render 'slider-controls',
+            absolute: false,
+            position: 'bottom-center',
+            show_pagination: true,
+            show_nav: true,
+            pagination_type: 'fraction',
+            extra_classes: extra_classes
+          %}
+        </div>
+      </div>
+    </favorite-product-slider>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Favorite product slider",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Product information"
+    },
+    {
+      "type": "product",
+      "id": "featured_product",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Custom title",
+      "default": "Example product title",
+      "info": "Leave blank to display product title"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subtitle"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store."
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "white",
+          "label": "Light"
+        },
+        {
+          "value": "black",
+          "label": "Dark"
+        },
+        {
+          "value": "inherit",
+          "label": "Inherit"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Button settings"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--secondary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        { "value": "inherit", "label": "Inherit global setting" },
+        { "value": "fade-in", "label": "Fade in" },
+        { "value": "fade-in-up", "label": "Fade in up" },
+        { "value": "fade-in-left", "label": "Fade in left" },
+        { "value": "fade-in-right", "label": "Fade in right" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Favorite product slider"
+    }
+  ]
+}
+{% endschema %}

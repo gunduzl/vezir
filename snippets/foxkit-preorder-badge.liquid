@@ -1,0 +1,30 @@
+{% liquid
+  assign collectionIds = ''
+  for collection in product.collections
+    assign collectionIds = collectionIds | append: collection.id | append: ','
+  endfor
+  assign class = 'foxkit-preorder-badge !foxkit-hidden'
+  if custom_class != blank
+    assign class = class | append: ' ' | append: custom_class
+  endif
+  if static == true
+    assign class = class | append: ' foxkit-preorder-badge--static'
+  endif
+%}
+{%- capture variants_json -%}
+  [{%- for variant in product.variants -%}
+  {"id": {{variant.id | json }}, "title": {{variant.title | json }},  "available": {{variant.available | json }},"inventory_quantity": {{variant.inventory_quantity | json }},"inventory_policy": {{variant.inventory_policy | json }},"inventory_management": {{variant.inventory_management | json }}}{% unless forloop.last %},{% endunless %}
+{%- endfor -%}]
+{%- endcapture -%}
+
+<foxkit-preorder-badge
+  class="{{ class }}"
+  data-product-id="{{ product.id }}"
+  data-product-available="{{ product.available }}"
+  data-collection-ids="{{ collectionIds | remove_last: ',' }}"
+  hidden
+>
+  <script type='application/json'>
+    {{- variants_json | strip_newlines -}}
+  </script>
+</foxkit-preorder-badge>

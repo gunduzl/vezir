@@ -1,0 +1,85 @@
+{%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+{%- if first_3d_model -%}
+  <script type="application/json" id="ProductJSON-{{ product.id }}">
+    {{ product.media | where: 'media_type', 'model' | json }}
+  </script>
+{%- endif -%}
+
+{%- assign selected_variant = product.selected_variant -%}
+{%- unless section.settings.show_featured_media -%}
+  {%- assign selected_variant = product.selected_or_first_available_variant -%}
+{%- endunless -%}
+<script>
+  window._themeProducts = window._themeProducts || {}
+  window._themeProducts[{{ product.id }}] = {
+    has_3d_model: {%- if first_3d_model -%}true{%- else -%}false{%- endif -%},
+    id: {{ product.id }},
+    title: {{ product.title | json }},
+    available: {{ product.available | json }},
+    handle: {{ product.handle | json }},
+    variants: {{ product.variants | json }},
+    options: {{ product.options_with_values | json }},
+    selected_or_first_available_variant: {{ product.selected_or_first_available_variant | json }},
+    selected_variant: {{ selected_variant | json }},
+    media: {{ product.media | json }},
+    featured_image: {{ product.featured_image | json }},
+    aspect_ratio: {{ product.featured_image.aspect_ratio | json }},
+    images: {{ product.images | json }},
+    price: {{ product.price | json }},
+  };
+  {%- for variant in product.variants -%}
+    window._themeProducts[{{ product.id }}].variants[{{ forloop.index0 }}].inventory_quantity = {{ variant.inventory_quantity }};
+  {%- endfor -%}
+</script>
+{%- liquid
+  if product.selected_or_first_available_variant.featured_media
+    assign seo_media = product.selected_or_first_available_variant.featured_media
+  else
+    assign seo_media = product.featured_media
+  endif
+-%}
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org/",
+    "@type": "Product",
+    "name": {{ product.title | json }},
+    "url": {{ request.origin | append: product.url | json }},
+    {%- if seo_media -%}
+      "image": [
+        {{ seo_media | image_url: width: seo_media.preview_image.width | prepend: "https:" | json }}
+      ],
+    {%- endif -%}
+    "description": {{ product.description | strip_html | json }},
+    {% if product.selected_or_first_available_variant.sku != blank -%}
+      "sku": {{ product.selected_or_first_available_variant.sku | json }},
+    {%- endif %}
+    "brand": {
+      "@type": "Brand",
+      "name": {{ product.vendor | json }}
+    },
+    "offers": [
+      {%- for variant in product.variants -%}
+        {
+          "@type" : "Offer",
+          {%- if variant.sku != blank -%}
+            "sku": {{ variant.sku | json }},
+          {%- endif -%}
+          {%- if variant.barcode.size == 12 -%}
+            "gtin12": {{ variant.barcode }},
+          {%- endif -%}
+          {%- if variant.barcode.size == 13 -%}
+            "gtin13": {{ variant.barcode }},
+          {%- endif -%}
+          {%- if variant.barcode.size == 14 -%}
+            "gtin14": {{ variant.barcode }},
+          {%- endif -%}
+          "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+          "price" : {{ variant.price | divided_by: 100.00 | json }},
+          "priceCurrency" : {{ cart.currency.iso_code | json }},
+          "url" : {{ request.origin | append: variant.url | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  }
+</script>

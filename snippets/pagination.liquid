@@ -1,0 +1,3 @@
+<div class="m-pagination{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+  {{ paginate | default_pagination: next: '»', previous: '«' }}
+</div>

@@ -1,0 +1,42 @@
+{%- capture page_title -%}
+  {{ 'customer.activate_account.title' | t }}
+{%- endcapture -%}
+{% render 'page-title', title: page_title %}
+<div class="m-activate-account">
+  <div class="container-narrow">
+    <h4 class="m-activate-account__heading">{{ 'customer.activate_account.subtext' | t }}</h4>
+    {% form 'activate_customer_password' %}
+      {{ form.errors | default_errors }}
+      <div class="form-group">
+        <label for="CustomerPassword" class="label-hidden">
+          {{ 'customer.activate_account.password' | t }}
+        </label>
+        <input
+          type="password"
+          name="customer[password]"
+          id="CustomerPassword"
+          placeholder="{{ 'customer.activate_account.password' | t }}"
+          class="form-field form-field--input"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="CustomerPasswordConfirmation" class="label-hidden">
+          {{ 'customer.activate_account.password_confirm' | t }}
+        </label>
+        <input
+          type="password"
+          name="customer[password_confirmation]" 
+          id="CustomerPasswordConfirmation" 
+          placeholder="{{ 'customer.activate_account.password_confirm' | t }}" 
+          class="form-field form-field--input"
+        >
+      </div>
+
+      <div class="m-activate-account__action mt-2">
+        <input type="submit" class="m-button m-button--primary" value="{{ 'customer.activate_account.submit' | t }}">
+        <input type="submit" class="m-button m-button--secondary m-button--white" name="decline" value="{{ 'customer.activate_account.cancel' | t }}">
+      </div>
+    {% endform %}
+  </div>
+</div>

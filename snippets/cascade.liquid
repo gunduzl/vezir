@@ -1,0 +1,179 @@
+{% liquid
+  assign item_separator = '||__cascade-item-end__||'
+  assign grid_class = 'm-cascading__grid m:display-grid m:grid-2-cols'
+  assign start_col = 0
+  assign half_col_counter = start_col
+
+  assign content_items_array = content_items | split: item_separator
+  assign first_item_after_break = true
+
+  assign offset = sequence | default: 1
+  assign offset = offset | minus: 1
+  assign indexes = '0,1,2,3,4' | split: ','
+  assign sliced_indexes = indexes | slice: 0, offset
+  assign indexes = indexes | slice: offset, 5 | concat: sliced_indexes
+
+  assign single_col_content = ''
+%}
+
+<div class="m-cascading__content m-cascading__content--desktop m:mx-auto m:hidden md:m:block">
+  <div class="{{ grid_class }}" style="--column-gap: {{ column_gap }}px;">
+    {% for content_item in content_items_array %}
+      {% liquid
+        assign enable_variance = true
+        assign parallax_item = cascade_enable_parallax
+
+        assign mod = half_col_counter | modulo: 2
+
+        capture cycle_index
+          cycle 0, 1, 2, 3, 4
+        endcapture
+
+        capture mobile_single_alignment_class
+          cycle 'mobile': 'm:mr-auto', 'm:ml-auto'
+        endcapture
+
+        if variance != 'none' and enable_variance
+          if variance == 'low'
+            assign item_widths = ' md:m:w-full | md:m:w-10/12 | md:m:w-10/12 | md:m:w-full | md:m:w-10/12 ' | split: '|'
+            assign item_speeds = '1,-3,-5,3,-1' | split: ','
+            assign item_align = 'md:mx-auto'
+            capture item_spacing
+              case spacing
+                when 'medium'
+                  echo 'm:mt-cascade-4'
+                when 'small'
+                  echo 'm:mt-cascade-2'
+                when 'large'
+                  echo 'm:mt-cascade-6'
+              endcase
+            endcapture
+          elsif variance == 'medium'
+            assign item_widths = ' md:m:w-full | md:m:w-8/12 | md:m:w-10/12 | md:m:w-full | md:m:w-8/12 ' | split: '|'
+            assign item_speeds = '-3,3,-1,1,2' | split: ','
+            capture item_align
+              cycle 'md:m:mr-auto', 'md:m:mx-auto', 'md:m:ml-auto', 'md:m:mx-auto'
+            endcapture
+            capture item_spacing
+              case spacing
+                when 'medium'
+                  echo 'm:mt-cascade-3'
+                when 'small'
+                  echo 'm:mt-cascade-1'
+                when 'large'
+                  echo 'm:mt-cascade-5'
+              endcase
+            endcapture
+          elsif variance == 'high'
+            assign item_widths = ' md:m:w-full | md:m:w-7/12 | md:m:w-10/12 | md:m:w-5/12 | md:m:w-8/12 ' | split: '|'
+            assign item_speeds = '-3,3,-2,1' | split: ','
+            capture item_align
+              cycle 'md:m:mr-auto', 'md:m:mx-auto', 'md:m:ml-auto', 'md:m:mx-auto'
+            endcapture
+            capture item_spacing
+              case spacing
+                when 'medium'
+                  echo 'm:mt-cascade-3'
+                when 'small'
+                  echo 'm:mt-cascade-1'
+                when 'large'
+                  echo 'm:mt-cascade-5'
+              endcase
+            endcapture
+          endif
+          assign cycle_index = cycle_index | plus: 0
+          assign width_index = indexes[cycle_index] | plus: 0
+          assign item_width = item_widths[width_index]
+          assign item_parallax_speed = item_speeds[width_index]
+        else
+          assign item_width = 'md:m:w-full'
+          assign item_align = ''
+
+          capture item_spacing
+            case spacing
+              when 'medium'
+                echo 'm:mt-cascade-4'
+              when 'small'
+                echo 'm:mt-cascade-2'
+              when 'large'
+                echo 'm:mt-cascade-6'
+            endcase
+          endcapture
+        endif
+
+        if forloop.index0 == 0
+          assign item_parallax_speed = 1
+        endif
+      %}
+
+      {% capture cascade_item %}
+        <div 
+          class="m:relative m-cascading__item motion-reduce:transition-none {{ item_width }} {{ item_align }}{% unless first_item_after_break %} {{ item_spacing }}{% endunless %}" 
+          data-cascade-item 
+          {% if parallax_item %}
+            data-parallax-container
+            data-parallax-speed="{{ item_parallax_speed }}"
+            data-parallax-id="{{ section_id }}-{{ forloop.index }}"
+          {% endif %}
+          style="min-height: 8vw;"
+        >
+          {%- if parallax_item -%}
+            <div data-parallax-element>
+          {%- endif -%}
+            {{ content_item }}
+          {%- if parallax_item -%}
+            </div>
+          {%- endif -%}
+        </div>
+      {% endcapture %}
+
+      {% capture single_cascade_item %}
+        <div
+          class="m-cascading__item m:w-9/12 motion-reduce:transition-none {{ item_spacing }} {{ mobile_single_alignment_class }}"
+          data-cascade-item
+          {% if parallax_item %}
+            data-parallax-container
+            data-parallax-speed="{{ item_parallax_speed }}"
+            data-parallax-id="{{ section_id }}-single-{{ forloop.index }}"
+          {% endif %}
+        >
+          <div class="{{ item_width }} {{ item_align }}">
+            {%- if parallax_item -%}
+            <div data-parallax-element >
+            {%- endif -%}
+            {{ content_item }}
+            {%- if parallax_item -%}
+            </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {% endcapture %}
+
+      {% liquid
+        assign single_col_content = single_col_content | append: single_cascade_item
+        if mod == 0
+          assign left_content = left_content | append: cascade_item
+        else
+          assign right_content = right_content | append: cascade_item
+        endif
+        assign half_col_counter = half_col_counter | plus: 1
+        assign first_item_after_break = false
+      %}
+      {% if forloop.last %}
+        {% if left_content != '' or right_content != '' %}
+          <div class="m:relative" style="--col-delay: 0ms;">
+            {{ left_content }}
+          </div>
+          <div class="m:relative" style="--col-delay: 300ms;">
+            {{ right_content }}
+          </div>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% if single_col_content != '' %}
+  <div class="m-cascading__content m-cascading__content--mobile m:relative md:m:hidden">
+    {{ single_col_content }}
+  </div>
+{% endif %}

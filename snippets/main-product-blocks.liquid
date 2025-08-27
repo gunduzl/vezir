@@ -1,0 +1,1153 @@
+{% liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign size_title = 'size'
+  assign product_form_id = 'product-form-' | append: section.id
+  assign product_form_class = 'product-form-' | append: section.id
+
+  if update_browser_history == null
+    assign update_browser_history = section.settings.enable_history_state
+  endif
+
+  assign image_field = section.blocks | where: 'type', 'image_field'
+  assign wishlist_app = settings.wishlist_app
+
+  if section.settings.layout == 'layout-7'
+    assign align_breadcrumb = 'center'
+  else
+    assign align_breadcrumb = 'left'
+  endif
+
+  for block in section.blocks
+    if block.type == 'variant_picker'
+      assign size_title = block.settings.size_title | default: 'size'
+      break
+    endif
+  endfor
+
+  assign variant_id = product.selected_or_first_available_variant.id
+  assign selected_variant_id = ''
+  unless section.settings.show_featured_media
+    assign selected_variant_id = product.selected_variant.id
+  endunless
+
+  assign variant_available = true
+  if product.selected_or_first_available_variant.available == false or quantity_rule_soldout or product.selected_or_first_available_variant == null
+    assign variant_available = false
+  endif
+%}
+{% comment %} Fallback for case not show block price, buy buttons {% endcomment %}
+<input type="hidden" name="id" value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}" disabled>
+{% comment %} End comment {% endcomment %}
+{%- for block in section.blocks -%}
+  <div
+    class="main-product__block main-product__block-{{ block.type }}"
+    {{ block.shopify_attributes }}
+  >
+    {%- case block.type -%}
+      {%- when '@app' -%}
+        {% render block %}
+      {%- when 'badge' -%}
+        {%- liquid
+          assign has_tags = false
+          for tag in product.tags
+            if tag contains 'tag__'
+              assign has_tags = true
+            endif
+          endfor
+        -%}
+        {% if has_tags %}
+          <div class="product-block-group product-block-group--tags m:display-flex">
+            {% render 'product-tags', product: product %}
+          </div>
+        {% endif %}
+      {%- when 'breadcrumb' -%}
+        {% render 'breadcrumb', container: 'container', justify: align_breadcrumb, hide_current: true %}
+      {%- when 'title' -%}
+        <div class="product-block-group product-block-group--title">
+          {% if is_featured == true %}
+            <h2 class="m-product-title">{{ product.title }}</h2>
+          {% else %}
+            <h1 class="m-product-title">{{ product.title }}</h1>
+          {% endif %}
+          {% if section.settings.show_atwl and section.settings.layout != 'layout-7' %}
+            <div class="m-product-wishlist m:hidden md:m:block">
+              {% if wishlist_app == 'growave' %}
+                {% comment %} theme-check-disable {% endcomment %}
+                {% liquid
+                  capture the_snippet_fave_icon
+                    render 'ssw-widget-faveicon' with product.id
+                  endcapture
+                %}
+                {% unless the_snippet_fave_icon contains 'Liquid error' %}
+                  {{ the_snippet_fave_icon }}
+                {% else %}
+                  {% render 'mm-ssw-widget-faveicon' with product.id %}
+                {% endunless %}
+                {% comment %} theme-check-enable {% endcomment %}
+              {% else %}
+                {% render 'tooltip', type: 'wishlist', product: product, class_name: 'm-tooltip--left', style: style %}
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+        {% if settings.review_app == 'ali_reviews' %}
+          <div product-id="{{ product.id }}" class="alr-display-review-badge"></div>
+        {% endif %}
+      {%- when 'price' -%}
+        <div class="product-block-group--price" id="Price-{{ section.id }}" role="status">
+          {% render 'product-prices',
+            use_variant: true,
+            product: product,
+            show_sale_badge: block.settings.show_saving,
+            price_text_size: 'm:text-xl md:m:text-2xl',
+            sale_badge_type: block.settings.sale_badge_type
+          %}
+        </div>
+        {%- if shop.taxes_included -%}
+          <div class="m-product-tax">
+            {{ 'products.product.include_taxes' | t }}
+          </div>
+        {%- endif -%}
+        <div class="installment-shoppay">
+          {%- assign product_form_installment_id = 'product-form-installment-' | append: section.id -%}
+          {%- form 'product', product, id: product_form_installment_id, class: 'installment' -%}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+            {{ form | payment_terms }}
+          {%- endform -%}
+        </div>
+      {%- when 'short_description' -%}
+        {% if product.metafields.descriptor.short_description != blank %}
+          <div class="m-product-description">{{ product.metafields.descriptor.short_description }}</div>
+        {% endif %}
+      {%- when 'description' -%}
+        <div class="m-product-description rte">
+          {{ product.description }}
+        </div>
+      {%- when 'rating' -%}
+        {% render 'product-reviews-app__badge', product: product %}
+      {%- when 'meta' -%}
+        <ul class="m-product-meta">
+          {% if block.settings.show_vendor and product.vendor != blank %}
+            <li class="m-product-meta__item m-product-meta__vendor">
+              <span class="m-product-meta--label">{{ 'products.product.vendor' | t }}:</span>
+              <div class="m-product-meta--value">{{ product.vendor | link_to_vendor }}</div>
+            </li>
+          {% endif %}
+          {% if block.settings.show_type and product.type != blank %}
+            <li class="m-product-meta__item m-product-meta__type">
+              <span class="m-product-meta--label">{{ 'products.product.type' | t }}:</span>
+              <div class="m-product-meta--value">{{ product.type | link_to_type }}</div>
+            </li>
+          {% endif %}
+          {% if block.settings.show_collections and product.collections.size > 0 %}
+            <li class="m-product-meta__item m-product-meta__collection">
+              <span class="m-product-meta--label">{{ 'products.product.collections' | t }}:</span>
+              <div class="m-product-meta--value">
+                {% for collection in product.collections %}
+                  <a href="{{ collection.url }}" class="hover:text-black">
+                    {{- collection.title -}}
+                    {%- unless forloop.last -%},{%- endunless -%}
+                  </a>
+                {% endfor %}
+              </div>
+            </li>
+          {% endif %}
+          {% if block.settings.show_availability %}
+            <li class="m-product-meta__item m-product-meta__availability" id="Availability-{{ section.id }}">
+              <span class="m-product-meta--label">{{ 'products.product.availability' | t }}:</span>
+              <div
+                class="m-product-meta--value m-product-availability{% unless variant_available %} m-product-availability--outofstock{% endunless %}"
+                data-availability
+                data-variant_available="{{ variant_available }}"
+              >
+                {%- if variant_available -%}
+                  {{- 'products.product.in_stock' | t -}}
+                {%- else -%}
+                  {% render 'new-locale', key: 'products.product.out_of_stock' %}
+                {%- endif -%}
+              </div>
+            </li>
+          {% endif %}
+          {% if block.settings.show_sku %}
+            <li class="m-product-meta__item m-product-meta__availability" id="Sku-{{ section.id }}">
+              <span class="m-product-meta--label">{{ 'products.product.sku' | t }}:</span>
+              <div class="m-product-meta--value" data-variant-sku>{{ selected_variant.sku | default: 'N/A' }}</div>
+            </li>
+          {% endif %}
+        </ul>
+      {%- when 'custom_field' -%}
+        {% liquid
+          assign label_hidden = false
+          assign field_type = block.settings.field_type
+          assign field_options = block.settings.field_options
+          assign field_name = block.settings.title
+          assign field_placeholder = block.settings.field_placeholder
+          assign field_required = block.settings.field_required
+          assign show_at_checkout = block.settings.show_at_checkout
+
+          if field_name == blank
+            assign label_hidden = true
+            assign field_name = 'Custom field ' | append: forloop.index
+          endif
+        %}
+        <div class="m-product-custom-field" data-theme-fields data-product-custom-field="{{ field_type }}">
+          <label class="m-product-option--label{% if label_hidden %} m:hidden{% endif %}" for="{{ block.id }}">
+            {{ field_name -}}
+            {%- if field_required -%}
+              <sup>*</sup>
+            {%- endif %}
+          </label>
+          {% unless show_at_checkout %}
+            {% assign field_name = field_name | prepend: '_' %}
+          {% endunless %}
+          {% case field_type %}
+            {% when 'text' %}
+              <input
+                type="text"
+                id="{{ block.id }}"
+                class="form-field form-field--input"
+                placeholder="{{ field_placeholder }}"
+                name="properties[{{- field_name -}}]"
+                {% if field_required %}
+                  required
+                {% endif %}
+                form="{{ product_form_id }}"
+              >
+            {% when 'textarea' %}
+              <textarea
+                id="{{ block.id }}"
+                class="form-field form-field--input"
+                placeholder="{{ field_placeholder }}"
+                name="properties[{{- field_name -}}]"
+                {% if field_required %}
+                  required
+                {% endif %}
+                form="{{ product_form_id }}"
+              ></textarea>
+            {% when 'select' %}
+              {% assign options = field_options | newline_to_br | split: '<br />' %}
+              <select
+                id="{{ block.id }}"
+                class="form-field form-field--input"
+                name="properties[{{- field_name -}}]"
+                {% if field_required %}
+                  required
+                {% endif %}
+                form="{{ product_form_id }}"
+              >
+                {% if field_placeholder != blank %}
+                  <option value="">{{ field_placeholder }}</option>
+                {% endif %}
+                {% for option in options %}
+                  <option value="{{ option }}" label="{{ option }}">{{ option }}</option>
+                {% endfor %}
+              </select>
+          {% endcase %}
+        </div>
+      {%- when 'image_field' -%}
+        {% liquid
+          assign label_hidden = false
+          assign field_name = block.settings.title
+          assign field_required = block.settings.field_required
+          assign show_at_checkout = block.settings.show_at_checkout
+          if field_name == blank
+            assign label_hidden = true
+            assign field_name = 'Custom image ' | append: forloop.index
+          endif
+        %}
+        <div class="m-product-custom-field" data-theme-fields data-product-custom-field="image_field">
+          <label class="m-product-option--label{% if label_hidden %} m:hidden{% endif %}" for="{{ block.id }}">
+            {{ field_name -}}
+            {%- if field_required -%}
+              <sup>*</sup>
+            {%- endif %}
+          </label>
+          {% unless show_at_checkout %}
+            {% assign field_name = field_name | prepend: '_' %}
+          {% endunless %}
+          <input
+            type="file"
+            accept="image/*"
+            id="{{ block.id }}"
+            name="properties[{{- field_name -}}]"
+            {% if field_required %}
+              required
+            {% endif %}
+            form="{{ product_form_id }}"
+            class="form-field form-field--input"
+          >
+        </div>
+      {%- when 'visitors' -%}
+        {%- liquid
+          assign live_views_min = block.settings.live_views_range | split: '-' | first
+          assign live_views_max = block.settings.live_views_range | split: '-' | last
+          assign modulo_numb = live_views_max | minus: live_views_min
+          assign live_views_current = 'now' | date: '%S' | modulo: modulo_numb | plus: live_views_min
+        -%}
+        <m-visitiors-counter
+          class="m-product-live-views m:inline-flex m:items-center m-gradient m-color-{{ block.settings.color_scheme }}"
+          data-live-views-current="{{ live_views_current }}"
+          data-live-views-min="{{ live_views_min }}"
+          data-live-views-max="{{ live_views_max }}"
+          data-live-views-duration="{{ block.settings.live_view_duration }}"
+        >
+          <span class="live-views-icon{% if block.settings.live_view_icon_blinks %} animate-pulse{% endif %}">
+            <svg
+              class="m-svg-icon--medium"
+              fill="currentColor"
+              stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 576 512"
+            >
+              <path d="M569.354 231.631C512.97 135.949 407.81 72 288 72 168.14 72 63.004 135.994 6.646 231.631a47.999 47.999 0 0 0 0 48.739C63.031 376.051 168.19 440 288 440c119.86 0 224.996-63.994 281.354-159.631a47.997 47.997 0 0 0 0-48.738zM288 392c-102.556 0-192.091-54.701-240-136 44.157-74.933 123.677-127.27 216.162-135.007C273.958 131.078 280 144.83 280 160c0 30.928-25.072 56-56 56s-56-25.072-56-56l.001-.042C157.794 179.043 152 200.844 152 224c0 75.111 60.889 136 136 136s136-60.889 136-136c0-31.031-10.4-59.629-27.895-82.515C451.704 164.638 498.009 205.106 528 256c-47.908 81.299-137.444 136-240 136z"/>
+            </svg>
+          </span>
+          <div class="live-views-text">
+            {%- assign live_views_numb = '{count_number}' -%}
+            {{ block.settings.live_views_text | replace: live_views_numb, live_views_current }}
+          </div>
+        </m-visitiors-counter>
+        <script src="{{ 'visitors-counter.js' | asset_url }}" defer="defer"></script>
+      {%- when 'variant_picker' -%}
+        {% render 'product-variant-picker',
+          product: product,
+          section: section,
+          size_title: size_title,
+          product_form_id: product_form_id
+        %}
+      {%- when 'buy_buttons' -%}
+        {% liquid
+          assign gift_card_recipient_feature_active = false
+          if block.settings.show_gift_card_recipient and product.gift_card?
+            assign gift_card_recipient_feature_active = true
+          endif
+
+          assign show_dynamic_checkout = block.settings.show_dynamic_checkout
+          if image_field.size > 0 or gift_card_recipient_feature_active == true
+            assign show_dynamic_checkout = false
+          endif
+        %}
+        <product-form class="m-product-form m-product-form--main" data-product-id="{{ product.id }}">
+          {%- form 'product',
+            product,
+            id: product_form_id,
+            data-product-id: product.id,
+            class: product_form_class,
+            novalidate: 'novalidate',
+            data-type: 'add-to-cart-form',
+            data-product-id: product.id,
+            data-product-handle: product.handle,
+            data-dynamic-checkout: show_dynamic_checkout,
+            data-enable-image-zoom: section.settings.show_zoom_button,
+            data-enable-video-autoplay: section.settings.enable_video_autoplay
+          -%}
+            <input
+              type="hidden"
+              name="id"
+              value="{{ variant_id }}"
+              data-selected-variant="{{ selected_variant_id }}"
+              disabled
+            >
+            {%- if gift_card_recipient_feature_active -%}
+              {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+            {%- endif -%}
+
+            {% if product.quantity_price_breaks_configured? and block.settings.show_quantity_selector %}
+              <div
+                id="QuantityForm-{{ section.id }}"
+                class="m-quantity-price-breaks m:display-grid"
+              >
+                {%- assign cart_qty = cart | item_count_for_variant: product.selected_or_first_available_variant.id -%}
+
+                <div class="m-quantity-price-breaks__wrapper m:display-grid">
+                  <div class="m-quantity-price-breaks__input m:display-grid">
+                    <label class="m-product-option--label" for="Quantity-{{ section.id }}">
+                      <span class="m:font-bold">{{ 'products.product.quantity' | t }}</span>
+                      <span
+                        id="QuantityRulesCart-{{ section.id }}"
+                        class="quantity__rules-cart{% if cart_qty == 0 %} m:hidden{% endif %} m:relative m:inline-flex m:items-center"
+                      >
+                        <span class="m-spinner-icon">
+                          <svg
+                            class="animate-spin m-svg-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </span>
+                        <span class="quantity-cart m:font-bold">
+                          (
+                          {%- render 'new-locale',
+                            key: 'products.product.quantity_in_cart_html',
+                            param: '{{ quantity }}',
+                            value: cart_qty
+                          -%}
+                          )
+                        </span>
+                      </span>
+                    </label>
+                    <div class="flex items-center gap-4">
+                      {% render 'product-qty-input',
+                        product_form_id: product_form_id,
+                        product: product,
+                        section_id: section.id
+                      %}
+
+                      {%- if product.quantity_price_breaks_configured? -%}
+                        {%- liquid
+                          assign volume_pricing_array = product.selected_or_first_available_variant.quantity_price_breaks | sort: 'quantity' | reverse
+                          assign current_qty_for_volume_pricing = cart_qty | plus: product.selected_or_first_available_variant.quantity_rule.min
+                          if cart_qty > 0
+                            assign current_qty_for_volume_pricing = cart_qty | plus: product.selected_or_first_available_variant.quantity_rule.increment
+                          endif
+                          assign variant_price_compare = product.selected_or_first_available_variant.compare_at_price
+                        -%}
+                        <price-per-item
+                          id="PricePerItem-{{ section.id }}"
+                          class="m:display-flex m:flex-wrap m:items-center m:gap-2"
+                          data-section-id="{{ section.id }}"
+                          data-product-id="{{ product.id }}"
+                          data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                        >
+                          {%- if variant_price_compare -%}
+                            <span class="m:visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                            <span class="m:inline-flex m:items-center h-auto m:relative">
+                              {%- liquid
+                                if settings.currency_code_enabled
+                                  echo variant_price_compare | money_with_currency
+                                else
+                                  echo variant_price_compare | money
+                                endif
+                              -%}
+                            </span>
+                            <span class="m:visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+                          {%- endif -%}
+                          {%- if product.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
+                            {%- if current_qty_for_volume_pricing < volume_pricing_array.last.minimum_quantity -%}
+                              {%- liquid
+                                if settings.currency_code_enabled
+                                  assign variant_price = product.selected_or_first_available_variant.price | money_with_currency
+                                else
+                                  assign variant_price = product.selected_or_first_available_variant.price | money
+                                endif
+                              -%}
+                              <span class="price-per-item--current price__regular m:whitespace-nowrap">
+                                {%- render 'new-locale',
+                                  key: 'products.product.volume_pricing.price_at_each_html',
+                                  param: '{{ price }}',
+                                  value: variant_price
+                                -%}
+                              </span>
+                            {%- else -%}
+                              {%- for price_break in volume_pricing_array -%}
+                                {%- if current_qty_for_volume_pricing >= price_break.minimum_quantity -%}
+                                  {%- liquid
+                                    if settings.currency_code_enabled
+                                      assign price_break_price = price_break.price | money_with_currency
+                                    else
+                                      assign price_break_price = price_break.price | money
+                                    endif
+                                  -%}
+                                  <span class="price-per-item--current price__regular m:whitespace-nowrap">
+                                    {%- render 'new-locale',
+                                      key: 'products.product.volume_pricing.price_at_each_html',
+                                      param: '{{ price }}',
+                                      value: price_break_price
+                                    -%}
+                                  </span>
+                                  {%- break -%}
+                                {%- endif -%}
+                              {%- endfor -%}
+                            {%- endif -%}
+                          {%- else -%}
+                            <span class="price-per-item--current price__regular m:whitespace-nowrap">
+                              {%- liquid
+                                if settings.currency_code_enabled
+                                  assign variant_price = product.selected_or_first_available_variant.price | money_with_currency
+                                else
+                                  assign variant_price = product.selected_or_first_available_variant.price | money
+                                endif
+                              -%}
+                              {%- render 'new-locale',
+                                key: 'products.product.volume_pricing.price_at_each_html',
+                                param: '{{ price }}',
+                                value: variant_price
+                              -%}
+                            </span>
+                          {%- endif -%}
+                        </price-per-item>
+                      {%- endif -%}
+                    </div>
+                  </div>
+
+                  <div
+                    class="quantity__rules"
+                    id="QuantityRules-{{ section.id }}"
+                  >
+                    {%- if product.selected_or_first_available_variant.quantity_rule.increment > 1 -%}
+                      <span class="divider">
+                        {%- render 'new-locale',
+                          key: 'products.product.quantity_multiples_of',
+                          param: '{{ quantity }}',
+                          value: product.selected_or_first_available_variant.quantity_rule.increment
+                        -%}
+                      </span>
+                    {%- endif -%}
+                    {%- if product.selected_or_first_available_variant.quantity_rule.min > 1 -%}
+                      <span class="divider">
+                        {%- render 'new-locale',
+                          key: 'products.product.quantity_minimum_of',
+                          param: '{{ quantity }}',
+                          value: product.selected_or_first_available_variant.quantity_rule.min
+                        -%}
+                      </span>
+                    {%- endif -%}
+                    {%- if product.selected_or_first_available_variant.quantity_rule.max != null -%}
+                      <span class="divider m:font-medium">
+                        {%- render 'new-locale',
+                          key: 'products.product.quantity_maximum_of',
+                          param: '{{ quantity }}',
+                          value: product.selected_or_first_available_variant.quantity_rule.max
+                        -%}
+                      </span>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+                {%- if product.quantity_price_breaks_configured? -%}
+                  <volume-pricing
+                    class="volume-pricing m:block parent-display m:blocks-radius-md"
+                    id="Volume-{{ section.id }}"
+                  >
+                    {%- if product.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
+                      <span class="caption block">
+                        {%- render 'new-locale', key: 'products.product.volume_pricing.title' -%}
+                      </span>
+                      <ul class="list-unstyled volume-pricing__list">
+                        <li class="volume-pricing__item m:blocks-radius-md">
+                          <span>{{ product.selected_or_first_available_variant.quantity_rule.min }}+</span>
+                          {%- liquid
+                            if settings.currency_code_enabled
+                              assign price = product.selected_or_first_available_variant.price | money_with_currency
+                            else
+                              assign price = product.selected_or_first_available_variant.price | money
+                            endif
+                          -%}
+                          {%- capture price_at_each -%}
+                            {%- render 'new-locale',
+                              key: 'products.product.volume_pricing.price_at_each',
+                              param: '{{ price }}',
+                              value: price
+                            -%}
+                          {%- endcapture -%}
+                          <span data-text="{{ price_at_each | strip_html }}">
+                            {%- render 'new-locale',
+                              key: 'products.product.volume_pricing.each_html',
+                              param: '{{ money }}',
+                              value: price
+                            -%}
+                          </span>
+                        </li>
+                        {%- for price_break in product.selected_or_first_available_variant.quantity_price_breaks -%}
+                          {%- liquid
+                            if settings.currency_code_enabled
+                              assign price_break_price = price_break.price | money_with_currency
+                            else
+                              assign price_break_price = price_break.price | money
+                            endif
+                          -%}
+                          <li class="volume-pricing__item m:blocks-radius-md{% if forloop.index >= 3 %} show-more-item m:hidden{% endif %}">
+                            <span>
+                              {{- price_break.minimum_quantity -}}
+                              <span aria-hidden="true">+</span></span
+                            >
+                            {%- capture price_at_each -%}
+                              {%- render 'new-locale',
+                                key: 'products.product.volume_pricing.price_at_each',
+                                param: '{{ price }}',
+                                value: price_break_price
+                              -%}
+                            {%- endcapture -%}
+                            <span data-text="{{ price_at_each | strip_html }}">
+                              {%- render 'new-locale',
+                                key: 'products.product.volume_pricing.each_html',
+                                param: '{{ money }}',
+                                value: price_break_price
+                              -%}
+                            </span>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                      {%- if product.selected_or_first_available_variant.quantity_price_breaks.size >= 3 -%}
+                        <show-more-button>
+                          <button
+                            class="button-show-more btn--link"
+                            id="Show-More-{{ section.id }}"
+                            type="button"
+                          >
+                            <span class="label-show-more label-text">
+                              <span aria-hidden="true">+ </span>
+                              {%- render 'new-locale', key: 'products.facets.show_more' %}
+                            </span>
+                          </button>
+                        </show-more-button>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </volume-pricing>
+                {%- endif -%}
+              </div>
+            {% endif %}
+
+            <div
+              class="m-product-form--wrapper m:display-flex m:flex-wrap m:items-end"
+              id="QuantityForm-{{ section.id }}"
+            >
+              {% if block.settings.show_quantity_selector and product.quantity_price_breaks_configured? != true %}
+                <div class="m-product-form--input">
+                  <label class="m-product-option--label">
+                    {{ 'products.product.quantity' | t }}
+                  </label>
+                  {% render 'product-qty-input',
+                    product_form_id: product_form_id,
+                    product: product,
+                    section_id: section.id
+                  %}
+                </div>
+              {% endif %}
+              {% if block.settings.show_atc_button %}
+                {% liquid
+                  assign btn_class = 'm-button--primary'
+                  if show_dynamic_checkout
+                    assign btn_class = 'm-button--secondary'
+                  endif
+                %}
+                <button
+                  id="ProductSubmitButton-{{ section.id }}"
+                  type="submit"
+                  name="add"
+                  class="m-add-to-cart m-spinner-button m-button {{ btn_class }}"
+                  data-atc-text="{{ 'products.product.add_to_cart' | t }}"
+                  {% unless variant_available %}
+                    disabled
+                  {% endunless %}
+                >
+                  <span class="m-spinner-icon">
+                    <svg
+                      class="animate-spin m-svg-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                  <span class="m-add-to-cart--text">
+                    {%- if product.selected_or_first_available_variant == null -%}
+                      {{ 'products.product.unavailable' | t }}
+                    {%- elsif product.selected_or_first_available_variant.available == false
+                      or quantity_rule_soldout
+                    -%}
+                      {{ 'products.product.sold_out' | t }}
+                    {%- else -%}
+                      {{ 'products.product.add_to_cart' | t }}
+                    {%- endif -%}
+                  </span>
+                </button>
+                {% if section.settings.show_atwl and section.settings.layout == 'layout-7' %}
+                  <div class="m-product-wishlist m:hidden md:m:block">
+                    {% render 'tooltip', type: 'wishlist', class_name: 'm-tooltip--top' %}
+                  </div>
+                {% endif %}
+              {% endif %}
+              {% liquid
+                assign show_terms = false
+                if settings.agree_text != blank and settings.show_agree_on_product
+                  render 'agree-terms-checkbox'
+                  assign show_terms = true
+                endif
+              %}
+              {% if show_dynamic_checkout %}
+                <div
+                  class="m-product-dynamic-checkout buy-one-click{% if block.settings.show_atc_button %} show-add-to-cart{% else %} m:flex-1{% endif %}"
+                  {% if show_terms %}
+                    data-terms-action disabled
+                  {% endif %}
+                >
+                  {{- form | payment_button -}}
+                </div>
+              {% endif %}
+            </div>
+            <div class="m-product-form-message"></div>
+          {%- endform -%}
+        </product-form>
+        <link
+          rel="stylesheet"
+          href="{{ 'pickup-availability.css' | asset_url }}"
+          media="print"
+          onload="this.media='all';"
+        >
+        {%- assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities
+          | where: 'pick_up_enabled', true
+        -%}
+        {% capture available %}{% if product.selected_or_first_available_variant.available and pick_up_availabilities.size > 0 %} available{% endif %}{% endcapture %}
+        <pickup-availability
+          {{ available }}
+          class="product__pickup-availabilities"
+          data-base-url="{{ routes.root_url }}"
+          data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+          data-has-only-default-variant="{{ product.has_only_default_variant }}"
+        >
+          <template>
+            <pickup-availability-preview class="m-pickup-availability__preview m:display-flex">
+              <svg
+                class="m-svg-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+              >
+                <path fill="#DE3618" stroke="#fff" d="M13.94 3.94 10 7.878l-3.94-3.94A1.499 1.499 0 1 0 3.94 6.06L7.88 10l-3.94 3.94a1.499 1.499 0 1 0 2.12 2.12L10 12.12l3.94 3.94a1.497 1.497 0 0 0 2.12 0 1.499 1.499 0 0 0 0-2.12L12.122 10l3.94-3.94a1.499 1.499 0 1 0-2.121-2.12z"/>
+              </svg>
+              <div class="m-pickup-availability__info">
+                <p class="m:text-color-subtext">
+                  {%- render 'new-locale', key: 'products.product.pickup_availability.unavailable' -%}
+                </p>
+                <button class="m-pickup-availability__button m-button m-button--link">
+                  {%- render 'new-locale', key: 'products.product.pickup_availability.refresh' -%}
+                </button>
+              </div>
+            </pickup-availability-preview>
+          </template>
+        </pickup-availability>
+        <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+
+      {%- when 'collapsible_tab' -%}
+        {% if block.settings.heading != blank %}
+          <div class="m-product-collapsible">
+            <collapsible-tab
+              class="m-collapsible no-js-hidden"
+              data-block-id="collapsible-tab-{{ block.id }}"
+              {% if block.settings.default_open %}
+                open="true"
+              {% endif %}
+            >
+              <button class="m-collapsible--button" data-trigger>
+                <span>{{ block.settings.heading }}</span>
+                <span class="m-collapsible--icon">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.5306 6.53073L8.5306 11.5307C8.46092 11.6007 8.37813 11.6561 8.28696 11.694C8.1958 11.7318 8.09806 11.7513 7.99935 11.7513C7.90064 11.7513 7.8029 11.7318 7.71173 11.694C7.62057 11.6561 7.53778 11.6007 7.4681 11.5307L2.4681 6.53073C2.3272 6.38984 2.24805 6.19874 2.24805 5.99948C2.24805 5.80023 2.3272 5.60913 2.4681 5.46823C2.60899 5.32734 2.80009 5.24818 2.99935 5.24818C3.19861 5.24818 3.3897 5.32734 3.5306 5.46823L7.99997 9.93761L12.4693 5.46761C12.6102 5.32671 12.8013 5.24756 13.0006 5.24756C13.1999 5.24756 13.391 5.32671 13.5318 5.46761C13.6727 5.60851 13.7519 5.7996 13.7519 5.99886C13.7519 6.19812 13.6727 6.38921 13.5318 6.53011L13.5306 6.53073Z" fill="currentColor"/>
+                  </svg>
+                </span>
+              </button>
+              <div class="m-collapsible--content" data-content hidden>
+                <div class="m-collapsible--content__inner rte">
+                  {{ block.settings.content }}
+                  {{ block.settings.liquid }}
+                </div>
+              </div>
+            </collapsible-tab>
+          </div>
+        {% endif %}
+      {%- when 'text' -%}
+        {% if block.settings.text != blank %}
+          {% liquid
+            assign text_style = block.settings.text_style
+            assign text_class = ''
+            case text_style
+              when 'subtitle'
+                assign text_class = 'm-product-text--subtitle'
+              when 'uppercase'
+                assign text_class = 'm-product-text--subtitle m-product-text--upercase'
+            endcase
+          %}
+          <div class="m-product-text {{ text_class }}">
+            {{ block.settings.text }}
+          </div>
+        {% endif %}
+      {%- when 'custom_text' -%}
+        {% if block.settings.content != blank %}
+          <div class="m-product-text">
+            <div class="rte">
+              {{ block.settings.content }}
+            </div>
+          </div>
+        {% endif %}
+      {%- when 'image' -%}
+        {% if block.settings.image != blank %}
+          {% assign image_link = block.settings.image_link %}
+          <div class="m:display-flex m:justify-{{ block.settings.image_alignment }}">
+            <div class="m-product-image m:blocks-radius" style="width: {{ block.settings.image_width }}%">
+              {% if image_link != blank %}<a href="{{ image_link }}" class="m:block">{% endif %}
+              {% render 'responsive-image', image: block.settings.image %}
+              {% if image_link != blank %}</a>{% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {%- when 'custom_liquid' -%}
+        {% if block.settings.custom_liquid != blank %}
+          <div class="m-product-text">
+            {{ block.settings.custom_liquid }}
+          </div>
+        {% endif %}
+      {%- when 'trust_badge' -%}
+        {% if block.settings.trust_badges_image != blank %}
+          {% assign position = block.settings.position %}
+          <div class="m-product-trust-badge m:text-center m-product-trust-badge--{{ position | default: 'below' }}">
+            <div style="width: {{ block.settings.trust_badges_image_width }};">
+              {% render 'responsive-image',
+                image: block.settings.trust_badges_image,
+                section_index: section.index,
+                index: forloop.index
+              %}
+            </div>
+            {% if block.settings.trust_badges_text != blank %}
+              <div class="m-product-trust-badge__content m:text-base rte">{{ block.settings.trust_badges_text }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {%- when 'addons' -%}
+        {% liquid
+          assign show_size_button = true
+          assign size_title_downcase = size_title | downcase
+          for option in product.options_with_values
+            assign downcased_option = option.name | downcase
+            if size_title_downcase contains downcased_option
+              assign show_size_button = false
+              break
+            endif
+          endfor
+        %}
+        <div class="m-product-addon">
+          {% if block.settings.show_atcp or block.settings.show_ask_a_question or show_size_button %}
+            <div class="m-product-addon--wrapper m:display-flex m:flex-wrap">
+              {% if block.settings.show_atcp %}
+                <a
+                  href="#add-to-compare"
+                  class="m-product-addon--item m-compare-button in-prod-page m:display-flex m:items-center"
+                  data-product-handle="{{ product.handle }}"
+                >
+                  <svg
+                    class="m-svg-icon--medium"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 384 512"
+                  >
+                    <path fill="currentColor" d="M164 384h-44V48a16 16 0 0 0-16-16H88a16 16 0 0 0-16 16v336H28a12 12 0 0 0-8.73 20.24l68 72a12 12 0 0 0 17.44 0l68-72A12 12 0 0 0 164 384zm200.72-276.24l-68-72a12 12 0 0 0-17.44 0l-68 72A12 12 0 0 0 220 128h44v336a16 16 0 0 0 16 16h16a16 16 0 0 0 16-16V128h44a12 12 0 0 0 8.72-20.24z" class=""></path>
+                  </svg>
+                  <span
+                    class="m-product-addon--label"
+                    data-revert-text="{{ 'products.product.remove_from_compare' | t }}"
+                  >
+                    {{- 'products.product.add_to_compare' | t -}}
+                  </span>
+                </a>
+              {% endif %}
+              {% if block.settings.show_ask_a_question %}
+                <m-ask-question class="m-product-addon--item m:display-flex">
+                  <a class="form-ask__button m:display-flex m:items-center" data-open-ask-question>
+                    <svg
+                      class="m-svg-icon--medium"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 512 512"
+                    >
+                      <path d="M256 340c-15.464 0-28 12.536-28 28s12.536 28 28 28 28-12.536 28-28-12.536-28-28-28zm7.67-24h-16c-6.627 0-12-5.373-12-12v-.381c0-70.343 77.44-63.619 77.44-107.408 0-20.016-17.761-40.211-57.44-40.211-29.144 0-44.265 9.649-59.211 28.692-3.908 4.98-11.054 5.995-16.248 2.376l-13.134-9.15c-5.625-3.919-6.86-11.771-2.645-17.177C185.658 133.514 210.842 116 255.67 116c52.32 0 97.44 29.751 97.44 80.211 0 67.414-77.44 63.849-77.44 107.408V304c0 6.627-5.373 12-12 12zM256 40c118.621 0 216 96.075 216 216 0 119.291-96.61 216-216 216-119.244 0-216-96.562-216-216 0-119.203 96.602-216 216-216m0-32C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8z"/>
+                    </svg>
+                    <span class="m-product-addon--label">{{ 'products.product.add_a_question' | t }}</span>
+                  </a>
+                  {% render 'form__ask-a-question' %}
+                </m-ask-question>
+                <script src="{{ 'ask-question.js' | asset_url }}" defer="defer"></script>
+              {% endif %}
+              {% if show_size_button %}
+                <a
+                  href="#open-size-guide"
+                  data-open-sizeguide
+                  class="m-product-addon--item m:display-flex m:items-center m:hidden"
+                >
+                  <svg
+                    class="m-svg-icon--large"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 640 512"
+                  >
+                    <path d="M608 128H32c-17.67 0-32 14.33-32 32v192c0 17.67 14.33 32 32 32h576c17.67 0 32-14.33 32-32V160c0-17.67-14.33-32-32-32zm0 224H32V160h80v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h80v192z"/>
+                  </svg>
+                  <span class="m-product-addon--label">{{ 'products.product.size_guide' | t }}</span>
+                </a>
+              {% endif %}
+              {% if block.settings.show_social %}
+                <m-sharing class="m-product-addon--item m:display-flex">
+                  <a class="m:display-flex m:items-center" data-open-share>
+                    <svg class="m-svg-icon--medium" width="14" height="16" fill="none" viewBox="0 0 14 16">
+                      <path fill="currentColor" d="M11 10c.8333 0 1.5417.2917 2.125.875.5833.5833.875 1.2917.875 2.125 0 .8333-.2917 1.5417-.875 2.125-.5833.5833-1.2917.875-2.125.875-.8333 0-1.54167-.2917-2.125-.875C8.29167 14.5417 8 13.8333 8 13c0-.3125.04167-.6146.125-.9062l-3.0625-1.9063C4.47917 10.7292 3.79167 11 3 11c-.83333 0-1.54167-.2917-2.125-.875C.291667 9.54167 0 8.83333 0 8c0-.83333.291667-1.54167.875-2.125C1.45833 5.29167 2.16667 5 3 5c.79167 0 1.47917.27083 2.0625.8125L8.125 3.90625C8.04167 3.61458 8 3.3125 8 3c0-.83333.29167-1.54167.875-2.125C9.45833.291667 10.1667 0 11 0c.8333 0 1.5417.291667 2.125.875C13.7083 1.45833 14 2.16667 14 3c0 .83333-.2917 1.54167-.875 2.125C12.5417 5.70833 11.8333 6 11 6c-.7917 0-1.47917-.27083-2.0625-.8125L5.875 7.09375c.1875.60417.1875 1.20833 0 1.8125l3.0625 1.90625C9.52083 10.2708 10.2083 10 11 10zm1.0625-8.0625C11.7708 1.64583 11.4167 1.5 11 1.5c-.4167 0-.7708.14583-1.0625.4375C9.64583 2.22917 9.5 2.58333 9.5 3s.14583.77083.4375 1.0625c.2917.29167.6458.4375 1.0625.4375.4167 0 .7708-.14583 1.0625-.4375.2917-.29167.4375-.64583.4375-1.0625s-.1458-.77083-.4375-1.0625zm-10.125 7.125C2.22917 9.35417 2.58333 9.5 3 9.5s.77083-.14583 1.0625-.4375S4.5 8.41667 4.5 8s-.14583-.77083-.4375-1.0625S3.41667 6.5 3 6.5s-.77083.14583-1.0625.4375S1.5 7.58333 1.5 8s.14583.77083.4375 1.0625zm8 5c.2917.2917.6458.4375 1.0625.4375.4167 0 .7708-.1458 1.0625-.4375.2917-.2917.4375-.6458.4375-1.0625 0-.4167-.1458-.7708-.4375-1.0625-.2917-.2917-.6458-.4375-1.0625-.4375-.4167 0-.7708.1458-1.0625.4375C9.64583 12.2292 9.5 12.5833 9.5 13c0 .4167.14583.7708.4375 1.0625z"/>
+                    </svg>
+                    <span class="m-product-addon--label">{{ 'products.product.social_share' | t }}</span>
+                  </a>
+                  <div class="m-product-addon--sharing m:hidden">
+                    <div
+                      class="m-product-addon--sharing__copy-link"
+                      data-color-scheme="m-color-{{ settings.drawer_popup_color_scheme }}"
+                    >
+                      <label>{{ 'products.product.copy_link' | t }}</label>
+                      <input
+                        class="form-field form-field--input"
+                        type="text"
+                        value="{{ shop.secure_url }}/products/{{ product.handle }}"
+                      >
+                    </div>
+                    {% assign url = shop.url | append: product.url %}
+                    {% render 'social-sharing', url: url %}
+                  </div>
+                </m-sharing>
+                <script src="{{ 'sharing.js' | asset_url }}" defer="defer"></script>
+              {% endif %}
+            </div>
+            {% if block.settings.show_ask_a_question %}
+              <div class="m-product-ask-question"></div>
+            {% endif %}
+          {% endif %}
+        </div>
+      {%- when 'shipping' -%}
+        <ul class="m-product-shipping">
+          {% if block.settings.show_delivery_times %}
+            <li class="m-product-shipping--item m:display-flex m:items-center">
+              <span class="m-product-shipping--icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16.5 7.50087H20.4938C20.6432 7.4999 20.7894 7.54415 20.9132 7.62781C21.037 7.71147 21.1326 7.83062 21.1875 7.96962L22.5 11.2509" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M1.5 13.5009H16.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M17.625 20.2509C18.8676 20.2509 19.875 19.2435 19.875 18.0009C19.875 16.7582 18.8676 15.7509 17.625 15.7509C16.3824 15.7509 15.375 16.7582 15.375 18.0009C15.375 19.2435 16.3824 20.2509 17.625 20.2509Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"/>
+                  <path d="M6.375 20.2509C7.61764 20.2509 8.625 19.2435 8.625 18.0009C8.625 16.7582 7.61764 15.7509 6.375 15.7509C5.13236 15.7509 4.125 16.7582 4.125 18.0009C4.125 19.2435 5.13236 20.2509 6.375 20.2509Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"/>
+                  <path d="M15.375 18.0009H8.625" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4.125 18.0009H2.25C2.05109 18.0009 1.86032 17.9218 1.71967 17.7812C1.57902 17.6405 1.5 17.4498 1.5 17.2509V6.75085C1.5 6.55194 1.57902 6.36118 1.71967 6.22052C1.86032 6.07987 2.05109 6.00085 2.25 6.00085H16.5V16.0509" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16.5 11.2509H22.5V17.2509C22.5 17.4498 22.421 17.6405 22.2803 17.7812C22.1397 17.9218 21.9489 18.0009 21.75 18.0009H19.875" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              {% liquid
+                assign range = 2 | times: 24 | times: 60 | times: 60
+                assign deliver_in = block.settings.deliver_days | times: 24 | times: 60 | times: 60
+                assign date_format = block.settings.date_format | default: '%b %d'
+                assign now = 'now' | date: '%s'
+
+                assign from = now | plus: deliver_in | minus: range | date: date_format
+                assign to = now | plus: deliver_in | plus: range | date: date_format
+              %}
+              <div class="m-product-shipping--content m:display-flex">
+                <p>
+                  <strong>{{ block.settings.deliver_text | strip_html }}</strong
+                  ><span class="m-product-shipping--content__value">{{ from }} - {{ to }}</span>
+                </p>
+              </div>
+            </li>
+          {% endif %}
+          {% if block.settings.show_shipping_text and block.settings.shipping_text != blank %}
+            <li class="m-product-shipping--item m-product-shipping--text m:display-flex m:items-center">
+              <span class="m-product-shipping--icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 16.6231V7.37934C20.9993 7.24582 20.9634 7.11484 20.8959 6.99963C20.8284 6.88441 20.7317 6.78903 20.6156 6.72309L12.3656 2.08247C12.2545 2.01829 12.1284 1.9845 12 1.9845C11.8716 1.9845 11.7455 2.01829 11.6344 2.08247L3.38437 6.72309C3.26827 6.78903 3.1716 6.88441 3.10411 6.99963C3.03663 7.11484 3.00072 7.24582 3 7.37934V16.6231C3.00072 16.7566 3.03663 16.8876 3.10411 17.0028C3.1716 17.118 3.26827 17.2134 3.38437 17.2793L11.6344 21.92C11.7455 21.9841 11.8716 22.0179 12 22.0179C12.1284 22.0179 12.2545 21.9841 12.3656 21.92L20.6156 17.2793C20.7317 17.2134 20.8284 17.118 20.8959 17.0028C20.9634 16.8876 20.9993 16.7566 21 16.6231Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16.5938 14.2977V9.42273L7.5 4.4071" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M20.8963 6.99426L12.0838 12.0005L3.10254 6.99426" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12.0844 12.0009L12 22.0134" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <div class="m-product-shipping--content m:display-flex rte">
+                {{ block.settings.shipping_text }}
+              </div>
+            </li>
+          {% endif %}
+        </ul>
+      {%- when 'complementary' -%}
+        {{ 'product-complementary.css' | asset_url | stylesheet_tag }}
+        {%- if settings.show_swatch_option == false and block.settings.enable_variant_options -%}
+          <script src="{{ 'product-card-swatch.js' | asset_url }}" defer="defer"></script>
+        {%- endif -%}
+        <product-recommendations
+          class="m-complementary-products m:block{% if block.settings.make_collapsible_row %} m-complementary-products--collapsible{% else %} m-complementary-products--default{% endif %}"
+          data-items-per-page="{{ block.settings.products_per_page }}"
+          data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ block.settings.product_list_limit }}&intent=complementary"
+          style="--column-gap: 15px; --column-gap-mobile: 15px;"
+          data-enable-slider="true"
+        >
+          {%- if recommendations.performed and recommendations.products_count > 0 -%}
+            {%- liquid
+              assign number_of_slides = recommendations.products_count | plus: 0.0 | divided_by: block.settings.products_per_page | ceil
+              assign enable_slider = false
+              if number_of_slides > 1
+                assign enable_slider = true
+              endif
+            -%}
+            {% capture block_content %}
+              <div class="m-complementary-products__wrapper m:blocks-radius">
+                <div class="m-complementary-products__inner m-product-list m-cols-{{ block.settings.products_per_page }} m:grid m:grid-2-cols md:m:grid-{{ block.settings.products_per_page | divided_by: 2.0 | ceil }}-cols xl:m:grid-{{ block.settings.products_per_page }}-cols{% if enable_slider %} swiper-container{% endif %}">
+                  {%- if enable_slider -%}<div class="swiper-wrapper">{%- endif -%}
+                    {%- for product in recommendations.products -%}
+                      {%- if enable_slider -%}
+                        <div class="swiper-slide m:column">
+                          {% render 'product-card-1', product: product, image_ratio: block.settings.pcard_image_ratio, show_desc: false, show_vendor: false, show_inventory: false, show_variant_options: block.settings.enable_variant_options, show_cart_button: block.settings.enable_quick_add, show_quickview_button: block.settings.enable_quick_view, show_wishlist_button: block.settings.enable_wishlist, show_compare_button: block.settings.enable_compare %}
+                        </div>
+                      {%- else -%}
+                        {% render 'product-card-1', product: product, image_ratio: block.settings.pcard_image_ratio, show_desc: false, show_vendor: false, show_inventory: false, show_variant_options: block.settings.enable_variant_options, show_cart_button: block.settings.enable_quick_add, show_quickview_button: block.settings.enable_quick_view, show_wishlist_button: block.settings.enable_wishlist, show_compare_button: block.settings.enable_compare, column_wrapper: true %}
+                      {%- endif -%}
+                    {%- endfor -%}
+                    {%- if enable_slider -%}</div>{%- endif -%}
+                </div>
+              </div>
+              {% if enable_slider %}
+                {%- liquid
+                  assign controls_absolute = true
+                  if block.settings.make_collapsible_row
+                    assign controls_absolute = false
+                  endif
+                -%}
+                {% render 'slider-controls', absolute: controls_absolute, container: 'container', show_pagination: true, show_nav: true, pagination_type: 'fraction', position: 'bottom-right' %}
+              {% endif %}
+            {% endcapture %}
+            {% if block.settings.make_collapsible_row %}
+              <collapsible-tab
+                class="m-collapsible no-js-hidden"
+                data-block-id="collapsible-tab-{{ block.id }}"
+                open="true"
+              >
+                <button
+                  class="m-collapsible--button"
+                  data-trigger
+                >
+                  <span>{{ block.settings.block_heading }}</span>
+                  <span class="m-collapsible--icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M13.5306 6.53073L8.5306 11.5307C8.46092 11.6007 8.37813 11.6561 8.28696 11.694C8.1958 11.7318 8.09806 11.7513 7.99935 11.7513C7.90064 11.7513 7.8029 11.7318 7.71173 11.694C7.62057 11.6561 7.53778 11.6007 7.4681 11.5307L2.4681 6.53073C2.3272 6.38984 2.24805 6.19874 2.24805 5.99948C2.24805 5.80023 2.3272 5.60913 2.4681 5.46823C2.60899 5.32734 2.80009 5.24818 2.99935 5.24818C3.19861 5.24818 3.3897 5.32734 3.5306 5.46823L7.99997 9.93761L12.4693 5.46761C12.6102 5.32671 12.8013 5.24756 13.0006 5.24756C13.1999 5.24756 13.391 5.32671 13.5318 5.46761C13.6727 5.60851 13.7519 5.7996 13.7519 5.99886C13.7519 6.19812 13.6727 6.38921 13.5318 6.53011L13.5306 6.53073Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                </button>
+                <div class="m-collapsible--content" data-content hidden>
+                  <div class="m-collapsible--content__inner">
+                    {{ block_content }}
+                  </div>
+                </div>
+              </collapsible-tab>
+            {% else %}
+              {% unless block.settings.block_heading == blank %}
+                <h3 class="m-complementary-products__heading h4">{{ block.settings.block_heading }}</h3>
+              {% endunless %}
+              {{ block_content }}
+            {% endif %}
+          {%- endif -%}
+        </product-recommendations>
+      {%- when 'inventory_status' -%}
+        {{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+        {% liquid
+          assign show_indicator_bar = block.settings.show_indicator_bar
+          assign inventory_threshold = settings.low_inventory_threshold
+          assign show_inventory_count = settings.show_inventory_count
+          assign inventory_visibility = settings.inventory_visibility
+
+          assign available = selected_variant.available
+          assign inventory_quantity = selected_variant.inventory_quantity
+          assign inventory_policy = selected_variant.inventory_policy
+
+          assign status = ''
+          assign show = false
+          assign show_count = false
+
+          if inventory_policy == 'continue'
+            assign status = 'instock'
+            if inventory_quantity <= 0
+              assign status = 'backordered'
+            endif
+          else
+            if inventory_quantity <= 0
+              assign status = 'outofstock'
+            else
+              assign status = 'normal'
+              if inventory_quantity <= inventory_threshold
+                assign status = 'low'
+              endif
+            endif
+          endif
+
+          unless selected_variant.inventory_management != blank
+            assign status = 'instock'
+          endunless
+
+          if inventory_visibility == 'always'
+            assign show = true
+            if settings.inventory_hide_backordered and status == 'backordered'
+              assign show = false
+            endif
+          else
+            if status == 'low'
+              assign show = true
+            endif
+          endif
+
+          assign message = ''
+          case status
+            when 'normal'
+              assign message = block.settings.normal_text
+              if show_inventory_count == 'always'
+                assign show_count = true
+              endif
+            when 'instock'
+              assign message = block.settings.normal_text
+            when 'outofstock'
+              assign message = block.settings.outofstock_text
+            when 'low'
+              assign message = block.settings.low_text
+              if show_inventory_count != 'never'
+                assign show_count = true
+              endif
+            when 'backordered'
+              assign message = block.settings.backordered_text
+          endcase
+        %}
+        <div id="Inventory-{{ section.id }}">
+          <div
+            class="m-product-inventory{% if show %} m:block{% else %} m:hidden{% endif %}"
+            data-status="{{ status }}"
+          >
+            <div class="m-product-inventory__inner">
+              <span class="m-product-inventory__text">
+                <span class="m-product-inventory__pin"></span>
+                <span class="m-product-inventory__status">
+                  {% liquid
+                    case status
+                      when 'normal'
+                        if show_count
+                          render 'new-locale', key: 'products.product.inventory_quantity_html', param: '{{ quantity }}', value: inventory_quantity
+                        else
+                          echo 'products.product.in_stock' | t
+                        endif
+                      when 'instock'
+                        echo 'products.product.in_stock' | t
+                      when 'outofstock'
+                        render 'new-locale', key: 'products.product.out_of_stock'
+                      when 'low'
+                        if show_count
+                          render 'new-locale', key: 'products.product.inventory_low_quantity_html', param: '{{ quantity }}', value: inventory_quantity
+                        else
+                          render 'new-locale', key: 'products.product.low_stock'
+                        endif
+                    endcase
+                  %}
+                </span>
+              </span>
+              <span class="m-product-inventory__message">{{ message }}</span>
+            </div>
+            {%- if status == 'low' and show_indicator_bar -%}
+              <progress-bar
+                class="m-product-inventory__indicator-bar m-progress-bar"
+                data-value="{{ inventory_quantity }}"
+                data-max="{{ inventory_threshold }}"
+              ></progress-bar>
+            {%- endif -%}
+          </div>
+        </div>
+    {%- endcase -%}
+  </div>
+{%- endfor -%}

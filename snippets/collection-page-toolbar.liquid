@@ -1,0 +1,133 @@
+{%- assign st = section.settings -%}
+
+{%- liquid
+  assign sort_by = results.sort_by | default: results.default_sort_by
+  for option in results.sort_options
+    if option.value == sort_by
+      assign sort_by_name = option.name | escape
+      break
+    endif
+  endfor
+-%}
+<div class="m-collection-toolbar">
+  <div class="m-collection-toolbar--wrapper">
+    <div class="m-toolbar--left m:flex{% unless st.sidebar == 'fixed' %} xl:m:hidden{% endunless %}">
+      {%- if st.show_filter -%}
+        <button class="m-sidebar--open m:flex m:items-center">
+          <span>{{ 'collections.toolbar.show_filter' | t }}</span>
+          <svg class="m-svg-icon--small" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M441.9 167.3l-19.8-19.8c-4.7-4.7-12.3-4.7-17 0L224 328.2 42.9 147.5c-4.7-4.7-12.3-4.7-17 0L6.1 167.3c-4.7 4.7-4.7 12.3 0 17l209.4 209.4c4.7 4.7 12.3 4.7 17 0l209.4-209.4c4.7-4.7 4.7-12.3 0-17z"/>
+          </svg>
+        </button>
+      {%- endif -%}
+      {% if st.show_sorting %}
+        <button class="m-sortby--open md:m:hidden m:flex m:items-center">
+          <span data-sortby-option>{{ sort_by_name }}</span>
+          <svg class="m-svg-icon--small" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M441.9 167.3l-19.8-19.8c-4.7-4.7-12.3-4.7-17 0L224 328.2 42.9 147.5c-4.7-4.7-12.3-4.7-17 0L6.1 167.3c-4.7 4.7-4.7 12.3 0 17l209.4 209.4c4.7 4.7 12.3 4.7 17 0l209.4-209.4c4.7-4.7 4.7-12.3 0-17z"/>
+          </svg>
+        </button>
+      {% endif %}
+    </div>
+    {%- if st.show_sorting or st.show_columns_switcher -%}
+      <div class="m-toolbar--right m:flex m:flex-1 m:items-center m:justify-end md:m:justify-between">
+        {% if st.show_sorting %}
+          <div class="m-toolbar--sortby m:hidden md:m:block" data-toolbar-sorting>
+            <m-select-component>
+              {%- assign sort_by = results.sort_by | default: results.default_sort_by -%}
+              <select name="sort_by" aria-describedby="a11y-refresh-page-message" class="js-selectNative">
+                {%- for option in results.sort_options -%}
+                  <option
+                    value="{{ option.value | escape }}"
+                    {% if option.value == sort_by %}
+                      selected="selected"
+                    {% endif %}
+                    data-index="{{ forloop.index0 }}"
+                  >
+                    {{ option.name | escape }}
+                  </option>
+                {%- endfor -%}
+              </select>
+              <div class="m-select-custom js-selectCustom" aria-hidden="true">
+                <div class="m-select-custom--trigger">
+                  <span class="m-select-custom--trigger-text"></span>
+                  <span class="m-select-custom--trigger-icon">
+                    <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                      <path d="M441.9 167.3l-19.8-19.8c-4.7-4.7-12.3-4.7-17 0L224 328.2 42.9 147.5c-4.7-4.7-12.3-4.7-17 0L6.1 167.3c-4.7 4.7-4.7 12.3 0 17l209.4 209.4c4.7 4.7 12.3 4.7 17 0l209.4-209.4c4.7-4.7 4.7-12.3 0-17z"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="m-select-custom--options m-select-custom--options-{{ pos }}">
+                  {%- for option in results.sort_options -%}
+                    <div class="m-select-custom--option" data-value="{{ option.value | escape }}">
+                      {{ option.name | escape }}
+                    </div>
+                  {%- endfor -%}
+                </div>
+              </div>
+            </m-select-component>
+          </div>
+        {% endif %}
+        {% if st.show_columns_switcher %}
+          <div class="m-toolbar--column-switcher m:flex">
+            <button class="m:flex m-tooltip m-tooltip--top" data-column="1" aria-label="1-column">
+              <svg
+                class="m-svg-icon--small"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 12.5 9.5"
+              >
+                <path id="Rectangle" d="M12.5.75a.76.76 0 01-.75.75h-11A.76.76 0 010 .75.76.76 0 01.75 0h11a.76.76 0 01.75.75z" class="cls-1"/><path id="Rectangle-2" d="M12.5 4.75a.76.76 0 01-.75.75h-11A.76.76 0 010 4.75.76.76 0 01.75 4h11a.76.76 0 01.75.75z" class="cls-1" data-name="Rectangle"/><path id="Rectangle-3" d="M12.5 8.75a.76.76 0 01-.75.75h-11A.76.76 0 010 8.75.76.76 0 01.75 8h11a.76.76 0 01.75.75z" class="cls-1" data-name="Rectangle"/>
+              </svg>
+              <span class="m-tooltip__content">{{ 'collections.toolbar.view_list' | t }}</span>
+            </button>
+            <button class="m:flex m-tooltip m-tooltip--top" data-column="2" aria-label="2-column">
+              <svg
+                class="m-svg-icon--small"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 5.5 12.5"
+              >
+                <path id="Rectangle" d="M.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 01.75 0z" class="cls-1"/><path id="Rectangle-2" d="M4.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 014.75 0z" class="cls-1" data-name="Rectangle"/></g></g></g></g>
+              </svg>
+              <span class="m-tooltip__content">{{ 'collections.toolbar.grid_2cloumns' | t }}</span>
+            </button>
+            <button class="m:hidden md:m:flex m-tooltip m-tooltip--top" data-column="3" aria-label="3-column">
+              <svg
+                class="m-svg-icon--small"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 9.5 12.5"
+              >
+                <path id="Rectangle" d="M.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 01.75 0z" class="cls-1"/><path id="Rectangle-2" d="M4.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 014.75 0z" class="cls-1" data-name="Rectangle"/><path id="Rectangle-3" d="M8.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 018.75 0z" class="cls-1" data-name="Rectangle"/>
+              </svg>
+              <span class="m-tooltip__content">{{ 'collections.toolbar.grid_3cloumns' | t }}</span>
+            </button>
+            <button class="m:hidden md:m:flex m-tooltip m-tooltip--top" data-column="4" aria-label="4-column">
+              <svg
+                class="m-svg-icon--small"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 13.5 12.5"
+              >
+                <path id="Rectangle" d="M.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 01.75 0z" class="cls-1"/><path id="Rectangle-2" d="M4.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 014.75 0z" class="cls-1" data-name="Rectangle"/><path id="Rectangle-3" d="M8.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 018.75 0z" class="cls-1" data-name="Rectangle"/><path id="Rectangle-4" d="M12.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11a.76.76 0 01.75-.75z" class="cls-1" data-name="Rectangle"/>
+              </svg>
+              <span class="m-tooltip__content">{{ 'collections.toolbar.grid_4cloumns' | t }}</span>
+            </button>
+            <button class="m:hidden lg:m:flex m-tooltip m-tooltip--top" data-column="5" aria-label="5-column">
+              <svg
+                class="m-svg-icon--small"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 17.5 12.5"
+              >
+                <path id="Rectangle" d="M.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 01.75 0z" class="cls-1"/><path id="Rectangle-2" d="M4.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 014.75 0z" class="cls-1" data-name="Rectangle"/><path id="Rectangle-3" d="M8.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11A.76.76 0 018.75 0z" class="cls-1" data-name="Rectangle"/><path id="Rectangle-4" d="M12.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11a.76.76 0 01.75-.75z" class="cls-1" data-name="Rectangle"/><path id="Rectangle-5" d="M16.75 0a.76.76 0 01.75.75v11a.76.76 0 01-.75.75.76.76 0 01-.75-.75v-11a.76.76 0 01.75-.75z" class="cls-1" data-name="Rectangle"/>
+              </svg>
+              <span class="m-tooltip__content">{{ 'collections.toolbar.grid_5cloumns' | t }}</span>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    {%- endif -%}
+  </div>
+</div>

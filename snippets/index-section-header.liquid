@@ -1,0 +1,70 @@
+{% comment %}
+  Accepts:
+  - section_settings: {Obj} Section settings (required)
+
+  Usage:
+  {% render 'index-section-header', section_settings: section.settings %}
+{% endcomment %}
+
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section_settings.animations and section_settings.animations != 'inherit'
+      assign animation_effect = section_settings.animations
+    endif
+  endif
+
+  assign heading_size = section_settings.heading_size | default: 'h3'
+  assign header_alignment = section_settings.header_alignment | default: 'left'
+  assign classes = 'm-section__header' | append: ' m:text-' | append: header_alignment | append: ' ' | append: custom_classes
+  if show_button_on_header
+    assign classes = classes | append: 'm-section__header-with-button'
+  endif
+%}
+
+{% if section_settings.heading != blank
+  or section_settings.subheading != blank
+  or section_settings.description != blank
+%}
+  <div class="{{ classes }}">
+    {% if show_button_on_header %}<div class="m-section__header-content">{% endif %}
+    {% if section_settings.subheading != blank %}
+      <p class="m-section__subheading{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {{ section_settings.subheading }}
+      </p>
+    {% endif %}
+    {% if section_settings.heading != blank %}
+      <h2 class="m-section__heading {{ heading_size }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {{ section_settings.heading }}
+      </h2>
+    {% endif %}
+    {% if section_settings.description != blank %}
+      <div class="m-section__description rte{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {{ section_settings.description }}
+      </div>
+    {% endif %}
+    {% if show_button_on_header %}</div>{% endif %}
+    {% if show_button_on_header and button_label != blank %}
+      {% capture arrow %}<svg class="m-rlt-reverse-x" width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7.03062 2.4694L12.0306 7.4694C12.1005 7.53908 12.156 7.62187 12.1939 7.71304C12.2317 7.8042 12.2512 7.90194 12.2512 8.00065C12.2512 8.09936 12.2317 8.1971 12.1939 8.28827C12.156 8.37943 12.1005 8.46222 12.0306 8.5319L7.03062 13.5319C6.88973 13.6728 6.69863 13.752 6.49937 13.752C6.30012 13.752 6.10902 13.6728 5.96812 13.5319C5.82723 13.391 5.74807 13.1999 5.74807 13.0007C5.74807 12.8014 5.82723 12.6103 5.96812 12.4694L10.4375 8.00003L5.9675 3.53065C5.8266 3.38976 5.74745 3.19866 5.74745 2.9994C5.74745 2.80015 5.8266 2.60905 5.9675 2.46815C6.10839 2.32726 6.29949 2.2481 6.49875 2.2481C6.69801 2.2481 6.8891 2.32726 7.03 2.46815L7.03062 2.4694Z" fill="currentColor"/>
+        </svg>
+      {% endcapture %}
+      {% liquid
+        assign is_button_icon = false
+        if button_label contains '[arrow]'
+          assign is_button_icon = true
+        endif
+      %}
+      <div class="m-section__button{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        <a
+          class="m-button{% if is_button_icon %} m-button--text-with-icon{% endif %} {{ button_style }} {{ button_size }}"
+          href="{{ button_link }}"
+        >
+          {{- button_label | replace: '[arrow]', arrow -}}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

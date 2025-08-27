@@ -1,0 +1,16 @@
+{% if section.settings.image_custom_payment == blank %}
+  <div class="m-payment-icons">
+    <span class="m:hidden">{{ 'general.payment.options' | t }}: </span>
+    <ul class="m-payment-icons--list m:flex m:flex-wrap{{ classes | prepend: ' ' }}">
+      {%- for type in shop.enabled_payment_types -%}
+        <li class="m-payment-icons--item">
+          {{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+{% else %}
+  <div style="width: {{ section.settings.payment_icons_width }}px;">
+    {% render 'responsive-image', image: section.settings.image_custom_payment %}
+  </div>
+{% endif %}

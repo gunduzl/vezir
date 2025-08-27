@@ -1,0 +1,50 @@
+{%- comment -%}
+{% unless form_id %}
+    {% assign form_id = 'language-form' %}
+{% endunless %}
+{%- endcomment -%}
+{%- liquid 
+  assign show_language_selector = true
+-%}
+
+{% if show_language_selector %}
+  {% liquid
+    assign min = 65
+    assign max = 80
+    assign diff = max | minus: min
+    assign randomNumber = "now" | date: "%N" | modulo: diff | plus: min
+  %}
+  <div class="m-switcher-dropdown m-language-switcher {{ box_size }}">
+    {% assign form_id = 'localization_form-' | append: randomNumber %}
+    {% form 'localization', data-localization-form: '', id: form_id %}
+      <input type="hidden" name="locale_code" value="{{ form.current_locale.iso_code }}" data-localization-input/>
+      <m-select-component>
+        <m-localization-form>
+          <select class="js-selectNative" data-localization-select>
+            {%- for language in localization.available_languages -%}
+              <option
+                value="{{- language.iso_code -}}"
+                {%- if language.iso_code == localization.language.iso_code -%}
+                  selected="selected"
+                {%- endif -%}
+              >
+                {{- language.endonym_name -}}
+              </option>
+            {%- endfor -%}
+          </select>
+        </m-localization-form>
+        <div class="m-select-custom js-selectCustom" aria-hidden="true">
+          <div class="m-select-custom--trigger">
+            <span class="m-select-custom--trigger-text"></span>
+            <span class="m-select-custom--trigger-icon"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M441.9 167.3l-19.8-19.8c-4.7-4.7-12.3-4.7-17 0L224 328.2 42.9 147.5c-4.7-4.7-12.3-4.7-17 0L6.1 167.3c-4.7 4.7-4.7 12.3 0 17l209.4 209.4c4.7 4.7 12.3 4.7 17 0l209.4-209.4c4.7-4.7 4.7-12.3 0-17z"/></svg></span>
+          </div>
+          <div class="m-select-custom--options m-select-custom--options-{{ pos }}">
+            {%- for language in localization.available_languages -%}
+              <div class="m-select-custom--option" data-value="{{ language.iso_code }}">{{ language.endonym_name }}</div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </m-select-component>
+    {% endform %}
+  </div>
+{% endif %}

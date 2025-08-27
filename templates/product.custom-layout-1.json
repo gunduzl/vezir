@@ -1,0 +1,233 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "d880451e-1d96-4f33-80f8-fffa1f3ffaa1": {
+      "type": "custom-code",
+      "settings": {
+        "custom_css": ".sf__index-custom-content {\n    background-image: url(\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/bg-4.jpg?v=1631937503\");\n    background-size: cover;\n    background-position: bottom center;\n    background-repeat: no-repeat;\n}\n\n.sf__index-custom-content .m-section__header {\n    margin-bottom: 100px;\n}\n.sf__index-custom-content .sf-custom__grid {\n    padding-bottom: 10%;\n}\n.sf__index-custom-content ul.sf__custom-list li {\n    display: grid;\n    grid-template-columns: 48px auto;\n    grid-gap: 40px;\n    margin-bottom: 50px;\n}\n.sf__index-custom-content ul.sf__custom-list li:last-child {\n    margin-bottom: 0;\n}\n.sf__index-custom-content ul.sf__custom-list .content_box h3 {\n    font-size: 24px;\n    line-height: 1.5;\n    margin-bottom: 10px;\n}\n.sf__index-custom-content ul.sf__custom-list .content_box p {\n    color: rgb(var(--color-foreground-secondary));\n}\n@media (min-width: 1280px) {\n  .sf__index-custom-content .m-section__heading {\n    font-size: 48px;\n  }\n}\n@media (min-width: 1921px) {\n    .sf__index-custom-content {\n        background-position: top;\n    }\n}\n\n@media (max-width: 767px) {\n    .sf__index-custom-content {\n        background-image: none;\n    }\n    .sf__index-custom-content .m-section__header {\n        margin-bottom: 30px;\n    }\n    .sf__index-custom-content ul.sf__custom-list .content_box h3 {\n        font-size: 18px;\n        margin-bottom: 5px;\n    }\n    .sf__index-custom-content .sf-custom__grid {\n        padding-bottom: 0;\n    }\n    .sf__index-custom-content ul.sf__custom-list li {\n        grid-template-columns: 30px auto;\n        grid-gap: 20px;\n        margin-bottom: 30px;\n    }\n}"
+      }
+    },
+    "1634180644dff29e33": {
+      "type": "breadcrumb",
+      "settings": {
+        "container": "container",
+        "text_alignment": "center",
+        "hide_current": false,
+        "hide_on_mb": false,
+        "animations": "inherit"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_saving": false,
+            "sale_badge_type": "percentage"
+          }
+        },
+        "a7c33681-2e92-4afe-af6c-09be8f611b30": {
+          "type": "short_description",
+          "settings": {}
+        },
+        "1bfc8830-45fe-4840-b192-262d4a0ed107": {
+          "type": "visitors",
+          "settings": {
+            "live_views_text": "{count_number} people are viewing this right now",
+            "live_views_range": "20-30",
+            "live_view_duration": "10",
+            "live_view_icon_blinks": true
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "size_title": "Size"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_atc_button": true,
+            "show_dynamic_checkout": false,
+            "show_gift_card_recipient": true
+          }
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {
+            "show_atcp": true,
+            "show_ask_a_question": true,
+            "show_social": true
+          }
+        },
+        "98eecea7-1e9e-46dd-8fc4-b00c7702dbda": {
+          "type": "shipping",
+          "settings": {
+            "show_delivery_times": true,
+            "deliver_text": "Estimated Delivery:",
+            "deliver_days": "7",
+            "date_format": "%b %d",
+            "show_shipping_text": true,
+            "shipping_text": "<p><strong>Free Shipping & Returns: </strong>On all orders over $75</p>"
+          }
+        },
+        "95858a21-0a8c-42d1-be95-cd4f1797f5fc": {
+          "type": "trust_badge",
+          "settings": {
+            "trust_badges_text": "<p>Guarantee safe & secure checkout</p>",
+            "trust_badges_image_width": "320px",
+            "position": "below"
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "a7c33681-2e92-4afe-af6c-09be8f611b30",
+        "1bfc8830-45fe-4840-b192-262d4a0ed107",
+        "variant_picker",
+        "buy_buttons",
+        "addons",
+        "98eecea7-1e9e-46dd-8fc4-b00c7702dbda",
+        "95858a21-0a8c-42d1-be95-cd4f1797f5fc"
+      ],
+      "settings": {
+        "container": "container",
+        "layout": "layout-4",
+        "show_atwl": true,
+        "enable_history_state": true,
+        "enable_variant_group_images": false,
+        "show_featured_media": true,
+        "show_zoom_button": true,
+        "enable_video_autoplay": false,
+        "show_nav_media_mobile": false,
+        "show_pagination_mobile": true,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
+        "enable_dynamic_checkout": false,
+        "sticky_atc_compare": false
+      }
+    },
+    "product-details-tabs": {
+      "type": "product-details-tabs",
+      "blocks": {
+        "description": {
+          "type": "description",
+          "settings": {
+            "header": "Product description"
+          }
+        },
+        "tab": {
+          "type": "tab",
+          "settings": {
+            "header": "Shipping & Return",
+            "content": "<p>Shipping cost is based on weight. Just add products to your cart and use the Shipping Calculator to see the shipping price.</p><p>We want you to be 100% satisfied with your purchase. Items can be returned or exchanged within 30 days of delivery.</p>",
+            "content_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "description",
+        "tab"
+      ],
+      "settings": {
+        "container": "container",
+        "default_open": true,
+        "animations": "inherit"
+      }
+    },
+    "custom-content": {
+      "type": "custom-content",
+      "blocks": {
+        "738fcb4e-f5f8-4f2f-bd48-84198bac2a3e": {
+          "type": "html",
+          "settings": {
+            "code": "<ul class=\"sf__custom-list\">\n<li>\n<div class=\"img_box\"><img src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-6.svg?v=1631810887\"></div>\n<div class=\"content_box rte\">\n<h3>Different Sound Experiences</h3>\n<p>Designed to be positioned up against<br> the wall on a shelf or side table.</p>\n</div>\n</li>\n<li>\n<div class=\"img_box\"><img src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-7.svg?v=1631810887\"></div>\n<div class=\"content_box rte\">\n<h3>Sound Performance</h3>\n<p>Designed to be positioned up against<br> the wall on a shelf or side table.</p>\n</div>\n</li>\n<li>\n<div class=\"img_box\"><img src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-8.svg?v=1631810887\"></div>\n<div class=\"content_box rte\">\n<h3>Active Room Compensation</h3>\n<p>Designed to be positioned up against<br> the wall on a shelf or side table.</p>\n</div>\n</li>\n</ul>",
+            "width": "33%",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "738fcb4e-f5f8-4f2f-bd48-84198bac2a3e"
+      ],
+      "settings": {
+        "heading": "A wireless speaker with a dynamic acoustic performance",
+        "subheading": "A PREMIUM SOUND.",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": "sf__index-custom-content sf__product-custom-content"
+      }
+    },
+    "163193713276a3d718": {
+      "type": "apps",
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "header_alignment": "center",
+        "container": "container",
+        "background_color": "",
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": ""
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "container": "container",
+        "heading": "You Might Also Like",
+        "text_align": "left",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true,
+        "use_scroll_mobile": true,
+        "animations": "inherit"
+      }
+    },
+    "recent-viewed-products": {
+      "type": "recent-viewed-products",
+      "settings": {
+        "container": "container",
+        "heading": "Recently Viewed Products",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true
+      }
+    }
+  },
+  "order": [
+    "d880451e-1d96-4f33-80f8-fffa1f3ffaa1",
+    "1634180644dff29e33",
+    "main",
+    "product-details-tabs",
+    "custom-content",
+    "163193713276a3d718",
+    "product-recommendations",
+    "recent-viewed-products"
+  ]
+}

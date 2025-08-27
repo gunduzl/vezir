@@ -1,0 +1,62 @@
+{% liquid
+  if content_align == null
+    assign content_align = settings.article_align_content
+  endif
+  if article_show_date == null
+    assign article_show_date = settings.article_show_date
+  endif
+  if article_show_tags == null
+    assign article_show_tags = settings.article_show_tags
+  endif
+  if article_show_excerpt == null
+    assign article_show_excerpt = settings.article_show_excerpt
+  endif
+  if article_show_button == null
+    assign article_show_button = settings.article_show_button
+  endif
+
+  if article.excerpt != blank
+    assign article_excerpt = article.excerpt
+  else
+    assign article_excerpt = article.content
+  endif
+%}
+{% capture date %}{{ article.published_at | time_tag: format: 'month_day_year' }}{% endcapture %}
+<div
+  class="m-article-card m-article-card--view-{{ view }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+  {% if animated %}
+    data-cascade
+    style="--animation-order: {{ index }};"
+  {% endif %}
+>
+  {% if article.image != blank %}
+    <a class="m-article-card__image m:blocks-radius" href="{{ article.url }}">
+      {% render 'responsive-image', image: article.image, aspect_ratio: settings.article_image_aspect_ratio %}
+    </a>
+  {% endif %}
+  <div class="m-article-card__content m:{{ content_align }}">
+    {%- if article.tags.size > 0 and article_show_tags -%}
+      <span class="m-article-card__tags m:text-color-body">
+        {%- for tag in article.tags limit: 1 -%}
+          {{ tag }}
+        {%- endfor -%}
+      </span>
+    {%- endif -%}
+    {%- if article_show_date -%}
+      <span class="m-article-card__date m:text-color-body">{{ date }}</span>
+    {%- endif -%}
+    <h3 class="m-article-card__title">
+      <a href="{{ article.url }}">{{ article.title }}</a>
+    </h3>
+    {%- if article_show_excerpt and article_excerpt != blank -%}
+      <div class="m-article-card__excerpt m:hidden md:m:block">
+        {{ article_excerpt | strip_html | truncatewords: 15, '...' }}
+      </div>
+    {%- endif -%}
+    {%- if article_show_button -%}
+      <a class="m-article-card__readmore m-button m-button--link" href="{{ article.url }}">
+        {{- 'blogs.article.read_more' | t -}}
+      </a>
+    {%- endif -%}
+  </div>
+</div>

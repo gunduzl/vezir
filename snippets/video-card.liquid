@@ -1,0 +1,132 @@
+{% liquid
+  assign text_color = block.settings.text_color
+  assign button_fixed = block.settings.button_fixed
+
+  assign placeholder_video = 'https://cdn.shopify.com/videos/c/o/v/fbb140fd46e3429eba459e1549dbbe38.mp4'
+
+  assign heading_size = block.settings.text_size
+  assign subtext_size = block.settings.text_size | replace: 'h3', 'h6' | replace: 'h2', 'h6' | replace: 'h1', 'h6'
+
+  assign content_position = ''
+  case block.settings.content_position
+    when 'top_left'
+      assign content_position = ' m:items-start m:justify-start'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-start sm:m:justify-start'
+      endif
+    when 'top_right'
+      assign content_position = ' m:justify-end m:items-start'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-start sm:m:justify-end'
+      endif
+    when 'top_center'
+      assign content_position = ' m:items-start m:justify-center'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-start sm:m:justify-center'
+      endif
+    when 'bottom_left'
+      assign content_position = ' m:items-end m:justify-start'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-end sm:m:justify-start'
+      endif
+    when 'bottom_right'
+      assign content_position = ' m:items-end m:justify-end'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-end sm:m:justify-end'
+      endif
+    when 'bottom_center'
+      assign content_position = ' m:justify-center m:items-end'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-end sm:m:justify-center'
+      endif
+    when 'center_left'
+      assign content_position = ' m:justify-start m:items-center'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-center sm:m:justify-start'
+      endif
+    when 'center_right'
+      assign content_position = ' m:items-center m:justify-end'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-center sm:m:justify-end'
+      endif
+    else
+      assign content_position = ' m:items-center m:justify-center'
+  endcase
+
+  assign use_content_above = block.settings.use_content_above
+
+  assign classes = 'm-image-card' | append: ' ' | append: image_card_class | append: ' ' | append: grid_columns
+  if stack_on_mobile == true or use_content_above == false
+    assign classes = classes | append: ' m-image-card--content-stack'
+  endif
+  if button_fixed == true
+    assign classes = classes | append: ' m-image-card--button-fixed'
+  endif
+
+  assign color_scheme_classes = ' m-gradient m-color-' | append: color_scheme
+
+  assign color_scheme_inherit = false
+  if color_scheme == parent_color_scheme
+    assign color_scheme_inherit = true
+  endif
+%}
+<div class="{{ classes }}{% unless color_scheme_inherit %} m:blocks-radius{% endunless %}">
+  <div class="m-image-card__inner {{ color_scheme_classes }}">
+    <m-video-component
+      class="m:block{% if color_scheme_inherit %} m:blocks-radius{% endif %}"
+      data-type="mp4"
+      style="--aspect-ratio: {{ block.settings.video_ratio | replace: ":", "/" }}"
+    >
+      {% if block.settings.shopify_video != blank %}
+        {{
+          block.settings.shopify_video
+          | video_tag: image_size: '3840px', autoplay: true, loop: true, controls: false, muted: true, playsinline: true
+        }}
+      {% else %}
+        <video src="{{ placeholder_video }}" playsinline autoplay muted loop></video>
+      {% endif %}
+    </m-video-component>
+    <div
+      class="m-image-card__content {{ content_position }} {% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+      {% if animated %}
+        data-cascade
+        style="--animation-order: {{ index }};"
+      {% endif %}
+    >
+      <div class="m-richtext m-image-card__content-inner {% if stack_on_mobile == true %}m:text-center sm:m:text-{{ block.settings.content_alignment }}{% else %}m:text-{{ block.settings.content_alignment }}{% endif %}">
+        {% if block.settings.subtitle != blank %}
+          <p class="m-richtext__subtitle m-image-card__subheading {{ subtext_size }}">
+            {{ block.settings.subtitle }}
+          </p>
+        {% endif %}
+        {% if block.settings.title != blank %}
+          <h3 class="m-richtext__title m-image-card__heading {{ heading_size }}">
+            {{ block.settings.title }}
+          </h3>
+        {% endif %}
+        {% if block.settings.description != blank %}
+          <div class="m-richtext__description">{{ block.settings.description }}</div>
+        {% endif %}
+        {% if block.settings.button_label != blank %}
+          <a
+            href="{{ block.settings.link }}"
+            class="m-richtext__button m-button {{ block.settings.button_style }} {{ block.settings.button_size }}"
+          >
+            {{ block.settings.button_label }}
+          </a>
+          {% if button_fixed == true %}
+            <a
+              href="{{ block.settings.link }}"
+              class="m-richtext__button m-button m-button--fixed {{ block.settings.button_size }} m:text-{{ text_color }}"
+            >
+              {{ block.settings.button_label }}
+              <svg class="m-svg-icon" viewBox="0 0 15 15" fill="none">
+                <path d="M6.8125 0.349609C7 0.182943 7.17708 0.182943 7.34375 0.349609L13.875 6.91211C14.0625 7.07878 14.0625 7.24544 13.875 7.41211L7.34375 13.9746C7.17708 14.1413 7 14.1413 6.8125 13.9746L6.1875 13.3496C6.125 13.2871 6.09375 13.2038 6.09375 13.0996C6.09375 12.9954 6.125 12.9017 6.1875 12.8184L11.0312 7.97461H0.375C0.125 7.97461 0 7.84961 0 7.59961V6.72461C0 6.47461 0.125 6.34961 0.375 6.34961H11.0312L6.1875 1.50586C6.02083 1.31836 6.02083 1.14128 6.1875 0.974609L6.8125 0.349609Z" fill="currentColor"/>
+              </svg>
+            </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

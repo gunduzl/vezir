@@ -1,0 +1,112 @@
+{%- if section.settings.enable_shop_login_button == false -%}
+  {%- assign hide_shop_login_button = true -%}
+{%- endif -%}
+
+{%- capture page_title -%}
+  {{ 'customer.login.title' | t }}
+{%- endcapture -%}
+{% render 'page-title', title: page_title, size: 'large' %}
+
+<div class="m-customer-forms">
+  <div class="container">
+    <div id="recover" class="m-recover-form">
+      <h3>{{ 'customer.recover_password.title' | t }}</h3>
+      <p>{{ 'customer.recover_password.subtext' | t }}</p>
+
+      <div data-recover-form>
+        {% form 'recover_customer_password' %}
+          {% if form.posted_successfully? %}
+            <div class="notification show success m-customer__recover-form-posted">
+              {{ 'customer.recover_password.success' | t }}
+            </div>
+          {% endif %}
+          {% render 'form__error', form: form %}
+
+          <input
+            class="form-field form-field--input"
+            type="email"
+            name="email"
+            placeholder="{{ 'customer.recover_password.email' | t }}"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+          >
+
+          <div class="m-recover-form__action">
+            <button type="submit" class="m-button m-button--primary">
+              {{ 'customer.recover_password.submit' | t }}
+            </button>
+            <a href="#login" class="m-recover-form__cancel-btn m-button m-button--white">
+              {{- 'customer.recover_password.cancel' | t -}}
+            </a>
+          </div>
+        {% endform %}
+      </div>
+    </div>
+    <div id="login" class="m-login-form">
+      <h3>{{ 'customer.login.title' | t }}</h3>
+      {%- if shop.features.login_with_shop_classic_customer_accounts? -%}
+        <section name="sign-in-with-shop-provider">
+          {{ shop | login_button: hide_button: hide_shop_login_button }}
+
+          {%- unless hide_shop_login_button -%}
+            <p>
+              {{ 'customer.login.alternate_provider_separator' | t }}
+            </p>
+          {%- endunless -%}
+        </section>
+      {%- endif -%}
+      {% form 'customer_login' %}
+        {% render 'form__error', form: form %}
+        <input
+          type="email"
+          name="customer[email]"
+          placeholder="{{ 'customer.login.email' | t }}"
+          class="form-field form-field--input"
+        >
+        <input
+          type="password"
+          name="customer[password]"
+          placeholder="{{ 'customer.login.password' | t }}"
+          class="form-field form-field--input"
+        >
+
+        <a href="#recover" class="m-reset-password-btn">{{ 'customer.login.forgot_password' | t }}</a>
+        <button class="m-button m-button--primary" type="submit">
+          {{ 'customer.login.sign_in' | t }}
+        </button>
+      {% endform %}
+
+      {% comment %} Fix for message not show when reset password {% endcomment %}
+      {% form 'recover_customer_password' %}
+        {% if form.posted_successfully? %}
+          <div class="notification show success m-customer__recover-form-posted">
+            {{ 'customer.recover_password.success' | t }}
+          </div>
+        {% endif %}
+        {% render 'form__error', form: form %}
+      {% endform %}
+    </div>
+    <div class="m-sign-up">
+      <h3>{{ 'customer.login.new_customer' | t }}</h3>
+      <p>{{ 'customer.register.description' | t }}</p>
+      <a class="m-button m-button--primary" href="{{ routes.account_register_url }}">
+        {{- 'customer.register.title' | t -}}
+      </a>
+    </div>
+  </div>
+</div>
+
+{%- schema -%}
+{
+  "name": "Main login",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_shop_login_button",
+      "label": "Enable Sign in with Shop",
+      "default": true
+    }
+  ]
+}
+{%- endschema -%}

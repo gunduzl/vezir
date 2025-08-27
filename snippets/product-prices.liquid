@@ -1,0 +1,135 @@
+{%- liquid
+  assign selected_variant = selected_variant | default: product.selected_or_first_available_variant
+  if use_variant
+    assign target = selected_variant
+  else
+    assign target = product
+  endif
+
+  assign compare_at_price = target.compare_at_price
+  assign price = target.price | default: 1999
+
+  if is_product_card and settings.pcard_show_lowest_prices
+    assign price = product.price
+    assign compare_at_price = product.compare_at_price
+  endif
+
+  assign available = target.available | default: false
+  assign money_price = price | money
+  assign price_min = product.price_min
+  assign price_max = product.price_max
+  assign money_price_min = price_min | money
+  assign money_price_max = price_max | money
+
+  if settings.currency_code_enabled
+    assign money_price = price | money_with_currency
+    assign money_price_min = price_min | money_with_currency
+    assign money_price_max = price_max | money_with_currency
+  endif
+
+  if target == product and product.price_varies and settings.pcard_show_lowest_prices
+    assign money_price = 'products.product.from_text_html' | t: price: money_price
+  endif
+
+  assign sale_badge_type = sale_badge_type | default: 'percentage'
+-%}
+
+<div
+  class="
+    m-price m:inline-flex m:items-center m:flex-wrap
+    {%- if alignment %} m-price--{{ alignment }}{% endif -%}
+    {%- if price_class %} {{ price_class }}{% endif -%}
+    {%- if available == false %} m-price--sold-out {% endif -%}
+    {%- if compare_at_price > price %} m-price--on-sale {% endif -%}
+    {%- if target.price_varies == false and target.compare_at_price_varies %} m-price--no-compare{% endif -%}
+  "
+  data-sale-badge-type="{{ sale_badge_type }}"
+>
+  <div class="m-price__regular">
+    {%- if product.quantity_price_breaks_configured? -%}
+      <span class="m:visually-hidden m:visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+      <span class="m-price-item m-price-item--regular {{ price_text_size }}">
+        {%- render 'new-locale',
+          key: 'products.product.volume_pricing.price_range_html',
+          param: '{{ minimum }}',
+          value: money_price_min,
+          param_2: '{{ maximum }}',
+          value_2: money_price_max
+        -%}
+      </span>
+    {%- else -%}
+      <span class="m:visually-hidden m:visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+      <span class="m-price-item m-price-item--regular {{ price_text_size }}">
+        {{ money_price }}
+      </span>
+    {%- endif -%}
+  </div>
+  <div class="m-price__sale">
+    <span class="m:visually-hidden m:visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
+    <span class="m-price-item m-price-item--sale m-price-item--last {{ price_text_size }}">
+      {{ money_price }}
+    </span>
+    {%- unless target.price_varies == false and target.compare_at_price_varies %}
+      <span class="m:visually-hidden m:visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+      <s class="m-price-item m-price-item--regular">
+        {% if settings.currency_code_enabled %}
+          {{ compare_at_price | money_with_currency }}
+        {% else %}
+          {{ compare_at_price | money }}
+        {% endif %}
+      </s>
+    {%- endunless -%}
+  </div>
+  <div class="m-price__unit-wrapper{% if selected_variant.unit_price_measurement == nil %} m:hidden{% endif %}">
+    <span class="m:visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
+    <div class="m-price__unit">
+      {%- capture unit_price_separator -%}
+        <span aria-hidden="true">/</span>
+      {%- endcapture -%}
+      {%- capture unit_price_base_unit -%}
+        <span data-unit-price-base-unit>
+          {%- if selected_variant.unit_price_measurement -%}
+            {%- if selected_variant.unit_price_measurement.reference_value != 1 -%}
+              {{- selected_variant.unit_price_measurement.reference_value -}}
+            {%- endif -%}
+            {{ selected_variant.unit_price_measurement.reference_unit }}
+          {%- endif -%}
+        </span>
+      {%- endcapture -%}
+      <span data-unit-price>{{ selected_variant.unit_price | money }}</span>
+      {{- unit_price_separator -}}
+      {{- unit_price_base_unit -}}
+    </div>
+  </div>
+
+  {% if show_sale_badge %}
+    <div class="m-price__badges">
+      {% liquid
+        assign save_amount = 0
+        if compare_at_price > price
+          assign save_amount = compare_at_price | minus: price
+        endif
+
+        assign discount = ''
+        if sale_badge_type == 'percentage'
+          assign discount = save_amount | times: 100.0 | divided_by: compare_at_price | round | append: '%'
+        elsif sale_badge_type == 'fixed_amount'
+          if settings.currency_code_enabled
+            assign discount = save_amount | money_with_currency
+          else
+            assign discount = save_amount | money
+          endif
+        endif
+      %}
+      <div class="m-price__badge-sale" data-type="{{ sale_badge_type }}">
+        <span class="m-product-tag m-product-tag--sale m-gradient m-color-{{ settings.sale_badge_color_scheme }}">
+          {% unless sale_badge_type == 'text' %}
+            {% render 'new-locale', key: 'products.product.save_html', param: '{{ amount }}', value: discount %}
+          {% else %}
+            {% render 'new-locale', key: 'products.product.sale_text' %}
+          {% endunless %}
+        </span>
+      </div>
+    </div>
+  {% endif %}
+</div>

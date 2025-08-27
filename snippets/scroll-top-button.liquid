@@ -1,0 +1,49 @@
+{% if settings.show_scroll_top_button %}
+  {% style %}
+    .m-button--scroll-top {
+      position: fixed;
+      right: 16px;
+      bottom: 86px;
+      z-index: 99;
+      border-radius: 50%;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      opacity: 0;
+    }
+
+    .m-button--scroll-top.is-show {
+      opacity: 1;
+    }
+
+    .m-scroll-top-target {
+      width: 0;
+      height: 0;
+      visibility: hidden;
+      opacity: 0;
+    }
+    @media (max-width: 767px) {
+      .m-button--scroll-top {
+        width: 40px;
+        height: 40px;
+      }
+      .m-button--scroll-top svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  {% endstyle %}
+{% endif %}
+<div id="scroll-to-top-target" class="m-scroll-top-target"></div>
+{% if settings.show_scroll_top_button %}
+<button
+  id="scroll-to-top-button"
+  class="m-button m-button--primary m-button--scroll-top"
+  aria-label="Scroll to Top"
+>
+  <svg class="m-svg-icon m-svg-icon--medium" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M4.465 263.536l7.07 7.071c4.686 4.686 12.284 4.686 16.971 0L207 92.113V468c0 6.627 5.373 12 12 12h10c6.627 0 12-5.373 12-12V92.113l178.494 178.493c4.686 4.686 12.284 4.686 16.971 0l7.07-7.071c4.686-4.686 4.686-12.284 0-16.97l-211.05-211.05c-4.686-4.686-12.284-4.686-16.971 0L4.465 246.566c-4.687 4.686-4.687 12.284 0 16.97z"/></svg>
+</button>
+{% endif %}

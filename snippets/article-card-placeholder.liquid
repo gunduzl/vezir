@@ -1,0 +1,25 @@
+<div
+  class="m-article-card m-article-card--view-grid{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+  {% if animated %}
+    data-cascade
+    style="--animation-order: {{ index }};"
+  {% endif %}
+>
+  <div style="--aspect-ratio: 4/3;" class="m-article-card__image m:blocks-radius">
+    {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+    {{
+      'collection-'
+      | append: current
+      | placeholder_svg_tag: 'm-placeholder-svg m:object-cover m-image-loaded m:w-full m:h-full'
+    }}
+  </div>
+  <div class="m-article-card__content">
+    <span class="m-article-card__tags m:text-color-body">Minimog</span>
+    <span class="m-article-card__date m:text-color-body">May 27, 2021</span>
+    <h3 class="m-article-card__title">{{ 'homepage.onboarding.blog_title' | t }}</h3>
+    <div class="m-article-card__excerpt">{{ 'homepage.onboarding.blog_excerpt' | t }}</div>
+    <a href="#" class="m-article-card__readmore m-button m-button--link">
+      {{- 'homepage.onboarding.blog_readmore' | t -}}
+    </a>
+  </div>
+</div>

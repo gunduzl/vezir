@@ -1,0 +1,118 @@
+{{ 'blog-sidebar.css' | asset_url | stylesheet_tag }}
+{%- for block in section.blocks -%}
+  {%- case block.type -%}
+    {%- when 'categories' -%}
+      {%- assign blogs_name = block.settings.list_blog -%}
+      {%- if blogs_name != blank -%}
+        <div class="m-widget">
+          <h3 class="m-widget__title">{{ block.settings.title }}</h3>
+          <div class="m-widget__content">
+            <ul class="m-link-lists">
+              {% for link in linklists[blogs_name].links %}
+                {% unless blog.handle == link.handle %}
+                  <li class="m-link-lists--item m:block">
+                    <a class="m-link" href="{{ link.url }}">
+                      <span class="m-link__label">
+                        {{ link.title }}
+                        {%- if blogs[link.handle] != blank -%}
+                          <span class="m-link__count">({{ blogs[link.handle].articles_count }})</span>
+                        {%- endif -%}
+                      </span>
+                    </a>
+                  </li>
+                {% endunless %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {%- endif -%}
+    {%- when 'tags' -%}
+      {%- if blog.all_tags != blank -%}
+        <div class="m-widget">
+          <h3 class="m-widget__title">{{ block.settings.title }}</h3>
+          <div class="m-widget__content">
+            <ul class="m-link-lists m-link-lists--inline">
+              {%- for tag in blog.all_tags -%}
+                <li class="m-link-lists--item m:block m:capitalize">
+                  <a class="m-link" href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag }}</a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </div>
+      {%- endif -%}
+    {%- when 'recent_post' -%}
+      {% liquid
+        assign name_collection = block.settings.sidebar_recent_blog_name
+        assign length = block.settings.sidebar_recent_blog_count | plus: 0
+        assign selected_blog = blogs[name_collection]
+      %}
+      {%- if name_collection != blank -%}
+        <div class="m-widget">
+          <h3 class="m-widget__title">{{ block.settings.title }}</h3>
+          <div class="m-widget__content">
+            <div class="m-recent-posts">
+              {%- for article in selected_blog.articles limit: length -%}
+                {% liquid
+                  if article.excerpt != blank
+                    assign article_excerpt = article.excerpt
+                  else
+                    assign article_excerpt = article.content
+                  endif
+
+                  assign truncate = block.settings.truncate | default: 10
+                %}
+                <div class="m-recent-post">
+                  <a class="m-recent-post__thumbnail m:blocks-radius-md" href="{{ article.url }}">
+                    {%- render 'responsive-image', image: article.image -%}
+                  </a>
+                  <div class="m-recent-post__summary">
+                    {%- if article.tags.size > 0 and block.settings.blog_show_tags -%}
+                      <div class="m-recent-post__tag">
+                        {%- for tag in article.tags limit: 1 -%}
+                          {{ tag | link_to_tag: tag }}
+                        {%- endfor -%}
+                      </div>
+                    {%- endif -%}
+
+                    <div class="m-recent-post__title">
+                      <a href="{{ article.url }}">{{ article.title }}</a>
+                    </div>
+                    {%- if block.settings.show_excerpt and article_excerpt != blank -%}
+                      <div class="m-recent-post__description">
+                        {%- if block.settings.truncate_excerpt -%}
+                          {{
+                            article_excerpt
+                            | strip_html
+                            | truncatewords: truncate, block.settings.truncate_last_symbols
+                          }}
+                        {%- else -%}
+                          {{ article_excerpt | strip_html }}
+                        {%- endif -%}
+                      </div>
+                    {%- endif -%}
+
+                    {%- if block.settings.blog_show_author or block.settings.blog_show_date -%}
+                      <div class="m-recent-post__meta">
+                        {% if block.settings.blog_show_author -%}
+                          {{- 'blogs.article.by_author' | t }}
+                          <span>{{ article.author }}</span>
+                        {% endif -%}
+                        {%- if block.settings.blog_show_date -%}
+                          {{- 'blogs.article.posted_in' | t }}
+                          <span>
+                            {{- article.created_at | date: '%B' }}
+                            {{ article.created_at | date: '%d, %Y' -}}
+                          </span>
+                        {%- endif %}
+                      </div>
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+  {%- endcase -%}
+{%- endfor -%}

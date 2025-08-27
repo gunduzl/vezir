@@ -1,0 +1,7 @@
+<m-cart-count class="m-cart-count-bubble m-cart-count{% if cart == empty %} m:hidden{% endif %}">
+  {%- if cart.item_count < 100 -%}
+    {{- cart.item_count -}}
+  {%- else -%}
+    99+
+  {%- endif -%}
+</m-cart-count>

@@ -1,0 +1,127 @@
+{% assign show_account_icon = header_settings.show_account_icon %}
+{% assign show_wishlist_icon = header_settings.show_wishlist_icon %}
+{% assign show_compare_icon = header_settings.show_compare_icon %}
+{% assign show_cart_icon = header_settings.show_cart_icon %}
+
+<div
+  data-search-popup
+  class="m-search-popup"
+  style="visibility: hidden;"
+>
+  <div class="m-search-popup--wrapper m-gradient m-color-{{ settings.drawer_popup_color_scheme }}" data-search-container>
+    {%- if settings.enable_predictive_search -%}
+      <predictive-search
+        data-search-by-tag="{{ settings.search_by_tag }}"
+        data-search-by-body="{{ settings.search_by_body }}"
+        data-unavailable-products-option="{{ settings.search_unavailable_products | downcase }}"
+      >
+    {%- endif -%}
+      <div class="container-fluid">
+          <div class="m-search-popup--header m:flex m:justify-between m:items-center md:m:hidden">
+            <h3 class="m:text-base">{{ 'general.search.title' | t }}</h3>
+            <button data-close-search aria-label="Close">
+              <svg class="m-svg-icon--medium" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="m:flex">
+            <div class="m:w-2/12 m:items-center m:hidden md:m:flex">
+              {% render 'header-logo', header_settings: header_settings, is_in_search: true %}
+            </div>
+            <div class="m:w-full md:m:w-8/12 m:flex m:justify-center m:items-center">
+              <div class="m-search-popup__search-form">
+                <form id="m-form-search" action="{{ routes.search_url }}" method="GET" role="search" novalidate class="m-search-form m:flex m:w-full">
+                    <input type="hidden" name="options[unavailable_products]" value="last">
+                    <input type="hidden" name="options[prefix]" value="last">
+                    <input type="hidden" name="options[fields]" value="title,vendor,product_type,variants.title">
+
+                    <input
+                      type="search" name="q" required autocomplete="off"
+                      placeholder="{{ 'general.search.placeholder' | t }}"
+                      aria-label="{{ 'general.search.placeholder' | t }}"
+                      class="form-field form-field--input"
+                      data-search-input
+                    />
+                    <button type="submit" class="m-search-form--button" aria-label="Submit">
+                      <svg class="m-svg-icon--medium-small" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                        <path d="M508.5 468.9L387.1 347.5c-2.3-2.3-5.3-3.5-8.5-3.5h-13.2c31.5-36.5 50.6-84 50.6-136C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c52 0 99.5-19.1 136-50.6v13.2c0 3.2 1.3 6.2 3.5 8.5l121.4 121.4c4.7 4.7 12.3 4.7 17 0l22.6-22.6c4.7-4.7 4.7-12.3 0-17zM208 368c-88.4 0-160-71.6-160-160S119.6 48 208 48s160 71.6 160 160-71.6 160-160 160z"/>
+                      </svg>
+                    </button>
+                    <span class="m-search-form--spinner" data-spinner>
+                      <svg class="animate-spin animate-spin-show m-svg-icon--large" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </span>
+                    <span
+                      class="m-search-form--clear"
+                      data-clear-search
+                    >
+                      <svg class="m-svg-icon" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                        <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"/>
+                      </svg>
+                    </span>
+                </form>
+                <div class="m-search-popup__result m-scrollbar--vertical m:hidden">
+                  {%- if settings.enable_predictive_search -%}
+                    <div tabindex="-1" data-predictive-search></div>
+                  {%- endif -%}
+                  <div class="m:display-flex m:justify-center">
+                    <button form="m-form-search" class="m:display-flex m-search-count-result m:hidden" data-search-count>
+                      <span
+                        data-message
+                        data-results-title="{{ 'general.search.results_for' | t | capitalize }}"
+                      ></span><span>&nbsp;</span>
+                      "<span data-query></span>"
+                      <span data-more-result-icon class="m:hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="m-svg-icon"fill="none" viewBox="0 0 16 17"><path fill="currentColor" d="M7.66406.585938c.21094-.1875.41016-.1875.59766 0L15.6094 7.96875c.2109.1875.2109.375 0 .5625L8.26172 15.9141c-.1875.1875-.38672.1875-.59766 0l-.70312-.7032c-.07032-.0703-.10547-.164-.10547-.2812s.03515-.2227.10547-.3164l5.44926-5.44924H.421875C.140625 9.16406 0 9.02344 0 8.74219v-.98438c0-.28125.140625-.42187.421875-.42187H12.4102L6.96094 1.88672c-.1875-.21094-.1875-.41016 0-.59766l.70312-.703122z"/></svg>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="m:w-2/12 m:hidden md:m:flex m:justify-end m:items-center">
+              {% liquid
+                if show_account_icon
+                  render 'header-option-item__account', display_by: 'icon'
+                endif
+
+                if show_wishlist_icon
+                    render 'header-option-item__wishlist', display_by: 'icon'
+                endif
+
+                if show_compare_icon
+                  render 'header-option-item__compare', display_by: 'icon'
+                endif
+
+                if show_cart_icon
+                    render 'cart'
+                endif
+              %}
+            </div>
+          </div>
+          {%- if settings.popular_search_queries != blank -%}
+          <div class="m-search-popular m:flex md:m:justify-center m:flex-wrap" data-popular-searches>
+              <span class="m-search-popular--label">{{ 'general.search.popular_searches' | t }}:</span>
+              <div class="m:flex m:items-center m:flex-wrap">
+                {%- assign popular_queries = settings.popular_search_queries | split: ',' -%}
+                {% for qr in popular_queries %}
+                  <a
+                      class="m-search-popular--item"
+                      data-ps-query="{{ qr | strip }}"
+                      data-ps-item
+                  >
+                    {{ qr | strip }}
+                  </a>
+                {% endfor %}
+              </div>
+          </div>
+          {%- endif -%}
+      </div>
+      {%- if settings.enable_predictive_search -%}
+      </predictive-search>
+      {%- endif -%}
+  </div>
+</div>

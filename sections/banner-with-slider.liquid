@@ -1,0 +1,1606 @@
+{{ 'slideshow.css' | asset_url | stylesheet_tag }}
+{{ 'banner-with-slider.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'banner-with-slider.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign classes = 'm-section m-banner-with-slider'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+
+  assign wrapper_class = 'md:m:grid'
+  case section.settings.layout
+    when 'layout-1'
+      assign wrapper_class = wrapper_class | append: ' md:m:grid-4-cols'
+      assign classes = classes | append: ' m-banner-with-slider--layout-1'
+    else
+      assign wrapper_class = wrapper_class | append: ' md:m:grid-2-cols'
+      assign classes = classes | append: ' m-banner-with-slider--layout-2'
+  endcase
+
+  assign scroll_mobile_class = 'm-mixed-layout'
+  if section.settings.use_scroll_mobile
+    assign scroll_mobile_class = scroll_mobile_class | append: ' m-mixed-layout--mobile-scroll'
+  else
+    assign scroll_mobile_class = scroll_mobile_class | append: ' m-mixed-layout--mobile-grid'
+  endif
+
+  assign slide_control_class = 'bottom-' | append: section.settings.pagination_position
+
+  assign banner_image_mobile_1 = section.settings.banner_image_mobile_1
+  if banner_image_mobile_1 == blank
+    assign banner_image_mobile_1 = section.settings.banner_image_1
+  endif
+
+  assign banner_image_mobile_2 = section.settings.banner_image_mobile_2
+  if banner_image_mobile_2 == blank
+    assign banner_image_mobile_2 = section.settings.banner_image_2
+  endif
+
+  assign banner_image_mobile_3 = section.settings.banner_image_mobile_3
+  if banner_image_mobile_3 == blank
+    assign banner_image_mobile_3 = section.settings.banner_image_3
+  endif
+
+  assign banner_image_mobile_4 = section.settings.banner_image_mobile_4
+  if banner_image_mobile_4 == blank
+    assign banner_image_mobile_4 = section.settings.banner_image_4
+  endif
+%}
+<style>
+  #m-banner-with-slider-{{ section.id }} {
+    --items: 1;
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+
+{% capture layout_1 %}
+  <div class="m-banner-with-slider__banner m-banner-with-slider__banner--medium m:hidden md:m:grid">
+    <a
+      href="{{ section.settings.button_link_1 }}"
+      class="m-hover-box m-hover-box--scale-up m:block"
+      aria-label="banner"
+    >
+      <div class="m:hidden md:m:block m:h-full">
+        {% if section.settings.banner_image_1 %}
+          {% render 'responsive-image',
+            image: section.settings.banner_image_1,
+            section_index: section.index,
+            index: 1,
+            wrapper_class: 'm:w-full m:h-full'
+          %}
+        {% else %}
+          <div class="m-placeholder-wrapper m:h-full m:w-full">
+            {{
+              'collection-4'
+              | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+            }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="md:m:hidden">
+        {% if banner_image_mobile_1 %}
+          {% render 'responsive-image',
+            image: banner_image_mobile_1,
+            wrapper_class: 'm:w-full m:h-full'
+          %}
+        {% else %}
+          <div class="m-placeholder-wrapper m:h-full m:w-full">
+            {{
+              'collection-4'
+              | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+            }}
+          </div>
+        {% endif %}
+      </div>
+    </a>
+    <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+      {% if section.settings.button_text_1 != blank %}
+        <a
+          href="{{ section.settings.button_link_1 | default: '#' }}"
+          class="m-button {{ section.settings.button_style_1 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_1 }}"
+          {% if animated %}
+            data-cascade
+            style="--animation-order: 1;"
+          {% endif %}
+        >
+          {{ section.settings.button_text_1 }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="m-banner-with-slider__slider">
+    <div class="m-slider m:h-full">
+      <div class="m-slider-{{ section.id }} swiper-container swiper--equal-height m:h-full">
+        <div class="swiper-wrapper">
+          {% for block in section.blocks %}
+            {% liquid
+              assign content_positions = block.settings.content_position | split: ' '
+              assign text_alignment = block.settings.text_alignment
+              assign text_horizontal_alignment = content_positions.first
+              assign text_vertical_alignment = content_positions.last | strip
+
+              assign block_classes = ' m-gradient m-color-' | append: block.settings.color_scheme
+
+              assign text_color = block.settings.content_text_color
+
+              assign heading_color = ''
+              assign desc_color = 'm:text-color-subtext'
+              if text_color != 'inherit'
+                assign heading_color = heading_color | append: 'm:text-' | append: text_color
+                assign desc_color = 'm:text-' | append: text_color
+              endif
+            %}
+            <div
+              {{ block.shopify_attributes }}
+              data-slide="{{ forloop.index0 }}"
+              class="{{ block_classes }} swiper-slide m-bg-lazy"
+            >
+              <div class="m-slide m-slide--{{ text_vertical_alignment }}-{{ text_horizontal_alignment }} m-slide--text-small">
+                <div class="m-slide__media m:h-full">
+                  {% if block.settings.item_image != blank %}
+                    {% render 'responsive-image',
+                      image: block.settings.item_image,
+                      section_index: section.index,
+                      index: forloop.index,
+                      wrapper_class: 'm:w-full m:h-full'
+                    %}
+                  {% else %}
+                    {% capture current %}{% cycle 1, 2, 3 %}{% endcapture %}
+                    {{
+                      'collection-'
+                      | append: current
+                      | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full m:object-cover m-image'
+                    }}
+                  {% endif %}
+                </div>
+                <div class="m-slide__wrapper{% if animated %} m-slide-animate--{{ animation_effect }}{% endif %}">
+                  <div class="m-richtext m-richtext--{{ block.settings.text_size | replace: 'h3', 'small' }} m-slide__content m:text-{{ text_alignment }}">
+                    {% if block.settings.subheading != blank %}
+                      <div class="m-richtext__subtitle m-slide__subtitle m:text-{{ text_color }} {{ block.settings.text_size | replace: 'h1', 'h5' | replace: 'h2', 'h6' | replace: 'h3', 'h6' }}">
+                        {{ block.settings.subheading }}
+                      </div>
+                    {% endif %}
+
+                    {% if block.settings.heading != blank %}
+                      <h2 class="m-richtext__title m-slide__title {{ heading_color }} {{ block.settings.text_size }}">
+                        {{ block.settings.heading }}
+                      </h2>
+                    {% endif %}
+
+                    {% if block.settings.description != blank %}
+                      <div class="m-richtext__description m-slide__description rte {{ desc_color }} {{ block.settings.text_size | replace: 'h1', 'h5' | replace: 'h2', 'h6' | replace: 'h3', 'h6' }}">
+                        {{ block.settings.description }}
+                      </div>
+                    {% endif %}
+
+                    {% if block.settings.button_text != blank %}
+                      <div class="m-richtext__button m-slide__button">
+                        <a
+                          href="{{ block.settings.button_link | default: "#" }}"
+                          class="m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ block.settings.button_size }}"
+                        >
+                          {{- block.settings.button_text -}}
+                        </a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% render 'slider-controls',
+        absolute: true,
+        show_nav: false,
+        pagination_class: 'm-dot-circle m-dot-circle--dark',
+        extra_classes: 'm-slider-control--bottom-center'
+      %}
+    </div>
+  </div>
+  <div class="m-banner-with-slider__banner-group m:hidden md:m:grid">
+    <div class="m-banner-with-slider__banner m-banner-with-slider__banner--small">
+      <a
+        href="{{ section.settings.button_link_2 | default: '#' }}"
+        class="m-hover-box m-hover-box--scale-up m:block"
+        aria-label="banner-2"
+      >
+        <div class="m:hidden md:m:block">
+          {% if section.settings.banner_image_2 %}
+            {% render 'responsive-image',
+              image: section.settings.banner_image_2,
+              section_index: section.index,
+              index: 1,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-5'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="md:m:hidden">
+          {% if banner_image_mobile_2 %}
+            {% render 'responsive-image',
+              image: banner_image_mobile_2,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-5'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+      </a>
+      <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% if section.settings.button_text_2 != blank %}
+          <a
+            href="{{ section.settings.button_link_2 | default: '#' }}"
+            class="m-button {{ section.settings.button_style_2 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_2 }}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: 2;"
+            {% endif %}
+          >
+            {{ section.settings.button_text_2 }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="m-banner-with-slider__banner m-banner-with-slider__banner--small">
+      <a
+        href="{{ section.settings.button_link_3 | default: '#' }}"
+        class="m-hover-box m-hover-box--scale-up m:block"
+        aria-label="banner-3"
+      >
+        <div class="m:hidden md:m:block">
+          {% if section.settings.banner_image_3 %}
+            {% render 'responsive-image',
+              image: section.settings.banner_image_3,
+              section_index: section.index,
+              index: 1,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-6'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="md:m:hidden">
+          {% if banner_image_mobile_3 %}
+            {% render 'responsive-image',
+              image: banner_image_mobile_3,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-6'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+      </a>
+      <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% if section.settings.button_text_3 != blank %}
+          <a
+            href="{{ section.settings.button_link_3 | default: '#' }}"
+            class="m-button {{ section.settings.button_style_3 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_3 }}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: 3;"
+            {% endif %}
+          >
+            {{ section.settings.button_text_3 }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div
+    class="{{ scroll_mobile_class }} m-mixed-layout--mobile-{{ section.settings.columns_mobile }}-cols md:m:hidden {% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+  >
+    <div class="m-mixed-layout__inner">
+      <div class="m:column">
+        <div class="m-banner-with-slider__card">
+          <a
+            href="{{ section.settings.button_link_1 | default: '#' }}"
+            class="m-banner-with-slider__inner m:block"
+            aria-label="banner-6"
+          >
+            <div class="m-banner-with-slider__card-img">
+              <div class="m:hidden md:m:block">
+                {% if section.settings.banner_image_1 %}
+                  {% render 'responsive-image',
+                    image: section.settings.banner_image_1,
+                    section_index: section.index,
+                    index: 1,
+                    wrapper_class: 'm:w-full m:h-full'
+                  %}
+                {% else %}
+                  <div class="m-placeholder-wrapper m:h-full m:w-full">
+                    {{
+                      'collection-4'
+                      | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+                    }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="md:m:hidden">
+                {% if banner_image_mobile_1 %}
+                  {% render 'responsive-image',
+                    image: banner_image_mobile_1,
+                    wrapper_class: 'm:w-full m:h-full'
+                  %}
+                {% else %}
+                  <div class="m-placeholder-wrapper m:h-full m:w-full">
+                    {{
+                      'collection-4'
+                      | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+                    }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% if section.settings.button_text_1 != blank %}
+                {% if section.settings.use_scroll_mobile %}
+                  <h4 class="h6">{{ section.settings.button_text_1 }}</h4>
+                {% else %}
+                  <a
+                    href="{{ section.settings.button_link_1 | default: '#' }}"
+                    class="m-button {{ section.settings.button_style_1 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_1 }}"
+                    {% if animated %}
+                      data-cascade
+                      style="--animation-order: 1;"
+                    {% endif %}
+                  >
+                    {{ section.settings.button_text_1 }}
+                  </a>
+                {% endif %}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="m:column">
+        <div class="m-banner-with-slider__card">
+          <a
+            href="{{ section.settings.button_link_2 | default: '#' }}"
+            class="m-banner-with-slider__inner m:block"
+            aria-label="banner-4"
+          >
+            <div class="m-banner-with-slider__card-img">
+              <div class="m:hidden md:m:block">
+                {% if section.settings.banner_image_2 %}
+                  {% render 'responsive-image',
+                    image: section.settings.banner_image_2,
+                    section_index: section.index,
+                    index: 1,
+                    wrapper_class: 'm:w-full m:h-full'
+                  %}
+                {% else %}
+                  <div class="m-placeholder-wrapper m:h-full m:w-full">
+                    {{
+                      'collection-5'
+                      | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+                    }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="md:m:hidden">
+                {% if banner_image_mobile_2 %}
+                  {% render 'responsive-image',
+                    image: banner_image_mobile_2,
+                    wrapper_class: 'm:w-full m:h-full'
+                  %}
+                {% else %}
+                  <div class="m-placeholder-wrapper m:h-full m:w-full">
+                    {{
+                      'collection-5'
+                      | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+                    }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% if section.settings.button_text_2 != blank %}
+                {% if section.settings.use_scroll_mobile %}
+                  <h4 class="h6">{{ section.settings.button_text_2 }}</h4>
+                {% else %}
+                  <a
+                    href="{{ section.settings.button_link_2 | default: '#' }}"
+                    class="m-button {{ section.settings.button_style_2 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_2 }}"
+                    {% if animated %}
+                      data-cascade
+                      style="--animation-order: 1;"
+                    {% endif %}
+                  >
+                    {{ section.settings.button_text_2 }}
+                  </a>
+                {% endif %}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="m:column">
+        <div class="m-banner-with-slider__card">
+          <a
+            href="{{ section.settings.button_link_3 | default: '#' }}"
+            class="m-banner-with-slider__inner m:block"
+            aria-label="banner-5"
+          >
+            <div class="m-banner-with-slider__card-img">
+              <div class="m:hidden md:m:block">
+                {% if section.settings.banner_image_3 %}
+                  {% render 'responsive-image',
+                    image: section.settings.banner_image_3,
+                    section_index: section.index,
+                    index: 1,
+                    wrapper_class: 'm:w-full m:h-full'
+                  %}
+                {% else %}
+                  <div class="m-placeholder-wrapper m:h-full m:w-full">
+                    {{
+                      'collection-6'
+                      | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+                    }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="md:m:hidden">
+                {% if banner_image_mobile_3 %}
+                  {% render 'responsive-image',
+                    image: banner_image_mobile_3,
+                    wrapper_class: 'm:w-full m:h-full'
+                  %}
+                {% else %}
+                  <div class="m-placeholder-wrapper m:h-full m:w-full">
+                    {{
+                      'collection-6'
+                      | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+                    }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {% if section.settings.button_text_3 != blank %}
+                {% if section.settings.use_scroll_mobile %}
+                  <h4 class="h6">{{ section.settings.button_text_3 }}</h4>
+                {% else %}
+                  <a
+                    href="{{ section.settings.button_link_3 | default: '#' }}"
+                    class="m-button {{ section.settings.button_style_3 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_3 }}"
+                    {% if animated %}
+                      data-cascade
+                      style="--animation-order: 1;"
+                    {% endif %}
+                  >
+                    {{ section.settings.button_text_3 }}
+                  </a>
+                {% endif %}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endcapture %}
+
+{% capture layout_2 %}
+<div class="m-banner-with-slider__slider">
+  <div class="m-slider m:h-full">
+    <div class="m-slider-{{ section.id }} swiper-container swiper--equal-height m:h-full">
+      <div class="swiper-wrapper">
+        {% for block in section.blocks %}
+          {% liquid
+            assign content_positions = block.settings.content_position | split: ' '
+            assign text_alignment = block.settings.text_alignment
+            assign text_horizontal_alignment = content_positions.first
+            assign text_vertical_alignment = content_positions.last | strip
+
+            assign block_classes = ' m-gradient m-color-' | append: block.settings.color_scheme
+
+            assign text_color = block.settings.content_text_color
+
+            assign heading_color = ''
+            assign desc_color = 'm:text-color-subtext'
+            if text_color != 'inherit'
+              assign heading_color = heading_color | append: 'm:text-' | append: text_color
+              assign desc_color = 'm:text-' | append: text_color
+            endif
+          %}
+          <div
+            {{ block.shopify_attributes }}
+            data-slide="{{ forloop.index0 }}"
+            class="{{ block_classes }} swiper-slide m-bg-lazy"
+          >
+            <div class="m-slide m-slide--{{ text_vertical_alignment }}-{{ text_horizontal_alignment }} m-slide--text-small" data-current-color="rgb(var(--color-foreground))">
+              <div class="m-slide__media m:h-full">
+                {% if block.settings.item_image != blank %}
+                  {% render 'responsive-image',
+                    image: block.settings.item_image,
+                    section_index: section.index,
+                    index: forloop.index,
+                    wrapper_class: 'm:w-full m:h-full'
+                  %}
+                {% else %}
+                  {% capture current %}{% cycle 1, 2, 3 %}{% endcapture %}
+                  {{
+                    'collection-'
+                    | append: current
+                    | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full m:object-cover m-image'
+                  }}
+                {% endif %}
+              </div>
+              <div class="m-slide__wrapper{% if animated %} m-slide-animate--{{ animation_effect }}{% endif %}">
+                <div class="m-richtext m-richtext--{{ block.settings.text_size | replace: 'h3', 'small' }} m-slide__content m:text-{{ text_alignment }}">
+                  {% if block.settings.subheading != blank %}
+                    <div class="m-richtext__subtitle m-slide__subtitle m:text-{{ text_color }} {{ block.settings.text_size | replace: 'h1', 'h5' | replace: 'h2', 'h6' | replace: 'h3', 'h6' }}">
+                      {{ block.settings.subheading }}
+                    </div>
+                  {% endif %}
+
+                  {% if block.settings.heading != blank %}
+                    <h2 class="m-richtext__title m-slide__title {{ heading_color }} {{ block.settings.text_size }}">
+                      {{ block.settings.heading }}
+                    </h2>
+                  {% endif %}
+
+                  {% if block.settings.description != blank %}
+                    <div class="m-richtext__description m-slide__description rte {{ desc_color }} {{ block.settings.text_size | replace: 'h1', 'h5' | replace: 'h2', 'h6' | replace: 'h3', 'h6' }}">
+                      {{ block.settings.description }}
+                    </div>
+                  {% endif %}
+
+                  {% if block.settings.button_text != blank %}
+                    <div class="m-richtext__button m-slide__button">
+                      <a
+                        href="{{ block.settings.button_link | default: "#" }}"
+                        class="m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ block.settings.button_size }}"
+                      >
+                        {{- block.settings.button_text -}}
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% render 'slider-controls',
+      absolute: true,
+      show_nav: false,
+      pagination_class: 'm-dot-circle m-dot-circle--dark',
+      position: slide_control_class
+    %}
+  </div>
+</div>
+<div 
+  class="{{ scroll_mobile_class }} m-mixed-layout--mobile-{{ section.settings.columns_mobile }}-cols m-banner-with-slider__banner-group"
+>
+  <div class="m-mixed-layout__inner">
+    <div class="m-banner-with-slider__banner m-banner-with-slider__banner--small">
+      <a
+        href="{{ section.settings.button_link_1 | default: '#' }}"
+        class="m-hover-box m-hover-box--scale-up m:block"
+        aria-label="banner-1"
+      >
+        <div class="m:hidden md:m:block">
+          {% if section.settings.banner_image_1 %}
+            {% render 'responsive-image',
+              image: section.settings.banner_image_1,
+              section_index: section.index,
+              index: 1,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-4'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="md:m:hidden">
+          {% if banner_image_mobile_1 %}
+            {% render 'responsive-image',
+              image: banner_image_mobile_1,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-4'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+      </a>
+      <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% if section.settings.button_text_1 != blank %}
+          <a
+            href="{{ section.settings.button_link_1 | default: '#' }}"
+            class="m-button {{ section.settings.button_style_1 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_1 }}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: 1;"
+            {% endif %}
+          >
+            {{ section.settings.button_text_1 }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="m-banner-with-slider__banner m-banner-with-slider__banner--small">
+      <a
+        href="{{ section.settings.button_link_2 | default: '#' }}"
+        class="m-hover-box m-hover-box--scale-up m:block"
+        aria-label="banner-2"
+      >
+        <div class="m:hidden md:m:block">
+          {% if section.settings.banner_image_2 %}
+            {% render 'responsive-image',
+              image: section.settings.banner_image_2,
+              section_index: section.index,
+              index: 1,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-5'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="md:m:hidden">
+          {% if banner_image_mobile_2 %}
+            {% render 'responsive-image',
+              image: banner_image_mobile_2,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-5'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+      </a>
+      <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% if section.settings.button_text_2 != blank %}
+          <a
+            href="{{ section.settings.button_link_2 | default: '#' }}"
+            class="m-button {{ section.settings.button_style_2 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_2 }}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: 2;"
+            {% endif %}
+          >
+            {{ section.settings.button_text_2 }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="m-banner-with-slider__banner m-banner-with-slider__banner--small">
+      <a
+        href="{{ section.settings.button_link_3 | default: '#' }}"
+        class="m-hover-box m-hover-box--scale-up m:block"
+        aria-label="banner-3"
+      >
+        <div class="m:hidden md:m:block">
+          {% if section.settings.banner_image_3 %}
+            {% render 'responsive-image',
+              image: section.settings.banner_image_3,
+              section_index: section.index,
+              index: 1,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-6'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="md:m:hidden">
+          {% if banner_image_mobile_3 %}
+            {% render 'responsive-image',
+              image: banner_image_mobile_3,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-6'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+      </a>
+      <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% if section.settings.button_text_3 != blank %}
+          <a
+            href="{{ section.settings.button_link_3 | default: '#' }}"
+            class="m-button {{ section.settings.button_style_3 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_3 }}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: 3;"
+            {% endif %}
+          >
+            {{ section.settings.button_text_3 }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="m-banner-with-slider__banner m-banner-with-slider__banner--small">
+      <a
+        href="{{ section.settings.button_link_4 | default: '#' }}"
+        class="m-hover-box m-hover-box--scale-up m:block"
+        aria-label="banner-4"
+      >
+        <div class="m:hidden md:m:block">
+          {% if section.settings.banner_image_4 %}
+            {% render 'responsive-image',
+              image: section.settings.banner_image_4,
+              section_index: section.index,
+              index: 1,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-4'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="md:m:hidden">
+          {% if banner_image_mobile_4 %}
+            {% render 'responsive-image',
+              image: banner_image_mobile_4,
+              wrapper_class: 'm:w-full m:h-full'
+            %}
+          {% else %}
+            <div class="m-placeholder-wrapper m:h-full m:w-full">
+              {{
+                'collection-4'
+                | placeholder_svg_tag: 'm-placeholder-svg m-placeholder-svg--no-border m:w-full m:h-full m:object-cover'
+              }}
+            </div>
+          {% endif %}
+        </div>
+      </a>
+      <div class="m-banner-with-slider__banner-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% if section.settings.button_text_4 != blank %}
+          <a
+            href="{{ section.settings.button_link_4 | default: '#' }}"
+            class="m-button {{ section.settings.button_style_4 | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size_4 }}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: 4;"
+            {% endif %}
+          >
+            {{ section.settings.button_text_4 }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endcapture %}
+
+<section
+  id="m-banner-with-slider-{{ section.id }}"
+  class="{{ classes }}"
+  data-section-type="banner-with-slider"
+  data-section-id="{{ section.id }}"
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    {% render 'index-section-header', section_settings: section.settings %}
+    <m-banner-with-slide
+      data-id="{{ section.id }}"
+      data-autoplay="{% if request.design_mode %}false{% else %}{{ section.settings.slide_autoplay }}{% endif %}"
+      data-timeout="{{ section.settings.autorotate_speed | times: 1000 }}"
+      class="{{ wrapper_class }}"
+    >
+      {% liquid
+        case section.settings.layout
+          when 'layout-1'
+            echo layout_1
+          else
+            echo layout_2
+        endcase
+      %}
+    </m-banner-with-slide>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Image with slider",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/6ToqPM)"
+    },
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        {
+          "value": "layout-1",
+          "label": "Layout 1"
+        },
+        {
+          "value": "layout-2",
+          "label": "Layout 2"
+        }
+      ],
+      "default": "layout-1"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "checkbox",
+      "id": "slide_autoplay",
+      "label": "Auto-rotate slides",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "pagination_position",
+      "label": "Pagination position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "autorotate_speed",
+      "label": "Change slides every",
+      "info": "Work when auto-rotate",
+      "max": 10,
+      "min": 2,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        }
+      ],
+      "default": "2",
+      "label": "Number of columns on mobile"
+    },
+    {
+      "type": "checkbox",
+      "label": "Use horizontal scrollbar",
+      "id": "use_scroll_mobile",
+      "default": true,
+      "info": "Uncheck to display as grid"
+    },
+    {
+      "type": "header",
+      "content": "Banner Image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_1",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_mobile_1",
+      "label": "Mobile Image"
+    },
+    {
+      "type": "text",
+      "id": "button_text_1",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link_1",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_1",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--white"
+    },
+    {
+      "type": "select",
+      "id": "button_size_1",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Banner Image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_2",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_mobile_2",
+      "label": "Mobile Image"
+    },
+    {
+      "type": "text",
+      "id": "button_text_2",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link_2",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_2",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--white"
+    },
+    {
+      "type": "select",
+      "id": "button_size_2",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Banner image 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_3",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_mobile_3",
+      "label": "Mobile Image"
+    },
+    {
+      "type": "text",
+      "id": "button_text_3",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link_3",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_3",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--white"
+    },
+    {
+      "type": "select",
+      "id": "button_size_3",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Banner image 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_4",
+      "label": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "banner_image_mobile_4",
+      "label": "Mobile Image"
+    },
+    {
+      "type": "text",
+      "id": "button_text_4",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link_4",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style_4",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--white"
+    },
+    {
+      "type": "select",
+      "id": "button_size_4",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item_slide",
+      "name": "Item slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Image settings"
+        },
+        {
+          "type": "image_picker",
+          "id": "item_image",
+          "label": "Image"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "Color scheme"
+        },
+        {
+          "type": "select",
+          "id": "content_text_color",
+          "label": "Text color",
+          "default": "black",
+          "options": [
+            {
+              "value": "black",
+              "label": "Dark"
+            },
+            {
+              "value": "white",
+              "label": "Light"
+            },
+            {
+              "value": "inherit",
+              "label": "Inherit"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "default": "left middle",
+          "options": [
+            {
+              "label": "Top left",
+              "value": "left top"
+            },
+            {
+              "label": "Top center",
+              "value": "center top"
+            },
+            {
+              "label": "Top right",
+              "value": "right top"
+            },
+            {
+              "label": "Middle left",
+              "value": "left middle"
+            },
+            {
+              "label": "Middle center",
+              "value": "center middle"
+            },
+            {
+              "label": "Middle right",
+              "value": "right middle"
+            },
+            {
+              "label": "Bottom left",
+              "value": "left bottom"
+            },
+            {
+              "label": "Bottom center",
+              "value": "center bottom"
+            },
+            {
+              "label": "Bottom right",
+              "value": "right bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Content alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Hot this week"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Chenille sweater with<br> raglan sleeves"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "h3",
+              "label": "Small"
+            },
+            {
+              "value": "h2",
+              "label": "Medium"
+            },
+            {
+              "value": "h1",
+              "label": "Large"
+            }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button label",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--link"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image with slider 1",
+      "blocks": [
+        {
+          "type": "item_slide"
+        },
+        {
+          "type": "item_slide"
+        },
+        {
+          "type": "item_slide"
+        }
+      ]
+    },
+    {
+      "name": "Image with slider 2",
+      "settings": {
+        "layout": "layout-2"
+      },
+      "blocks": [
+        {
+          "type": "item_slide"
+        },
+        {
+          "type": "item_slide"
+        },
+        {
+          "type": "item_slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

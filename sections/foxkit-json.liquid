@@ -1,0 +1,12 @@
+{% if collection %}
+  <script data-collection-json>
+  {% paginate collection.products by 20 %}
+    {{ collection.products | json }}
+  {% endpaginate %}
+  </script>
+  {% endif %}
+  {% if product %}
+  <script data-product-collections-json>
+    {{ product.collections | json }}
+  </script>
+{% endif %}

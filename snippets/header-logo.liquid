@@ -1,0 +1,86 @@
+{% liquid
+  assign class = 'm-header__logo m-logo'
+
+  if header_settings.logo
+    assign class = class | append: ' m-logo--has-image'
+  endif
+
+  assign logo_alt = section.settings.logo.alt | default: shop.name
+  assign transparent_on_top = header_settings.transparent_on_top
+
+  assign default_logo = header_settings.logo
+  assign logo_svg = header_settings.logo_svg
+  assign logo_transparent_svg = header_settings.logo_transparent_svg
+  assign logo_transparent = header_settings.logo_transparent
+
+  if logo_svg != blank
+    assign default_logo = logo_svg
+  endif
+%}
+{% if request.page_type == 'index' and is_in_search != true %}
+<h1 class="{{ class | strip_newlines }}">
+{% else %}
+<div class="{{ class | strip_newlines }}">
+{% endif %}
+  {% if default_logo != blank or logo_svg != blank or logo_transparent_svg != blank or logo_transparent != blank %}
+      <a href="{{ routes.root_url }}" class="m-logo__image m:block" title="{{ shop.name }}">
+        {% if logo_svg != blank %}
+          <div class="m-logo__image-default m-image">
+            {% comment %} theme-check-disable RemoteAsset {% endcomment %}
+            <img src="{{ logo_svg }}" alt="{{ logo_alt }}" width="auto" height="auto" loading="lazy">
+            {% comment %} theme-check-enable RemoteAsset {% endcomment %}
+          </div>
+        {% else %}
+          <div class="m-logo__image-default m-image">
+            {% if default_logo != blank %}
+              {{ section.settings.logo | image_url: width: section.settings.width | image_tag:
+                class: 'm:inline-block',
+                widths: '50, 100, 150, 200, 250, 300, 400, 500',
+                alt: logo_alt
+              }}
+            {% else %}
+              <strong>{{ header_settings.logo_text | default: shop.name }}</strong>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if transparent_on_top %}
+          {% liquid
+            if logo_transparent == blank
+              assign logo_transparent = default_logo
+              if logo_svg != blank and logo_transparent_svg == blank
+                assign logo_transparent_svg = logo_svg
+              endif
+            endif
+          %}
+
+          {% if logo_transparent_svg != blank %}
+            <div class="m-logo__image-transparent m-image">
+              {% comment %} theme-check-disable RemoteAsset {% endcomment %}
+              <img src="{{ logo_transparent_svg }}" alt="{{ logo_alt }}" width="auto" height="auto" loading="lazy">
+              {% comment %} theme-check-enable RemoteAsset {% endcomment %}
+            </div>
+          {% else %}
+            {%- assign logo_height = section.settings.logo_max_width | divided_by: logo_transparent.aspect_ratio -%}
+            <div class="m-logo__image-transparent m-image">
+              {{ logo_transparent | image_url: width: section.settings.width | image_tag:
+                class: 'inline-block',
+                widths: '50, 100, 150, 200, 250, 300, 400, 500',
+                height: logo_height,
+                width: section.settings.logo_max_width,
+                alt: logo_alt
+              }}
+            </div>
+          {% endif %}
+        {% endif %}
+      </a>
+  {% else %}
+      <a href="{{ routes.root_url }}" class="m:block">
+          <strong>{{ header_settings.logo_text | default: shop.name }}</strong>
+      </a>
+  {% endif %}
+{% if request.page_type == 'index' and is_in_search != true %}
+</h1>
+{% else %}
+</div>
+{% endif %}

@@ -1,0 +1,64 @@
+<div class="m-testimonials__inner">
+  <div class="swiper-container swiper--equal-height">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div class="swiper-slide" {{ block.shopify_attributes }} data-index="{{ forloop.index0 }}">
+          <div
+            class="m-testimonial{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: {{ forloop.index }};"
+            {% endif %}
+          >
+            <div class="m-testimonial__wrapper m-gradient m-color-{{ section.settings.item_color_scheme }} m:blocks-radius">
+              <div class="m-testimonial__content">
+                <div class="m-testimonial__info">
+                  <div class="m-testimonial__name">{{ block.settings.footer }}</div>
+                  {% if section.settings.show_stars %}
+                    <div class="m-stars">
+                      {%- for i in (1..5) -%}
+                        <span class="m-star">{%- render 'icon', name: 'star-solid', size: 'small' -%}</span>
+                      {%- endfor -%}
+                    </div>
+                  {% endif %}
+                  {% if block.settings.title != blank %}
+                    <h3 class="m-testimonial__title">{{ block.settings.title }}</h3>
+                  {% endif %}
+                  <div class="m-testimonial__description rte">{{ block.settings.description }}</div>
+                </div>
+                {% if block.settings.image != blank %}
+                  {% # theme-check-disable LiquidHTMLSyntaxError %}
+                  {%- liquid
+                    assign tag = 'div'
+                    if block.settings.image_link != blank
+                      assign tag = 'a'
+                    endif
+                  -%}
+                  <{{ tag }}
+                    {% if block.settings.image_link != blank %}
+                      href="{{ block.settings.image_link | default: '#' }}"
+                    {% endif %}
+                    class="m-testimonial__image m:hidden md:m:block m:blocks-radius"
+                  >
+                    {% render 'responsive-image', image: block.settings.image %}
+                  </{{ tag }}>
+                  {% # theme-check-enable LiquidHTMLSyntaxError %}
+                {% endif %}
+              </div>
+
+              {% if block.settings.product != blank %}
+                <div class="m-testimonial__footer">
+                  {%- assign product = block.settings.product -%}
+                  <a class="m-testimonial__product" href="{{ product.url }}" target="_blank">
+                    {% render 'responsive-image', image: product.featured_image, wrapper_class: 'm:blocks-radius-md' %}
+                    <p class="m-testimonial__product-title m:text-heading">{{ product.title }}</p>
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

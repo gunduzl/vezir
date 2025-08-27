@@ -1,0 +1,242 @@
+{{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'lookbook-hero.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  assign index = -1
+
+  assign total_products = 0
+  for i in (1..5)
+    assign product__ = 'product_' | append: i
+    assign product = block.settings[product__]
+    if product != blank
+      assign total_products = total_products | plus: 1
+    endif
+  endfor
+
+  assign card_style = block.settings.pcard_layout
+  assign image_ratio = block.settings.pcard_image_ratio
+  assign show_vendor = block.settings.show_vendor
+  assign hide_title = block.settings.hide_title
+
+  assign slider_offset_x = block.settings.slider_offset_x | default: 0
+
+  if card_style == null or card_style == blank
+    assign card_style = settings.pcard_layout
+  endif
+
+  assign lazy_load = 'lazy'
+  assign fetchpriority_mode = 'auto'
+
+  if section.index < 2
+    assign fetchpriority_mode = 'high'
+    assign lazy_load = 'eager'
+  endif
+
+  assign desktop_image = block.settings.image
+  assign mobile_image = block.settings.mobile_image
+  if mobile_image == blank
+    assign mobile_image = block.settings.image
+  endif
+
+  if image_aspect_ratio == 'original'
+    assign image_aspect_ratio = desktop_image.aspect_ratio | default: 2.333
+    assign mobile_image_aspect_ratio = mobile_image.aspect_ratio | default: 1
+  endif
+
+  assign pagination_type = 'bullets'
+  if block.settings.show_pagination
+    assign pagination_type = 'fraction'
+  endif
+%}
+
+<m-lookbook-hero
+  class="m-lookbook-card m-lookbook-hero m:block{% if animated and section.settings.enable_bg_zoom_effect %} m:overflow-hidden m-scroll-trigger animate--zoom-fade{% endif %}"
+  data-id="{{ block.id }}"
+>
+  <div class="m-lookbook-card__image m:blocks-radius">
+    <div
+      class="m-lookbook-card__image-inner"
+      style="--aspect-ratio: {{ image_aspect_ratio }}; --aspect-ratio-mobile: {{ mobile_image_aspect_ratio | default: image_aspect_ratio  }};"
+    >
+      <div class="m-media">
+        {% if desktop_image == blank %}
+          {% liquid
+            assign placeholder_svg_tag = 'm-placeholder-svg m-placeholder-svg--no-border m:object-cover m:w-full m:h-full'
+            if block.settings.mobile_image != blank
+              assign placeholder_svg_tag = placeholder_svg_tag | append: ' m:hidden md:m:block'
+            endif
+          %}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full' }}
+        {% endif %}
+        {% if desktop_image != blank or block.settings.mobile_image != blank %}
+          <picture class="m-media__wrapper m:block m:w-full m:h-full{% if desktop_image == blank %} md:m:hidden{% endif %}">
+            {%- if block.settings.mobile_image != blank -%}
+              <source
+                media="(max-width: 767px)"
+                srcset="{{ block.settings.mobile_image | image_url: width: '400x' }} 400w, {{ block.settings.mobile_image | image_url: width: '600x' }} 600w, {{ block.settings.mobile_image | image_url: width: '800x' }} 800w, {{ block.settings.mobile_image | image_url: width: '1000x' }} 1000w"
+                width="{{ block.settings.mobile_image.width }}"
+                height="{{ block.settings.mobile_image.height }}"
+              >
+            {%- endif %}
+            {% liquid
+              if desktop_image == blank
+                assign desktop_image = block.settings.mobile_image
+              endif
+              assign image_height = desktop_image.width | divided_by: desktop_image.aspect_ratio | round
+            %}
+            {{
+              desktop_image
+              | image_url: width: 3200
+              | image_tag:
+                loading: lazy_load,
+                fetchpriority: fetchpriority_mode,
+                width: desktop_image.width,
+                sizes: '100vw',
+                height: image_height,
+                widths: '300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200',
+                alt: desktop_image.alt
+            }}
+          </picture>
+        {%- endif %}
+      </div>
+    </div>
+
+    {% for i in (1..5) %}
+      {% liquid
+        assign top__ = 'top_' | append: i
+        assign m_top__ = 'm_top_' | append: i
+        assign top = block.settings[top__]
+        assign m_top = block.settings[m_top__]
+        assign left__ = 'left_' | append: i
+        assign m_left__ = 'm_left_' | append: i
+        assign left = block.settings[left__]
+        assign m_left = block.settings[m_left__]
+        assign product__ = 'product_' | append: i
+        assign product = block.settings[product__]
+      %}
+
+      {% if product != blank %}
+        {%- assign prod = product -%}
+        {% assign index = index | plus: 1 %}
+        <div
+          class="m-lookbook-icon m-lookbook-icon--{{ block.settings.button_style }}"
+          style="--pos-x: {{ left }}%; --pos-y: {{ top }}%;{% if block.settings.mobile_image != blank %} --pos-x-mobile: {{ m_left }}%; --pos-y-mobile: {{ m_top }}%;{% endif %}"
+          data-id="{{ block.id }}-{{ i }}"
+          data-index="{{ index }}"
+        >
+          <span class="m-lookbook-icon__wrapper">
+            <span class="m-lookbook-icon__main"></span>
+          </span>
+
+          {% liquid
+            assign y_pos = ' m-lookbook-product__top'
+            if top > 50
+              assign y_pos = ' m-lookbook-product__bottom'
+            endif
+            assign x_pos = ' m-lookbook-product__left'
+            if left > 50
+              assign x_pos = ' m-lookbook-product__right'
+            endif
+
+            assign classes = 'm-lookbook-product'
+            assign classes = classes | append: y_pos | append: x_pos | append: ' m-gradient' | append: ' m-color-' | append: block.settings.color_scheme_hovered
+          %}
+          <div
+            class="{{ classes }}"
+            data-id="{{ block.id }}-{{ i }}-content"
+          >
+            <a href="{{ prod.url }}" class="m-lookbook-product__thumb" aria-label="{{ prod.title }}">
+              {% render 'responsive-image',
+                image: prod.featured_image,
+                aspect_ratio: prod.featured_image.aspect_ratio
+              %}
+            </a>
+            <div class="m-lookbook-product__info">
+              <a href="{{ prod.url }}" class="m-lookbook-product__title">{{ prod.title }}</a>
+              <p class="m-lookbook-product__price">{{ prod.price | money }}</p>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div
+    class="m-lookbook-hero__wrapper"
+    data-enable-slider="true"
+    data-show-pagination="{{ block.settings.show_pagination }}"
+    data-show-navigation="{{ block.settings.show_navigation }}"
+    data-pagination-type="fraction"
+    style="--slider-offset: {{ slider_offset_x }}%;"
+  >
+    <div class="m-lookbook-hero__products m-product-list{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %} m:blocks-radius">
+      <div class="swiper-container">
+        <div class="swiper-wrapper">
+          {% if total_products > 0 %}
+            {% for i in (1..5) %}
+              {% liquid
+                assign product__ = 'product_' | append: i
+                assign product = block.settings[product__]
+                if product == blank
+                  continue
+                endif
+              %}
+              <div class="swiper-slide m:column">
+                {% liquid
+                  case card_style
+                    when '1'
+                      render 'product-card-1', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index
+                    when '2'
+                      render 'product-card-2', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index
+                    when '3'
+                      render 'product-card-3', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index
+                    when '4'
+                      render 'product-card-4', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index
+                    when '5'
+                      render 'product-card-5', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index
+                  endcase
+                %}
+              </div>
+            {% endfor %}
+          {% else %}
+            {% for i in (1..3) %}
+              <div class="swiper-slide m:column">
+                <div
+                  class="m-product-card m-product-card--placeholder{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                  {% if animated %}
+                    data-cascade
+                    style="--animation-order: {{ forloop.index }};"
+                  {% endif %}
+                >
+                  <div class="m-product-card__media" style="--aspect-ratio: 1/1;">
+                    {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+                    {{ 'product-' | append: current | placeholder_svg_tag: 'm-placeholder-svg' }}
+                  </div>
+                  <div class="m-product-card__content m:text-left">
+                    <div class="m-product-card__name{% if settings.uppercase_prd_name %} m:uppercase{% endif %} {{ heading_color }}">
+                      {{ 'homepage.onboarding.product_title' | t }}
+                    </div>
+                    <div class="m-product-card__price">
+                      <p class="m-price">$19.99</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if total_products != 1 and block.settings.show_pagination or block.settings.show_navigation %}
+      {% render 'slider-controls',
+        absolute: false,
+        position: 'bottom-center',
+        container: section.settings.container,
+        show_pagination: block.settings.show_pagination,
+        show_nav: block.settings.show_navigation,
+        animated: animated,
+        pagination_type: pagination_type,
+        animation_effect: animation_effect
+      %}
+    {% endif %}
+  </div>
+</m-lookbook-hero>

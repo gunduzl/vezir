@@ -1,0 +1,48 @@
+{% if localization.available_countries.size > 1 %}
+  {% unless form_id %}
+    {% assign random_number = 'now' | date: '%N' | modulo: 10 | plus: 25 %}
+    {% assign form_id = 'country-' | append: random_number %}
+  {% endunless %}
+  <div class="m-switcher-dropdown m-country-switcher {{ box_size }}">
+    {% form 'localization', data-localization-form: '', id: form_id %}
+      <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}" data-localization-input>
+      <m-select-component>
+        <m-localization-form>
+          <select name="country_code" class="js-selectNative" data-localization-select>
+            {%- for country in localization.available_countries -%}
+              <option
+                value="{{ country.iso_code }}"
+                {% if country.iso_code == localization.country.iso_code %}
+                  selected
+                {% endif %}
+              >
+                {{ country.name }} ({{ country.currency.iso_code }}
+                {{ country.currency.symbol }})
+              </option>
+            {%- endfor -%}
+          </select>
+        </m-localization-form>
+        <div class="m-select-custom js-selectCustom" aria-hidden="true">
+          <div class="m-select-custom--trigger">
+            <span class="m-country-flags m-country-flags--{{ localization.country.iso_code }}"></span>
+            <span class="m-select-custom--trigger-text"></span>
+            <span class="m-select-custom--trigger-icon">
+              <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path d="M441.9 167.3l-19.8-19.8c-4.7-4.7-12.3-4.7-17 0L224 328.2 42.9 147.5c-4.7-4.7-12.3-4.7-17 0L6.1 167.3c-4.7 4.7-4.7 12.3 0 17l209.4 209.4c4.7 4.7 12.3 4.7 17 0l209.4-209.4c4.7-4.7 4.7-12.3 0-17z"/>
+              </svg>
+            </span>
+          </div>
+          <div class="m-select-custom--options m-select-custom--options-{{ pos }}">
+            {%- for country in localization.available_countries -%}
+              <div class="m-select-custom--option" data-value="{{ country.iso_code }}">
+                <span class="m-country-flags m-country-flags--{{ country.iso_code }}"></span>
+                {{ country.name }} ({{ country.currency.iso_code }}
+                {{ country.currency.symbol }})
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </m-select-component>
+    {%- endform -%}
+  </div>
+{% endif %}

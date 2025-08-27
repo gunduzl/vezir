@@ -1,0 +1,76 @@
+{% assign review_app = settings.review_app %}
+{% case review_app %}
+  {% when 'shopify' %}
+    <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
+  {% when 'judge' %}
+    {% capture judgeme_widgets %}{% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', jm_style: '', concierge_install: false, product: product %}{% endcapture %}
+    {% unless judgeme_widgets contains 'Liquid error' %}
+      {{ judgeme_widgets }}
+    {% else %}
+      {% render 'mm-judgeme-widgets',
+        widget_type: 'judgeme_preview_badge',
+        jm_style: '',
+        concierge_install: false,
+        product: product
+      %}
+    {% endunless %}
+  {% when 'loox' %}
+    <div
+      class="loox-rating"
+      data-id="{{ product.id }}"
+      data-rating="{{ product.metafields.loox.avg_rating }}"
+      data-raters="{{ product.metafields.loox.num_reviews }}"
+    ></div>
+  {% when 'growave' %}
+    {% capture the_snippet_review_avg %}{% render 'ssw-widget-avg-rate-listing', product: product %}{% endcapture %}
+    {% unless the_snippet_review_avg contains 'Liquid error' %}
+      {{ the_snippet_review_avg }}
+    {% else %}
+      {% render 'mm-ssw-widget-avg-rate-listing', product: product %}
+    {% endunless %}
+  {% when 'ali_reviews' %}
+    <div product-id="{{ product.id }}" class="arv-collection arv-collection--{{ product.id }}"></div>
+  {% when 'automizely' %}
+    <div
+      class="automizely_reviews_product_collection_star_widget"
+      data-product-id="{{ product.id }}"
+      data-ratings="{{ product.metafields.automizely_reviews.ratings }}"
+      data-raters="{{ product.metafields.automizely_reviews.raters }}"
+    ></div>
+  {% when 'yotpo' %}
+    <div class="yotpo bottomLine" data-product-id="{{ product.id }}"></div>
+  {% when 'stamped' %}
+    <span
+      class="stamped-product-reviews-badge stamped-main-badge"
+      data-id="{{ product.id }}"
+      data-product-sku="{{ product.handle }}"
+      data-product-title="{{ product.title }}"
+      data-product-type="{{ product.type }}"
+    >
+      {{ product.metafields.stamped.badge }}
+    </span>
+  {% when 'lai_reviews' %}
+    <div
+      class="scm-reviews-rate"
+      data-rate-version2="{{ product.metafields.scm_review_importer.reviewsData.reviewCountInfo | json }}"
+      data-product-id="{{ product.id }}"
+    ></div>
+  {% when 'ryviu' %}
+    <div class="ryviu-collection">
+      <ryviu-widget-total
+        collection="1"
+        reviews_data="{{product.metafields.ryviu.product_reviews_info  | escape  }}"
+        product_id="{{product.id}}"
+        handle="{{product.handle}}"
+      ></ryviu-widget-total>
+    </div>
+  {% when 'trustify' %}
+    <div
+      class="trustify-review-stars-collection"
+      data-review-type="collection"
+      data-review-avg="{{ product.metafields.tr_reviews_product.review_avg }}"
+      data-review-count="{{ product.metafields.tr_reviews_product.review_count }}"
+    ></div>
+  {% when 'other' %}
+    {% render 'other-review-app-snippet', product: product %}
+{% endcase %}

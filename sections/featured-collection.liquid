@@ -1,0 +1,730 @@
+{{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+{{ 'featured-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'featured-collection.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  assign enable_slider = section.settings.enable_slider
+  assign mobile_disable_slider = section.settings.mobile_disable_slider
+  assign current_collection = collections[section.settings.collection]
+  assign items_per_row = section.settings.items_per_row
+  assign product_to_show = section.settings.product_to_show | default: 8
+  assign button_type = section.settings.button_type
+  assign max_pages = section.settings.max_page_load
+  assign show_button_on_header = section.settings.show_button_on_header
+
+  if current_collection != blank
+    if product_to_show <= items_per_row or current_collection.products.size <= items_per_row
+      assign enable_slider = false
+    endif
+  else
+    if product_to_show <= items_per_row
+      assign enable_slider = false
+    endif
+  endif
+
+  if button_type == 'load'
+    assign show_button_on_header = false
+  endif
+
+  assign infinite_load = section.settings.infinite_load
+  assign card_style = section.settings.pcard_layout
+  assign image_ratio = section.settings.pcard_image_ratio
+  assign show_vendor = section.settings.show_vendor
+  assign hide_title = section.settings.hide_title
+  assign use_scroll_mobile = section.settings.use_scroll_mobile
+  assign enable_flashsale = section.settings.enable_flashsale
+  assign show_countdown = false
+
+  if card_style == null or card_style == blank
+    assign card_style = settings.pcard_layout
+  endif
+
+  if enable_flashsale and section.settings.show_countdown
+    assign show_countdown = true
+  endif
+
+  if paginate.pages < max_pages
+    assign max_pages = paginate.pages
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign button_loadmore_class = ''
+  if enable_slider
+    assign button_loadmore_class = 'md:m:hidden'
+    if mobile_disable_slider
+      if use_scroll_mobile
+        assign button_loadmore_class = button_loadmore_class | append: ' m:hidden'
+      else
+        assign button_loadmore_class = button_loadmore_class | append: ' m:flex'
+      endif
+    else
+      assign button_loadmore_class = button_loadmore_class | append: ' m:hidden'
+    endif
+  else
+    assign button_loadmore_class = 'md:m:flex'
+    if use_scroll_mobile
+      assign button_loadmore_class = button_loadmore_class | append: ' m:hidden'
+    else
+      assign button_loadmore_class = button_loadmore_class | append: ' m:flex'
+    endif
+  endif
+
+  assign classes = 'm-featured-collection m-swiper-overflow'
+  if section.settings.button_text == blank
+    assign classes = classes | append: ' show__more-disabled'
+  endif
+  if show_countdown
+    assign classes = classes | append: ' m-featured-collection--show-countdown'
+  endif
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+%}
+{% comment %} Fix SEO {% endcomment %}
+<style>
+  #m-section--{{ section.id }} {
+    --column-gap: {{ section.settings.item_gap }}px;
+    --column-gap-mobile: {{ section.settings.item_gap_mobile }}px;
+    --row-gap: {{ section.settings.item_gap | plus: 10 }}px;
+    --row-gap-mobile: 30px;
+    --items: {{ items_per_row }};
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+{% paginate current_collection.products by product_to_show %}
+  <section
+    id="m-section--{{ section.id }}"
+    class="m-section m-featured-collection-section"
+  >
+    <m-featured-collection
+      data-id="{{ section.id }}"
+      data-section-type="featured-collection"
+      data-section-id="{{ section.id }}"
+      data-enable-slider="{{ enable_slider }}"
+      data-mobile-disable-slider="{{ section.settings.mobile_disable_slider }}"
+      {% if enable_slider %}
+        data-show-pagination="{{ section.settings.show_pagination }}"
+        data-show-navigation="{{ section.settings.show_navigation }}"
+      {% endif %}
+      data-url="{{ current_collection.url }}"
+      data-items="{{ items_per_row }}"
+      data-total-pages="{{ paginate.pages }}"
+      data-button-type="{{ button_type }}"
+      {% if infinite_load %}
+        data-infinite-load="{{ infinite_load }}"
+        data-max-pages="{{ max_pages }}"
+      {% endif %}
+      class="{{ classes }}"
+      data-enable-flashsale="{{ enable_flashsale }}"
+      data-enable-countdown="{{ show_countdown }}"
+      data-collection-id="{{ current_collection.id }}"
+    >
+      <div class="{{ container }} m-section-my m-section-py">
+        {% if show_countdown %}
+          <div class="m-section__header{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            <h2 class="m-section__heading {{ section.settings.heading_size | default: 'h3' }}">
+              <a href="{{ current_collection.url }}">{{ section.settings.heading }}</a>
+            </h2>
+            <div
+              data-flashsale-countdown
+              class="m-flashsale-countdown"
+            >
+              <div class="m-flashsale-countdown__wrapper">
+                <div class="m-flashsale-countdown__box">
+                  <span class="countdown-timer-day">00</span>
+                </div>
+                <div class="m-flashsale-countdown__box">
+                  <span class="countdown-timer-hour">00</span>
+                </div>
+                <div class="m-flashsale-countdown__box">
+                  <span class="countdown-timer-minute">00</span>
+                </div>
+                <div class="m-flashsale-countdown__box">
+                  <span class="countdown-timer-sec">00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          {% render 'index-section-header',
+            section_settings: section.settings,
+            show_button_on_header: show_button_on_header,
+            button_style: section.settings.button_style,
+            button_link: current_collection.url,
+            button_size: section.settings.button_size,
+            button_label: section.settings.button_text
+          %}
+        {% endif %}
+
+        <div class="m-product-list m-slider-control-hover-inside m-mixed-layout {% if mobile_disable_slider or enable_slider != true %} m-mixed-layout--mobile-grid{% if use_scroll_mobile %} m-mixed-layout--mobile-scroll{% endif %}{% endif %}">
+          <div class="m-mixed-layout__wrapper{% if enable_slider %} swiper-container{% endif %}">
+            <div
+              class="m-mixed-layout__inner m:grid m-cols-{{ items_per_row }} m:grid-2-cols md:m:grid-{{ items_per_row | divided_by: 2.0 | ceil }}-cols lg:m:grid-3-cols xl:m:grid-{{ items_per_row }}-cols{% if enable_slider %} swiper-wrapper{% endif %}"
+              data-products-container
+            >
+              {% if current_collection != blank %}
+                {% for product in current_collection.products limit: product_to_show %}
+                  <div class="swiper-slide m:column">
+                    {% liquid
+                      case card_style
+                        when '1'
+                          render 'product-card-1', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                        when '2'
+                          render 'product-card-2', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                        when '3'
+                          render 'product-card-3', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                        when '4'
+                          render 'product-card-4', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                        when '5'
+                          render 'product-card-5', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                      endcase
+                    %}
+                  </div>
+                {% endfor %}
+              {% else %}
+                {% for i in (1..product_to_show) %}
+                  <div class="swiper-slide m:column m:text-{{ settings.pcard_alignment }}">
+                    <div
+                      class="m-product-card m-product-card--placeholder{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      <div class="m-product-card__media" style="--aspect-ratio: 1/1;">
+                        {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+                        {{
+                          'product-'
+                          | append: current
+                          | placeholder_svg_tag: 'm-placeholder-svg m:object-cover m:w-full m:h-full'
+                        }}
+                      </div>
+                      <div class="m-product-card__name{% if settings.uppercase_prd_name %} m:uppercase{% endif %}">
+                        {{ 'homepage.onboarding.product_title' | t }}
+                      </div>
+                      <div class="m-product-card__price">
+                        <p class="m-price">$19.99</p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+          {% if enable_slider %}
+            {% render 'slider-controls',
+              extra_classes: 'm:hidden',
+              absolute: true,
+              container: section.settings.container,
+              show_pagination: section.settings.show_pagination,
+              show_nav: section.settings.show_navigation,
+              nav_class: 'm:hidden'
+            %}
+          {% endif %}
+        </div>
+        {% if section.settings.button_text != blank %}
+          {% capture arrow %}<svg class="m-rlt-reverse-x" width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.03062 2.4694L12.0306 7.4694C12.1005 7.53908 12.156 7.62187 12.1939 7.71304C12.2317 7.8042 12.2512 7.90194 12.2512 8.00065C12.2512 8.09936 12.2317 8.1971 12.1939 8.28827C12.156 8.37943 12.1005 8.46222 12.0306 8.5319L7.03062 13.5319C6.88973 13.6728 6.69863 13.752 6.49937 13.752C6.30012 13.752 6.10902 13.6728 5.96812 13.5319C5.82723 13.391 5.74807 13.1999 5.74807 13.0007C5.74807 12.8014 5.82723 12.6103 5.96812 12.4694L10.4375 8.00003L5.9675 3.53065C5.8266 3.38976 5.74745 3.19866 5.74745 2.9994C5.74745 2.80015 5.8266 2.60905 5.9675 2.46815C6.10839 2.32726 6.29949 2.2481 6.49875 2.2481C6.69801 2.2481 6.8891 2.32726 7.03 2.46815L7.03062 2.4694Z" fill="currentColor"/>
+            </svg>{% endcapture %}
+          {% liquid
+            assign is_button_icon = false
+            if section.settings.button_text contains '[arrow]'
+              assign is_button_icon = true
+            endif
+          %}
+          {% if button_type == 'load' and paginate.pages > 1 %}
+            <div class="m-featured-collection__button {{ button_loadmore_class }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              <button
+                class="m-button {{ section.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size }} m-spinner-button"
+                data-load-more
+              >
+                <span class="m-spinner-icon">
+                  <svg
+                    class="animate-spin m-svg-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </span>
+                <span>{{ section.settings.button_text }}</span>
+              </button>
+            </div>
+          {% endif %}
+          {% if button_type == 'link' and show_button_on_header == false %}
+            <div class="m-featured-collection__button m:display-flex{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              <a
+                class="m-button{% if is_button_icon %} m-button--text-with-icon{% endif %} {{ section.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size }}"
+                href="{{ current_collection.url }}"
+              >
+                {{- section.settings.button_text | replace: '[arrow]', arrow -}}
+              </a>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </m-featured-collection>
+  </section>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Featured collection",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured collection"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "id": "collection",
+      "type": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Flash sale",
+      "info": "Need to setup a countdown timer for flash sale via Fox Kit"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_flashsale",
+      "label": "Enable flash sale",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Show countdown timer",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Grid settings"
+    },
+    {
+      "type": "range",
+      "id": "product_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "items_per_row",
+      "label": "Products per row",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Column gap",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 30,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Product card settings"
+    },
+    {
+      "type": "select",
+      "id": "pcard_layout",
+      "label": "Design layout",
+      "default": "",
+      "options": [
+        {
+          "value": "",
+          "label": "Use global settings"
+        },
+        {
+          "value": "1",
+          "label": "Style 1"
+        },
+        {
+          "value": "2",
+          "label": "Style 2"
+        },
+        {
+          "value": "3",
+          "label": "Style 3"
+        },
+        {
+          "value": "4",
+          "label": "Style 4"
+        },
+        {
+          "value": "5",
+          "label": "Style 5"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "pcard_image_ratio",
+      "label": "Image aspect ratio",
+      "default": "",
+      "options": [
+        {
+          "value": "",
+          "label": "Use global settings"
+        },
+        {
+          "value": "original",
+          "label": "Original aspect ratio"
+        },
+        {
+          "value": "1/1",
+          "label": "1:1"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show product vendors",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_title",
+      "label": "Hide product title",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_slider",
+      "label": "Enable slider",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show navigation",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Button settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button_on_header",
+      "label": "Show button on header"
+    },
+    {
+      "type": "select",
+      "id": "button_type",
+      "label": "Button type",
+      "options": [
+        {
+          "value": "link",
+          "label": "Link to collection page"
+        },
+        {
+          "value": "load",
+          "label": "Load more products"
+        }
+      ],
+      "default": "link",
+      "info": "Load more options only work when slider is disabled"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button label",
+      "default": "Shop more",
+      "info": "Leave it blank to hide"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        },
+        {
+          "value": "m-button--plain",
+          "label": "Plain button"
+        }
+      ],
+      "default": "m-button--primary"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Infinite loading",
+      "info": "This function does not work when slider enabled. Total products need to greater than number of products to show."
+    },
+    {
+      "type": "checkbox",
+      "id": "infinite_load",
+      "label": "Load products on scroll",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "max_page_load",
+      "label": "Max pages to load",
+      "default": 3,
+      "min": 2,
+      "max": 5
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "checkbox",
+      "label": "Disable slider",
+      "id": "mobile_disable_slider",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Use horizontal scrollbar",
+      "id": "use_scroll_mobile",
+      "default": true,
+      "info": "Uncheck to display as grid"
+    },
+    {
+      "type": "range",
+      "id": "item_gap_mobile",
+      "label": "Column gap",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

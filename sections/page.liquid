@@ -1,0 +1,15 @@
+{%- liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+-%}
+{% render 'page-title', title: page.title, container: 'container' %}
+{%- if page.content != blank -%}
+  <div class="container">
+    <div class="m-page-content rte{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+      {{ page.content }}
+    </div>
+  </div>
+{%- endif -%}

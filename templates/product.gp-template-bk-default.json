@@ -1,0 +1,427 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "order": [
+    "breadcrumb",
+    "main",
+    "product-details-tabs",
+    "scrolling_promotion_MVNN6Q",
+    "icon_box_9UtNky",
+    "collapsible_tabs_JndiBV",
+    "product-recommendations",
+    "recent-viewed-products"
+  ],
+  "sections": {
+    "breadcrumb": {
+      "type": "breadcrumb",
+      "settings": {
+        "container": "container",
+        "text_alignment": "center",
+        "hide_current": false,
+        "hide_on_mb": false,
+        "animations": "inherit"
+      }
+    },
+    "collapsible_tabs_JndiBV": {
+      "type": "collapsible-tabs",
+      "blocks": {
+        "item_NQRQAp": {
+          "type": "item",
+          "settings": {
+            "header": "What are your sizing options?",
+            "text_size": "h4",
+            "content": "<p>All the details you love about the original—with a fresh flared block heel and modern square toe. Expertly crafted using soft Nappa leather, this essential style molds and moves with you to keep you comfortably on your feet all day (and night). This boot uses leather sourced from a Leather Working Group-approved trader. The Leather Working Group (LWG) Audit Standards provide transparency and accountability within the leather supply chain—covering energy and water usage.</p>",
+            "content_page": "",
+            "open": false
+          }
+        },
+        "item_RGMrHr": {
+          "type": "item",
+          "settings": {
+            "header": "Do you ship internationally?",
+            "text_size": "h4",
+            "content": "<p>All the details you love about the original—with a fresh flared block heel and modern square toe. Expertly crafted using soft Nappa leather, this essential style molds and moves with you to keep you comfortably on your feet all day (and night). This boot uses leather sourced from a Leather Working Group-approved trader. The Leather Working Group (LWG) Audit Standards provide transparency and accountability within the leather supply chain—covering energy and water usage.</p>",
+            "content_page": "",
+            "open": false
+          }
+        },
+        "item_bHzngY": {
+          "type": "item",
+          "settings": {
+            "header": "How long does it take to process an order?",
+            "text_size": "h4",
+            "content": "<p>All the details you love about the original—with a fresh flared block heel and modern square toe. Expertly crafted using soft Nappa leather, this essential style molds and moves with you to keep you comfortably on your feet all day (and night). This boot uses leather sourced from a Leather Working Group-approved trader. The Leather Working Group (LWG) Audit Standards provide transparency and accountability within the leather supply chain—covering energy and water usage.</p>",
+            "content_page": "",
+            "open": true
+          }
+        },
+        "item_nceVP8": {
+          "type": "item",
+          "settings": {
+            "header": "What is your return policy?",
+            "text_size": "h4",
+            "content": "<p>All the details you love about the original—with a fresh flared block heel and modern square toe. Expertly crafted using soft Nappa leather, this essential style molds and moves with you to keep you comfortably on your feet all day (and night). This boot uses leather sourced from a Leather Working Group-approved trader. The Leather Working Group (LWG) Audit Standards provide transparency and accountability within the leather supply chain—covering energy and water usage.</p>",
+            "content_page": "",
+            "open": false
+          }
+        }
+      },
+      "block_order": [
+        "item_bHzngY",
+        "item_RGMrHr",
+        "item_nceVP8",
+        "item_NQRQAp"
+      ],
+      "custom_css": [
+        ".m-collapsible--button {font-weight: 400;}",
+        ".m-collapsible + .m-collapsible {margin-top: 20px; display: block;}",
+        ".m-collapsible--content__inner {padding-bottom: 0; color: rgb(var(--color-foreground-secondary));}"
+      ],
+      "settings": {
+        "container": "container",
+        "color_scheme": "",
+        "image_position": "left",
+        "column_gap": 100,
+        "heading": "Discover more in our FAQ",
+        "heading_size": "h3",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "animations": "inherit",
+        "custom_class": ""
+      }
+    },
+    "icon_box_9UtNky": {
+      "type": "icon-box",
+      "blocks": {
+        "iconbox_EiwgTg": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Customers Services",
+            "description": "<p>Invest in our activewear with absolute confidence, backed by our 30-day satisfaction guarantee.</p>",
+            "link": "",
+            "button_label": "Learn more [arrow]",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        },
+        "iconbox_RW46nE": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Lifetime Warranty",
+            "description": "<p>Our dedicated team provides timely assistance, <br/>committed to addressing your queries.</p>",
+            "link": "",
+            "button_label": "Learn more [arrow]",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        },
+        "iconbox_pJbJGA": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "100 Days Return",
+            "description": "<p>Enjoy a seamless shopping experience, facilitated<br/> by our complimentary shipping.</p>",
+            "link": "",
+            "button_label": "Learn more [arrow]",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        }
+      },
+      "block_order": [
+        "iconbox_pJbJGA",
+        "iconbox_RW46nE",
+        "iconbox_EiwgTg"
+      ],
+      "custom_css": [
+        ".m-icon-box__heading {font-weight: 400;}"
+      ],
+      "settings": {
+        "container": "container",
+        "color_scheme": "",
+        "heading": "Why Minimog?",
+        "heading_size": "h3",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "item_per_row": 3,
+        "item_gap": 30,
+        "item_gap_mobile": 10,
+        "card_style": "vertical",
+        "image_max_width": "70px",
+        "content_alignment": "center",
+        "hover_effect": "scaling-up",
+        "enable_slider": false,
+        "show_pagination": false,
+        "show_navigation": false,
+        "use_scroll_mobile": true,
+        "use_grid_column_mb": false,
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "addons": {
+          "type": "addons",
+          "settings": {
+            "show_atcp": true,
+            "show_ask_a_question": true,
+            "show_social": true
+          }
+        },
+        "badge_ChqgGj": {
+          "type": "badge",
+          "settings": {}
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_atc_button": true,
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_saving": false,
+            "sale_badge_type": "percentage"
+          }
+        },
+        "shipping_VBJFtx": {
+          "type": "shipping",
+          "settings": {
+            "show_delivery_times": true,
+            "deliver_text": "Estimated Delivery:",
+            "deliver_days": "7",
+            "date_format": "%b %d",
+            "show_shipping_text": true,
+            "shipping_text": "<p><strong>Free Shipping & Returns: </strong>On all orders over $75</p>"
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "trust_badge_NyBMd4": {
+          "type": "trust_badge",
+          "settings": {
+            "trust_badges_text": "<p>Guarantee safe & secure checkout</p>",
+            "trust_badges_image_width": "60%",
+            "position": "below"
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "size_title": "Size"
+          }
+        }
+      },
+      "block_order": [
+        "badge_ChqgGj",
+        "title",
+        "price",
+        "variant_picker",
+        "buy_buttons",
+        "addons",
+        "shipping_VBJFtx",
+        "trust_badge_NyBMd4"
+      ],
+      "settings": {
+        "container": "container",
+        "layout": "layout-4",
+        "show_atwl": true,
+        "enable_history_state": true,
+        "enable_variant_group_images": false,
+        "disable_selected_variant_default": false,
+        "show_featured_media": true,
+        "show_zoom_button": true,
+        "enable_video_autoplay": true,
+        "show_nav_media_mobile": false,
+        "show_pagination_mobile": true,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
+        "enable_dynamic_checkout": false,
+        "sticky_atc_compare": false
+      }
+    },
+    "product-details-tabs": {
+      "type": "product-details-tabs",
+      "blocks": {
+        "description": {
+          "type": "description",
+          "settings": {
+            "header": "Product description"
+          }
+        },
+        "tab": {
+          "type": "tab",
+          "settings": {
+            "header": "Shipping & Return",
+            "content": "<p>Shipping cost is based on weight. Just add products to your cart and use the Shipping Calculator to see the shipping price.</p><p>We want you to be 100% satisfied with your purchase. Items can be returned or exchanged within 30 days of delivery.</p>",
+            "content_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "description",
+        "tab"
+      ],
+      "custom_css": [
+        ".m-tabs__header {justify-content: flex-start;}"
+      ],
+      "settings": {
+        "container": "container",
+        "color_scheme": "",
+        "default_open": true,
+        "padding_top": 0,
+        "padding_bottom": 50,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "container": "container-fluid",
+        "color_scheme": "",
+        "remove_params": false,
+        "heading": "You Might Also Like",
+        "heading_size": "h3",
+        "text_align": "center",
+        "limit": 8,
+        "columns": 5,
+        "column_gap": 30,
+        "enable_slider": true,
+        "use_scroll_mobile": true,
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "recent-viewed-products": {
+      "type": "recent-viewed-products",
+      "settings": {
+        "container": "container-fluid",
+        "color_scheme": "",
+        "heading": "Recently Viewed Products",
+        "heading_size": "h3",
+        "text_align": "center",
+        "limit": 8,
+        "columns": 5,
+        "column_gap": 30,
+        "pcard_layout": "",
+        "pcard_image_ratio": "",
+        "show_vendor": false,
+        "hide_title": false,
+        "enable_slider": true,
+        "show_pagination": false,
+        "show_navigation": false,
+        "mobile_disable_slider": false,
+        "use_scroll_mobile": true,
+        "item_gap_mobile": 16,
+        "padding_top": 0,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "scrolling_promotion_MVNN6Q": {
+      "type": "scrolling-promotion",
+      "blocks": {
+        "announcement_iDtgyD": {
+          "type": "announcement",
+          "settings": {
+            "custom_svg": "",
+            "icon_size": "medium",
+            "text": "Free Delivery on orders over $200",
+            "text_size": 16,
+            "text_link": ""
+          }
+        },
+        "announcement_pPW8nc": {
+          "type": "announcement",
+          "settings": {
+            "custom_svg": "",
+            "icon_size": "medium",
+            "text": "Free Delivery on orders over $200",
+            "text_size": 16,
+            "text_link": ""
+          }
+        },
+        "announcement_wewTPP": {
+          "type": "announcement",
+          "settings": {
+            "custom_svg": "",
+            "icon_size": "medium",
+            "text": "Free Delivery on orders over $200",
+            "text_size": 16,
+            "text_link": ""
+          }
+        },
+        "image_83fwGn": {
+          "type": "image",
+          "settings": {
+            "image_height": 8,
+            "image_link": ""
+          }
+        },
+        "image_88JkQc": {
+          "type": "image",
+          "settings": {
+            "image_height": 8,
+            "image_link": ""
+          }
+        },
+        "image_T6f3z4": {
+          "type": "image",
+          "settings": {
+            "image_height": 8,
+            "image_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "announcement_wewTPP",
+        "image_88JkQc",
+        "announcement_iDtgyD",
+        "image_T6f3z4",
+        "announcement_pPW8nc",
+        "image_83fwGn"
+      ],
+      "custom_css": [
+        ".m-promotion__text {font-weight: 500;}"
+      ],
+      "settings": {
+        "container": "w-full",
+        "direction": "left",
+        "speed": 20,
+        "item_gap": 50,
+        "item_gap_mobile": 30,
+        "color_scheme": "scheme-09e5b5b4-774c-4b6c-8025-416ced49cc74",
+        "padding_top": 24,
+        "padding_bottom": 24,
+        "custom_class": ""
+      }
+    }
+  }
+}

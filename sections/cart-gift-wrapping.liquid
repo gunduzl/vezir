@@ -1,0 +1,68 @@
+{%- liquid
+  if linklists['gift-wrapping'].links != blank and linklists['gift-wrapping'].links.first.type == 'product_link'
+    assign gift_wrapping = linklists['gift-wrapping'].links.first
+
+    assign gift_wrap_id = gift_wrapping.object.variants.first.id
+    assign gift_wraps_in_cart = 0
+    for item in cart.items
+      if item.id == gift_wrap_id
+        assign gift_wraps_in_cart = item.quantity
+        break
+      endif
+    endfor
+    assign items_in_cart = cart.item_count | minus: gift_wraps_in_cart
+  endif
+-%}
+
+{%- if gift_wrapping != null -%}
+  <m-gift-wrapping-component
+    class="m-gift-wrapping"
+    data-gift-wrap-id="{{ gift_wrap_id }}"
+    data-gift-wrapping="{{ cart.attributes.gift-wrapping | escape }}"
+    cart-items-size="{{ cart.items.size }}"
+    gift-wraps-in-cart="{{ gift_wraps_in_cart }}"
+    items-in-cart="{{ items_in_cart }}"
+    data-test="{{ gift_wraps_in_cart }}"
+  >
+    <input
+      id="m-gift-wrapping"
+      type="checkbox"
+      name="attributes[gift-wrapping]"
+      value="yes"
+      {% if gift_wraps_in_cart > 0 %}
+        checked="checked"
+      {% endif %}
+      class="m:visually-hidden"
+    >
+    <label for="m-gift-wrapping" class="m-gift-wrapping--label">
+      {%- capture gift_price -%}<strong class="m-gift-wrapping--price">{{ gift_wrapping.object.price | money }}</strong>{%- endcapture -%}
+      <span class="m-gift-wrapping--text">{{ 'cart.general.gift_wrapping_html' | t: price: gift_price }}</span>
+      <div class="m-gift-wrapping--loading">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <svg
+        class="m-gift-wrapping--icon"
+        viewBox="0 0 14 14"
+        with="16"
+        height="16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="0.5" y="0.5" width="13" height="13" stroke="currentColor"/>
+        <path d="M3.5625 7.625L5.75 9.8125L10.75 4.8125" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </label>
+    {%- if gift_wraps_in_cart > 0 -%}
+      <m-gift-note-component class="m-gift-wrapping--note">
+        <textarea
+          class="form-field"
+          name="attributes[gift-note]"
+          placeholder="{{ 'cart.general.gift_note_placeholder' | t }}"
+        >{{ cart.attributes.gift-note }}</textarea>
+      </m-gift-note-component>
+    {%- endif -%}
+  </m-gift-wrapping-component>
+{%- endif -%}

@@ -1,0 +1,234 @@
+{% liquid
+  if media_layout == null
+    assign media_layout = section.settings.layout
+  endif
+  assign enable_zoom = section.settings.show_zoom_button
+  assign enable_video_autoplay = section.settings.enable_video_autoplay
+
+  if show_thumbnails == null
+    assign show_thumbnails = true
+  endif
+  if show_dots == null
+    assign show_dots = true
+  endif
+  if show_nav == null
+    assign show_nav = true
+  endif
+
+  if template_product == null
+    assign template_product = false
+  endif
+
+  assign media_count = product.media.size
+
+  assign enable_variant_group_img = false
+  assign has_variant_group_img = false
+  assign variant_groups = product.metafields['foxecom-bs-kit']['variant-images'].value
+  if section.settings.enable_variant_group_images and product.metafields['foxecom-bs-kit']['variant-images'].value.enable
+    assign enable_variant_group_img = true
+  endif
+
+  assign selected_variant = product.selected_or_first_available_variant
+
+  for media in variant_groups.mapping
+    assign media_id = media.id | times: 1
+    if media_id == selected_variant.id and media.media.size > 0
+      assign has_variant_group_img = true
+    endif
+  endfor
+
+  assign enable_loading_media = false
+  if has_variant_group_img and template_product and section.settings.enable_variant_group_images and product.has_only_default_variant == false and media_count > 1
+    assign enable_loading_media = true
+  endif
+
+  assign enable_desktop_slider = false
+
+  assign grid_col_class = 'm:grid'
+
+  case media_layout
+    when 'layout-1', 'layout-2', 'layout-3'
+      assign grid_layout = 'list'
+      assign show_thumbnails = false
+    when 'layout-2', 'layout-3'
+      if media_count > 1
+        assign grid_col_class = grid_col_class | append: ' m:grid-2-cols'
+      endif
+    when 'layout-4'
+      assign grid_layout = 'slider'
+      if media_count > 1
+        assign enable_desktop_slider = true
+      endif
+    when 'layout-5'
+      assign grid_layout = 'slider'
+      assign show_thumbnails = false
+      if media_count > 2
+        assign enable_desktop_slider = true
+      endif
+    when 'layout-6'
+      assign grid_layout = 'slider'
+      if media_count > 1
+        assign enable_desktop_slider = true
+      endif
+    when 'layout-7'
+      assign grid_layout = 'slider'
+      assign show_thumbnails = false
+      if media_count > 1
+        assign grid_col_class = grid_col_class | append: ' m:grid-3-cols'
+      endif
+      if media_count > 3
+        assign enable_desktop_slider = true
+      endif
+  endcase
+
+  assign only_media = true
+  if media_count > 1
+    assign only_media = false
+  endif
+%}
+{% if media_count > 0 %}
+  <media-gallery
+    id="MediaGallery-{{ section.id }}"
+    data-product-id="{{ product.id }}"
+    data-product-handle="{{ product.handle }}"
+    data-product-url="{{ product.url }}"
+    data-enable-image-zoom="{{ section.settings.show_zoom_button }}"
+    data-enable-video-autoplay="{{ section.settings.enable_video_autoplay }}"
+    data-enable-variant-group-images="{{ enable_variant_group_img }}"
+    data-only-media="{{ only_media }}"
+    data-layout="{{ media_layout }}"
+    data-enable-desktop-slider="{{ enable_desktop_slider }}"
+    data-section="{{ section.id }}"
+    class="m-media-gallery m:w-full {{ class }}"
+    {% if enable_loading_media %}
+      data-media-loading
+    {% endif %}
+    data-media-size="{{ media_count }}"
+    data-available="{{ product.available }}"
+    data-context="{{ context | default: 'product' }}"
+  >
+    <div
+      class="m-media-gallery__wrapper m-product-media--{{ grid_layout }}{% if media_layout == 'layout-7' %} media-slider-full{% endif %}"
+      {% if grid_layout == 'list' %}
+        style="--column-gap: 10px;"
+      {% endif %}
+    >
+      <div
+        class="m-media-gallery__inner{% if grid_layout == 'slider' %} m-product-media--slider__images{% endif %} swiper-container"
+        {% if enable_loading_media %}
+          style="opacity: 0;"
+        {% endif %}
+      >
+        <div class="m-media-gallery__list swiper-wrapper {{ grid_col_class }}">
+          {%- for media in product.media -%}
+            {% liquid
+              assign remainder = forloop.index0 | modulo: 3
+              assign item_classes = 'm-product-media--item media-type-' | append: media.media_type | append: ' swiper-slide m:column'
+              if media_layout == 'layout-2' and remainder == 0 or media_count < 3
+                assign item_classes = item_classes | append: ' m-col-span-2'
+              endif
+            %}
+            <div
+              class="{{ item_classes }}"
+              data-index="{{ forloop.index0 }}"
+              data-media-type="{{ media.media_type }}"
+              data-media-id="{{ media.id }}"
+              data-aspect-ratio="{{ media.aspect_ratio | default: '1' }}"
+            >
+              {% render 'product-thumbnail',
+                media: media,
+                index: forloop.index0,
+                autoplay: enable_video_autoplay,
+                loop: true,
+                media_layout: media_layout,
+                product: product
+              %}
+              {%- if enable_zoom and media.media_type == 'image' -%}
+                <div class="m-product-media--zoom-icon">
+                  {% render 'tooltip', type: 'zoom-in', class_name: ' m-tooltip--left' %}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+        {% if show_nav and enable_desktop_slider %}
+          <div class="m-product-media--slider__navigation m:hidden m:md:block">
+            <button class="swiper-button-control swiper-button-prev m-button--icon" aria-label="Previous">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="swiper-button-control swiper-button-next m-button--icon" aria-label="Next">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+
+      {% liquid
+        assign thumbnail_aspect_ratio = product.media[0].preview_image.aspect_ratio | default: 1
+      %}
+      <div class="m-product-media--slider__thumbnails{% if show_thumbnails_mobile %} m:block{% else %} m:hidden{% endif %}{% if show_thumbnails %} md:m:block{% else %} md:m:hidden{% endif %}">
+        <div class="nav-swiper-container">
+          <div class="swiper-wrapper" style="min-width: 70px;">
+            {% for media in product.media %}
+              <div
+                class="swiper-slide media-type-{{ media.media_type }}"
+                data-index="{{ forloop.index0 }}"
+                data-media-type="{{ media.media_type }}"
+                data-media-id="{{ media.id }}"
+                data-aspect-ratio="{{ thumbnail_aspect_ratio }}"
+                style="--slide-height: {{ 70 | divided_by: thumbnail_aspect_ratio }}px;"
+              >
+                {% render 'product-thumbnail',
+                  media: media,
+                  thumbnail: true,
+                  index: forloop.index0,
+                  media_layout: media_layout,
+                  product: product,
+                  aspect_ratio: thumbnail_aspect_ratio
+                %}
+                {% if media.media_type contains 'video' %}
+                  <div class="m-product-media--slider__thumbnail-icon">
+                    <svg
+                      class="m-svg-icon"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 576 512"
+                    >
+                      <path d="M543.9 96c-6.2 0-12.5 1.8-18.2 5.7L416 171.6v-59.8c0-26.4-23.2-47.8-51.8-47.8H51.8C23.2 64 0 85.4 0 111.8v288.4C0 426.6 23.2 448 51.8 448h312.4c28.6 0 51.8-21.4 51.8-47.8v-59.8l109.6 69.9c5.7 4 12.1 5.7 18.2 5.7 16.6 0 32.1-13 32.1-31.5v-257c.1-18.5-15.4-31.5-32-31.5zM384 400.2c0 8.6-9.1 15.8-19.8 15.8H51.8c-10.7 0-19.8-7.2-19.8-15.8V111.8c0-8.6 9.1-15.8 19.8-15.8h312.4c10.7 0 19.8 7.2 19.8 15.8v288.4zm160-15.7l-1.2-1.3L416 302.4v-92.9L544 128v256.5z"/>
+                    </svg>
+                  </div>
+                {% endif %}
+                {% if media.media_type == 'model' %}
+                  <div class="m-product-media--slider__thumbnail-icon">
+                    <svg
+                      class="m-svg-icon"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 512 512"
+                    >
+                      <path d="M239.1 6.3l-208 78c-18.7 7-31.1 25-31.1 45v225.1c0 18.2 10.3 34.8 26.5 42.9l208 104c13.5 6.8 29.4 6.8 42.9 0l208-104c16.3-8.1 26.5-24.8 26.5-42.9V129.3c0-20-12.4-37.9-31.1-44.9l-208-78C262 2.2 250 2.2 239.1 6.3zM256 34.2l224 84v.3l-224 97.1-224-97.1v-.3l224-84zM32 153.4l208 90.1v224.7l-208-104V153.4zm240 314.8V243.5l208-90.1v210.9L272 468.2z"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      {% if show_dots %}
+        <div
+          class="m-product-media--slider__pagination swiper-pagination m:w-full{% if media_layout != 'layout-5' %} !md:m:hidden{% endif %}{% unless show_pagination_mobile %} !m:hidden-mobile{% endunless %}"
+        ></div>
+      {% endif %}
+    </div>
+  </media-gallery>
+{% else %}
+  {{ 'product-1' | placeholder_svg_tag: 'm-placeholder-svg' }}
+{% endif %}

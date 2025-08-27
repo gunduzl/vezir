@@ -1,0 +1,50 @@
+<div class="m-testimonials__inner">
+  <div class="swiper-container">
+    <div class="swiper-wrapper">
+      {% for block in section.blocks %}
+        <div class="swiper-slide" {{ block.shopify_attributes }}>
+          <div
+            data-index="{{ forloop.index0 }}"
+            class="m-testimonial{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: {{ forloop.index }};"
+            {% endif %}
+          >
+            <div class="m-testimonial__wrapper">
+              {% if section.settings.show_stars %}
+                <div class="m-stars">
+                  {%- for i in (1..5) -%}
+                    <span class="m-star">{%- render 'icon', name: 'star-solid', size: 'small' -%}</span>
+                  {%- endfor -%}
+                </div>
+              {% endif %}
+              <div class="m-testimonial__description rte m:text-color-subtext">{{ block.settings.description }}</div>
+              {% if block.settings.footer != blank %}
+                <div class="m-testimonial__name">
+                  <div>{{ block.settings.footer }}</div>
+                  {% if block.settings.product %}
+                    <a class="m-testimonial__product" href="{{ block.settings.product.url }}">
+                      {{- block.settings.product.title -}}
+                    </a>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="m-testimonial__fraction{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+      <span class="m-testimonial-index">1</span>
+      <span class="m-slash">/</span>
+      <span>{{ section.blocks | size }}</span>
+    </div>
+  </div>
+</div>
+{% render 'slider-controls',
+  show_nav: section.settings.show_navigation,
+  show_pagination: section.settings.show_pagination,
+  absolute: true,
+  container: container_class
+%}

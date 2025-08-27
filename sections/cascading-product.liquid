@@ -1,0 +1,330 @@
+
+{% if section.index > 1 %}
+  <link rel="stylesheet" href="{{ 'cascading.css' | asset_url }}" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="{{ 'component-cascading-product-card.css' | asset_url }}" media="print" onload="this.media='all'">
+{% else %}
+  {{ 'cascading.css' | asset_url | stylesheet_tag }}
+  {{ 'component-cascading-product-card.css' | asset_url | stylesheet_tag }}
+{% endif %}
+{% liquid
+  assign section_class = 'm-cascading-collection m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+  if section.settings.custom_class != blank
+    assign section_class = section_class | append: ' ' | append: section.settings.custom_class
+  endif
+
+  assign variance = section.settings.variance
+  assign sequence = section.settings.sequence
+  assign spacing = section.settings.spacing
+  assign heading = section.settings.heading
+  assign column_gap = section.settings.column_gap
+  assign heading_size = section.settings.heading_size
+  assign cascade_enable_parallax = section.settings.cascade_enable_parallax
+  assign cascade_parallax_intensity = section.settings.cascade_parallax_intensity
+
+  assign header_class = 'm-cascading__header'
+  if section.settings.overlay_heading
+    assign header_class = header_class | append: ' m-cascading__header--overlay'
+  else
+    assign header_class = header_class | append: ' m-section__header'
+    assign header_class = header_class | append: ' m:text-' | append: section.settings.heading_alignment
+  endif
+
+  assign item_separator = '||__cascade-item-end__||'
+
+  assign collection = section.settings.collection
+%}
+<section
+  class="{{ section_class }}"
+  style="--section-padding-top: {{ section.settings.padding_top }}px; --section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="{{ section.settings.container }} m-section-my m-section-py">
+    <{% if cascade_enable_parallax %}m-cascading{% else %}div{% endif %}
+      data-enable-parallax="{{ cascade_enable_parallax }}"
+      data-parallax-intensity="{{ cascade_parallax_intensity }}"
+      class="m-cascading m:block m-cascading-collection__wrapper m:relative"
+    >
+      {% if heading != blank %}
+        <div class="{{ header_class }}">
+          <div class="m-cascading__header-wrapper">
+            <h3 class="{{ heading_size }}">{{ heading }}</h3>
+          </div>
+        </div>
+      {% endif %}
+      {% liquid
+        capture product_items
+          for product in collection.products limit: section.settings.product_to_show
+            echo '<div data-media-item>'
+            render 'cascade-product-card', product: product
+            echo '</div>'
+            echo item_separator
+          else
+            for i in (1..section.settings.product_to_show)
+              assign placeholder_index = placeholder_index | modulo: 6 | plus: 1
+              assign placeholder_name = 'product-' | append: placeholder_index
+              echo '<div data-media-item>'
+              render 'cascade-product-card-placeholder', placeholder_name: placeholder_name
+              echo '</div>'
+              echo item_separator
+            endfor
+          endfor
+        endcapture
+      %}
+      {% render 'cascade',
+        content_items: product_items,
+        variance: variance,
+        sequence: sequence,
+        spacing: spacing,
+        column_gap: column_gap,
+        cascade_enable_parallax: cascade_enable_parallax,
+        cascade_parallax_intensity: cascade_parallax_intensity,
+        section_id: section.id
+      %}
+    </{% if cascade_enable_parallax %}m-cascading{% else %}div{% endif %}>
+  </div>
+</section>
+{% if cascade_enable_parallax %}
+  <script src="{{ 'cascading-parallax.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+{% schema %}
+{
+  "name": "Cascading product",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/xQCLAp)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "product_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 12,
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by collections"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Small",
+          "value": "h3"
+        },
+        {
+          "label": "Medium",
+          "value": "h2"
+        },
+        {
+          "label": "Large",
+          "value": "h1"
+        }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Text aligmnent",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "overlay_heading",
+      "label": "Overlay heading",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Grid settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "Adjust variation and sequence of media sizes to create unique layouts"
+    },
+    {
+      "type": "select",
+      "id": "spacing",
+      "label": "Vertical space between items",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "variance",
+      "label": "Variation between media sizes",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "low",
+          "label": "Low"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "high",
+          "label": "High"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "range",
+      "id": "sequence",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "Sequence",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Desktop column gap",
+      "min": 50,
+      "max": 250,
+      "step": 5,
+      "default": 165,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "cascade_enable_parallax",
+      "label": "Enable parallax animations",
+      "info": "When enabled small cascade media will scroll faster than large cascade media.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "cascade_parallax_intensity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Parallax intensity",
+      "info": "Adjust the level of parallax animations.",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cascading product"
+    }
+  ]
+}
+{% endschema %}

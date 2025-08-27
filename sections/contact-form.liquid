@@ -1,0 +1,222 @@
+{%- liquid 
+  assign st = section.settings
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+-%}
+<section data-section-type="contact-page" data-section-id={{ section.id }} class="m-section m-contact-form">
+  <div class="{{ container }}">
+    <div class="m-row{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+      <div class="m-contact-form__main{% if section.blocks.size > 0 %} xl:m:w-8/12 m:w-full{% else %} m-contact-form__main--full xl:m:w-6/12 m:w-full{% endif %}">
+        {%- if st.title != blank -%}
+        <h3 class="m-contact-form__heading">{{ st.title }}</h3>
+        {%- endif -%}
+        {%- if st.description != blank -%}
+        <div class="m-contact-form__description rte">{{ st.description }}</div>
+        {%- endif -%}
+        {%- form 'contact' -%}
+          {%- capture success_message -%}
+            {{ 'contact.form.post_success' | t }}
+          {%- endcapture -%}
+          {% render 'form__success', form: form, success_message: success_message %}
+          {% render 'form__error', form: form %}
+          <div class="m-contact-form__form-fields m:flex m:flex-wrap">
+            {% if section.settings.show_name %}
+            <div class="m-contact-form__name m:column m:w-full md:m:w-1/2">
+              <input type="text" class="form-field form-field--input" name="contact[name]" value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}" id="inputName" placeholder="{{ 'contact.form.name' | t }}">
+            </div>
+            {% endif %}
+            <div class="m-contact-form__email m:column m:w-full md:m:w-1/2">
+              <input type="email" class="form-field form-field--input" name="contact[email]" required autocorrect="off" autocapitalize="off" value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}" id="inputEmail" placeholder="{{ 'contact.form.email' | t }}">
+            </div>
+            {% if section.settings.show_phone %}
+            <div class="m-contact-form__phone m:column m:w-full">
+              <input type="tel" class="form-field form-field--input" name="contact[phone]" autocorrect="off" autocapitalize="off" value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}" id="inputPhone" placeholder="{{ 'contact.form.phone' | t }}">
+            </div>
+            {% endif %}
+          </div>
+          <div class="m-contact-form__message m:w-full">
+            <textarea class="form-field form-field--input" name="contact[body]" rows="6" required placeholder="{{ 'contact.form.message' | t }}" id="textareaMessage">{%- if form.body -%}{{ form.body }}{%- endif -%}</textarea>
+          </div>
+          {% if section.settings.show_signup_email %}
+          <div class="m-contact-form__save">
+            <label class="form-field--checkbox">
+              <input type="checkbox" name="contact[saveInfo]">
+              <span class="form-field--checkbox__label">{{ 'contact.form.save_infor_message' | t }}</span>
+              <span class="form-field--checkbox__icon">
+                <svg
+                  class="m-svg-icon--medium"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  focusable="false"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M18.5 1.5H1.5L1.5 18.5H18.5V1.5ZM1.5 0.5C0.947715 0.5 0.5 0.947715 0.5 1.5V18.5C0.5 19.0523 0.947715 19.5 1.5 19.5H18.5C19.0523 19.5 19.5 19.0523 19.5 18.5V1.5C19.5 0.947715 19.0523 0.5 18.5 0.5H1.5Z" fill-rule="evenodd" fill="currentColor"/>
+                  <path d="M14.9975 6.09084C15.201 6.27746 15.2147 6.59375 15.0281 6.79728L8.91631 13.4627C8.82231 13.5652 8.68987 13.6239 8.55079 13.6247C8.41172 13.6256 8.27857 13.5684 8.18335 13.4671L4.99513 10.0731C4.80606 9.87179 4.81596 9.55536 5.01723 9.3663C5.21849 9.17723 5.53492 9.18713 5.72399 9.3884L8.54335 12.3897L14.291 6.12145C14.4776 5.91791 14.7939 5.90421 14.9975 6.09084Z" fill="currentColor"/>
+                </svg>
+              </span>
+            </label>
+          </div>
+          {% endif %}
+          <button type="submit" class="m-button m-button--primary">{{ 'contact.form.send' | t }}</button>
+        {%- endform -%}
+      </div>
+      {% if section.blocks.size > 0 %}
+      <div class="m-contact-form__info m:flex m:flex-wrap m:w-full xl:m:w-4/12">
+        {% for block in section.blocks %}
+          <div class="m-info-box m:column m:w-full md:m:w-1/2 lg:m:w-3/12 xl:m:w-full">
+            <h3>{{ block.settings.title }}</h3>
+            {% case block.type %}
+              {% when 'textblock' %}
+                <div class="m-info-box__content rte">{{ block.settings.content }}</div>
+              {% else %}
+                {% render 'social-media-links' %}
+            {% endcase %}
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Contact form",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "We would love to hear from you."
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>If you’ve got great products your making or looking to work with us then drop us a line.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Contact form"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_name",
+      "label": "Show field name",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_phone",
+      "label": "Show field phone number",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_signup_email",
+      "label": "Show email sign up",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "textblock",
+      "name": "Text block",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Block Title"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": "<p>7895 Piermont Dr NE Albuquerque, NM 198866, <a href='#'>See Our Stores</a></p>"
+        }
+      ]
+    },
+    {
+      "type": "socialmedia",
+      "name": "Social media",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Social Media"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

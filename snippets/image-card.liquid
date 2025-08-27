@@ -1,0 +1,170 @@
+{% liquid
+  assign image = block.settings.image
+  assign mobile_image = block.settings.mobile_image
+  assign text_color = block.settings.text_color
+  assign button_fixed = block.settings.button_fixed
+
+  assign heading_size = block.settings.text_size | replace: 'small', 'h3' | replace: 'medium', 'h2' | replace: 'large', 'h1'
+  assign subtext_size = block.settings.text_size | replace: 'small', 'h6' | replace: 'medium', 'h6' | replace: 'large', 'h5'
+
+  assign heading_color = ''
+  if text_color != 'inherit'
+    assign heading_color = heading_color | append: 'm:text-' | append: text_color
+  endif
+
+  assign content_position = ''
+  case block.settings.content_position
+    when 'top_left'
+      assign content_position = ' m:items-start m:justify-start'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-start sm:m:justify-start'
+      endif
+    when 'top_right'
+      assign content_position = ' m:justify-end m:items-start'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-start sm:m:justify-end'
+      endif
+    when 'top_center'
+      assign content_position = ' m:items-start m:justify-center'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-start sm:m:justify-center'
+      endif
+    when 'bottom_left'
+      assign content_position = ' m:items-end m:justify-start'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-end sm:m:justify-start'
+      endif
+    when 'bottom_right'
+      assign content_position = ' m:items-end m:justify-end'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-end sm:m:justify-end'
+      endif
+    when 'bottom_center'
+      assign content_position = ' m:justify-center m:items-end'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-end sm:m:justify-center'
+      endif
+    when 'center_left'
+      assign content_position = ' m:justify-start m:items-center'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-center sm:m:justify-start'
+      endif
+    when 'center_right'
+      assign content_position = ' m:items-center m:justify-end'
+      if stack_on_mobile == true
+        assign content_position = ' m:justify-center sm:m:items-center sm:m:justify-end'
+      endif
+    else
+        assign content_position = ' m:items-center m:justify-center'
+  endcase
+
+  assign use_content_above = block.settings.use_content_above
+
+  if mobile_image == blank
+    assign mobile_image = image
+  endif
+  
+  assign classes = 'm-image-card' | append: ' ' | append: image_card_class | append: ' ' | append: grid_columns 
+  if stack_on_mobile == true or use_content_above == false
+    assign classes = classes | append: ' m-image-card--content-stack'
+  endif
+  if button_fixed == true
+    assign classes = classes | append: ' m-image-card--button-fixed'
+  endif
+
+  assign color_scheme_classes = ' m-gradient m-color-' | append: color_scheme
+
+  assign aspect_ratio = image.aspect_ratio | default: 1
+  assign aspect_ratio_mobile = mobile_image.aspect_ratio | default: 1
+
+  assign loading =  'lazy'
+  assign fetchpriority = 'low'
+  if index == 1 and section_index < 2 or enable_preload_image
+    assign loading = 'eager'
+    assign fetchpriority = 'high'
+  endif
+
+  assign color_scheme_inherit = false
+  if parent_color_scheme != nil and color_scheme == parent_color_scheme
+    assign color_scheme_inherit = true
+  endif
+%}
+<div class="{{ classes }}{% if color_scheme_inherit %} color-scheme-inherit{% endif %}">
+  <div class="m-image-card__inner {{ color_scheme_classes }}{% unless color_scheme_inherit %} m:blocks-radius{% endunless %}">
+    <{% if block.settings.link %}a href="{{ block.settings.link | default: "#" }}" aria-label="{{ block.settings.title | default: 'image card ' | append: block.id }}"{% else %}div{% endif %} class="m-image-card__img{% if color_scheme_inherit %} m:blocks-radius{% endif %} m:block m:h-full" style="--aspect-ratio: {{ aspect_ratio }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }};">
+      <div class="m-media">
+        {% if image == blank %}
+          {% liquid
+            assign placeholder_svg_tag = 'm-placeholder-svg m-placeholder-svg--no-border m:object-cover m:w-full m:h-full'
+            if block.settings.mobile_image != blank
+              assign placeholder_svg_tag = placeholder_svg_tag | append: ' m:hidden md:m:block'
+            endif
+          %}
+          {% capture current %}{% cycle 1, 2, 3, 4, 5 %}{% endcapture %}
+          {{ 'collection-' | append: current | placeholder_svg_tag: placeholder_svg_tag }}
+        {% endif %}
+        {% if image != blank or block.settings.mobile_image != blank %}
+          <picture class="m-media__wrapper m:block m:w-full m:h-full{% if image == blank %} md:m:hidden{% endif %}">
+            {%- if block.settings.mobile_image != blank -%}
+              <source
+                media="(max-width: 767px)"
+                srcset="{{ block.settings.mobile_image | image_url: width: '400x' }} 400w, {{ block.settings.mobile_image | image_url: width: '600x' }} 600w, {{ block.settings.mobile_image | image_url: width: '800x' }} 800w, {{ block.settings.mobile_image | image_url: width: '1000x' }} 1000w"
+                width="{{ block.settings.mobile_image.width }}"
+                height="{{ block.settings.mobile_image.height }}"
+              >
+            {%- endif %}
+            {% liquid
+              if image == blank
+                assign image = block.settings.mobile_image
+              endif
+              assign image_height = image.width | divided_by: image.aspect_ratio | round
+            %}
+            {{
+              image
+              | image_url: width: 2000
+              | image_tag:
+                loading: loading,
+                fetchpriority: fetchpriority,
+                width: image.width,
+                height: image_height,
+                widths: '300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000',
+                alt: image.alt
+            }}
+          </picture>
+        {%- endif %}
+      </div>
+    </{% if block.settings.link %}a{% else %}div{% endif %}>
+    <div 
+      class="m-image-card__content {{ content_position }} {% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+      {% if animated %}
+        data-cascade
+        style="--animation-order: {{ index }};"
+      {% endif %}
+    >
+      <div class="m-richtext m-image-card__content-inner m:text-{{ text_color }} {% if stack_on_mobile == true %}m:text-center sm:m:text-{{ block.settings.content_alignment }}{% else %}m:text-{{ block.settings.content_alignment }}{% endif %}">
+        {% if block.settings.subtitle != blank %}
+          <p class="m-richtext__subtitle m-image-card__subheading {{ subtext_size }} {{ text_color }}">{{ block.settings.subtitle }}</p>
+        {% endif %}
+        {% if block.settings.title != blank %}
+          <h3 class="m-richtext__title m-image-card__heading {{ heading_color }} {{ heading_size }}">{{ block.settings.title }}</h3>
+        {% endif %}
+        {% if block.settings.description != blank %}
+          <div class="m-richtext__description rte m:text-color-subtext">{{ block.settings.description }}</div>
+        {% endif %}
+        {% if block.settings.button_label != blank %}
+          <a href="{{ block.settings.link }}" class="m-richtext__button m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ block.settings.button_size }}">
+            {{ block.settings.button_label }}
+          </a>
+          {% if button_fixed == true %}
+            <a href="{{ block.settings.link }}" class="m-richtext__button m-button m-button--fixed {{ block.settings.button_size }} m:text-{{ text_color }}">
+              {{ block.settings.button_label }}
+              <svg class="m-svg-icon" viewBox="0 0 15 15" fill="none">
+                <path d="M6.8125 0.349609C7 0.182943 7.17708 0.182943 7.34375 0.349609L13.875 6.91211C14.0625 7.07878 14.0625 7.24544 13.875 7.41211L7.34375 13.9746C7.17708 14.1413 7 14.1413 6.8125 13.9746L6.1875 13.3496C6.125 13.2871 6.09375 13.2038 6.09375 13.0996C6.09375 12.9954 6.125 12.9017 6.1875 12.8184L11.0312 7.97461H0.375C0.125 7.97461 0 7.84961 0 7.59961V6.72461C0 6.47461 0.125 6.34961 0.375 6.34961H11.0312L6.1875 1.50586C6.02083 1.31836 6.02083 1.14128 6.1875 0.974609L6.8125 0.349609Z" fill="currentColor"/>
+              </svg>
+            </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

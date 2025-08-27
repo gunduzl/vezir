@@ -1,0 +1,5470 @@
+{{ 'custom-content.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign scrollMobile = section.settings.use_scroll_mobile
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign classes = 'm-section m-custom-content' | append: ' m-gradient m-color-' | append: section.settings.color_scheme
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+
+  assign background_image = section.settings.background_image
+  assign background_image_mobile = section.settings.background_image_mobile
+  assign background_image_class = ''
+  if background_image_mobile == blank
+    assign background_image_mobile = background_image
+  else
+    assign background_image_class = 'm:hidden md:m:block'
+  endif
+
+  assign image_height = background_image.width | divided_by: background_image.aspect_ratio | round
+  assign mobile_image_height = background_image_mobile.width | divided_by: background_image_mobile.aspect_ratio | round
+
+  assign enable_parallax = section.settings.enable_parallax | default: false
+%}
+<style>
+  #m-custom-{{ section.id }} {
+    --column-gap: {{ section.settings.gap }}px;
+    --column-gap-mobile: {{ section.settings.gap_mobile }}px;
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+{% if enable_parallax %}
+  <script src="{{ 'parallax.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+<div
+  id="m-custom-{{ section.id }}"
+  class="{{ classes }}"
+  data-section-type="custom-content"
+  data-section-id="{{ section.id }}"
+>
+  {% if background_image != blank or background_image_mobile != blank %}
+    {% liquid
+      assign loading = 'lazy'
+      assign fetchpriority = 'low'
+      if section.index < 2 or section.settings.enable_preload_image
+        assign loading = 'eager'
+        assign fetchpriority = 'high'
+      endif
+    %}
+    <m-parallax
+      class="m-parallax m:block"
+      data-enable-parallax="{{ enable_parallax }}"
+      data-direction="{{ section.settings.parallax_direction }}"
+    >
+      <div class="m-parallax__wrapper m:relative m:w-full m:h-full">
+        <div class="m-parallax__image m:h-full">
+          {% if background_image != blank %}
+            {{
+              background_image
+              | image_url: width: 3840
+              | image_tag:
+                class: background_image_class,
+                loading: loading,
+                fetchpriority: fetchpriority,
+                width: background_image.width,
+                height: image_height,
+                sizes: '100vw',
+                widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+                alt: background_image.alt
+              | escape
+            }}
+          {% endif %}
+          {% if section.settings.background_image_mobile != blank %}
+            {{
+              background_image_mobile
+              | image_url: width: 1500
+              | image_tag:
+                class: 'md:m:hidden',
+                loading: loading,
+                fetchpriority: fetchpriority,
+                width: background_image_mobile.width,
+                height: mobile_image_height,
+                sizes: '100vw',
+                widths: '375, 550, 750, 1100, 1500',
+                alt: background_image_mobile.alt
+              | escape
+            }}
+          {% endif %}
+        </div>
+      </div>
+    </m-parallax>
+  {% endif %}
+  <div class="{{ container }} m-section-my m-section-py m-custom-content__container">
+    <div class="m-gradient m-color-{{ section.settings.content_color_scheme }}{% if section.settings.content_color_scheme != section.settings.color_scheme %} m:blocks-radius m-custom-content__boxed{% endif %}">
+      {%- assign block_width_mobile = '' -%}
+      {% render 'index-section-header', section_settings: section.settings %}
+      {% if section.blocks.size > 0 %}
+        {% if scrollMobile %}<div class="m-mixed-layout m-mixed-layout--mobile-scroll">{% endif %}
+        <div class="m-custom-content__wrapper m:flex {% unless scrollMobile %}m:flex-wrap{% else %}m-mixed-layout__inner md:m:flex-wrap{% endunless %}">
+          {% for block in section.blocks %}
+            {% liquid
+              assign vertical_alignment = block.settings.alignment
+              case block.settings.width
+                when '16%'
+                  assign block_width = 'lg:m:w-2/12'
+                  assign block_width_mobile = 'md:w-1/2 m:w-full'
+                when '25%'
+                  assign block_width = 'lg:m:w-1/4'
+                  assign block_width_mobile = 'md:m:w-1/2 m:w-full'
+                when '33%'
+                  assign block_width = 'lg:m:w-1/3'
+                  assign block_width_mobile = 'm:w-full'
+                when '50%'
+                  assign block_width = 'lg:m:w-1/2'
+                  assign block_width_mobile = 'm:w-full'
+                when '66%'
+                  assign block_width = 'lg:m:w-8/12'
+                  assign block_width_mobile = 'm:w-full'
+                when '75%'
+                  assign block_width = 'lg:m:w-9/12'
+                  assign block_width_mobile = 'm:w-full'
+                when '83%'
+                  assign block_width = 'lg:m:w-10/12'
+                  assign block_width_mobile = 'm:w-full'
+                when '100%'
+                  assign block_width = 'lg:m:w-full'
+                  assign block_width_mobile = 'm:w-full'
+              endcase
+
+              assign animation_effect = settings.animations
+              assign animated = false
+              if animation_effect != 'none'
+                assign animated = true
+                if block.settings.animations != 'inherit'
+                  assign animation_effect = block.settings.animations
+                endif
+              endif
+
+              assign heading_size = block.settings.text_size | replace: 'small', 'h3' | replace: 'medium', 'h2' | replace: 'large', 'h1'
+              assign subtext_size = block.settings.text_size | replace: 'small', 'h6' | replace: 'medium', 'h6' | replace: 'large', 'h6'
+
+              assign block_classes = 'm:column m:display-flex m-custom-content__block m-custom-content__block-' | append: block.type | append: ' ' | append: block_width | append: ' ' | append: block_width_mobile
+              if vertical_alignment != blank
+                assign block_classes = block_classes | append: ' m:items-' | append: vertical_alignment
+              endif
+              if block.settings.block_custom_class != blank
+                assign block_classes = block_classes | append: ' ' | append: block.settings.block_custom_class
+              endif
+
+              assign text_color = block.settings.text_color
+              assign heading_color = ''
+              assign desc_color = 'm:text-color-subtext'
+              if text_color != 'inherit'
+                assign heading_color = heading_color | append: 'm:text-' | append: text_color
+                assign desc_color = 'm:text-' | append: text_color
+              endif
+            %}
+            <div id="m-custom__block--{{ block.id }}" class="{{ block_classes }}" {{ block.shopify_attributes }}>
+              <div class="m-custom-content__block-inner m:w-full{% if animated and animation_effect == 'zoom-fade' %} m:overflow-hidden{% endif %}">
+                {% case block.type %}
+                  {% when 'image' %}
+                    <div
+                      class="m:w-full m:block{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %} m:blocks-radius"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      {% if block.settings.image != blank %}
+                        {%- liquid
+                          assign tag = 'div'
+                          if block.settings.link
+                            assign tag = 'a'
+                          endif
+                        -%}
+                        <{{ tag }}
+                          {% if block.settings.link %}
+                            href="{{ block.settings.link }}"
+                          {% endif %}
+                        >
+                          {% render 'responsive-image',
+                            image: block.settings.image,
+                            section_index: section.index,
+                            index: 1,
+                            enable_preload_image: block.settings.enable_preload_image
+                          %}
+                        </{{ tag }}>
+                      {% else %}
+                        {% if block.settings.width == '100%' %}
+                          {{
+                            'lifestyle-1'
+                            | placeholder_svg_tag: 'placeholder-svg m-placeholder-svg m-placeholder-svg--no-border'
+                          }}
+                        {% else %}
+                          {{
+                            'image'
+                            | placeholder_svg_tag: 'placeholder-svg m-placeholder-svg m-placeholder-svg--no-border'
+                          }}
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  {% when 'text' %}
+                    <div
+                      class="m-richtext m-richtext--{{ block.settings.text_size }} m:text-{{ block.settings.align_text }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      style="--text-color: {{ text_color }};{% if animated %}--animation-order: {{ forloop.index }};{% endif %}"
+                      {% if animated %}
+                        data-cascade
+                      {% endif %}
+                    >
+                      {% if block.settings.subheading != blank %}
+                        <p class="m-richtext__subtitle m:text-{{ text_color }} {{ subtext_size }}">
+                          {{ block.settings.subheading }}
+                        </p>
+                      {% endif %}
+                      {% if block.settings.title != blank %}
+                        <h3 class="m-richtext__title {{ heading_color }} {{ heading_size }}">
+                          {{ block.settings.title }}
+                        </h3>
+                      {% endif %}
+                      {% if block.settings.text != blank %}
+                        <div class="m-richtext__description rte {{ desc_color }} {{ subtext_size }}">
+                          {{ block.settings.text }}
+                        </div>
+                      {% endif %}
+                      {% if block.settings.button_label != blank %}
+                        <div class="m-richtext__button content__button">
+                          <a
+                            href="{{ block.settings.button_link }}"
+                            class="m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ block.settings.button_size }}"
+                          >
+                            {{- block.settings.button_label -}}
+                          </a>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% when 'video' %}
+                    {{ 'video.css' | asset_url | stylesheet_tag }}
+                    {% liquid
+                      assign autoplay = false
+                      if block.settings.autoplay and block.settings.muted
+                        assign autoplay = true
+                      endif
+
+                      assign cover_image = false
+                      if block.settings.image != blank
+                        assign cover_image = true
+                      endif
+                    %}
+                    <div
+                      class="m-video{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      data-video-block
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      <div class="m-video__container m-video__container--{{ block.id }} mx-auto">
+                        <div
+                          class="m-video__wrapper m-video__wrapper--{{ block.id }} m:blocks-radius"
+                          style="--aspect-ratio: {{ block.settings.ratio | replace: ':', '/' }}"
+                        >
+                          <video-component
+                            class="deferred-media no-js-hidden"
+                            data-media-id="{{ block.settings.video_link.id }}"
+                            data-auto-play="{{ autoplay }}"
+                            data-muted="{{ block.settings.muted }}"
+                            data-cover-image="{{ cover_image }}"
+                          >
+                            {% unless autoplay %}
+                              <button
+                                id="Video-Deferred-Poster-Modal-{{ block.settings.video_link.id }}"
+                                class="deferred-media__poster"
+                                type="button"
+                                aria-label="Play"
+                              >
+                                <span class="deferred-media__poster-button motion-reduce m-video__play m-video__play--style-{{ block.settings.play_style }} m-video__play--size-{{ block.settings.play_size }} m:text-{{ block.settings.text_color }}">
+                                  <svg viewBox="0 0 18 18" fill="currentColor">
+                                    <path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z" fill="currentColor"></path>
+                                  </svg>
+                                </span>
+                                {%- unless block.settings.video_title == blank -%}
+                                  <h2 class="m-video__title m:text-xl {% if block.settings.text_size == 'medium' %}sm:m:text-3xl{% else %}sm:m:text-5xl{% endif %} m:text-{{ block.settings.text_color }}">
+                                    {{ block.settings.video_title }}
+                                  </h2>
+                                {%- endunless -%}
+                                {%- if block.settings.image != blank -%}
+                                  <div
+                                    class="m-video__cover m-bg-lazy"
+                                    style="background-image: url({{ block.settings.image | image_url: width: 1920 }})"
+                                  ></div>
+                                {%- else -%}
+                                  <div class="m-video__cover m-video__cover-placeholder">
+                                    {{ 'lifestyle-2' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full' }}
+                                  </div>
+                                {%- endif -%}
+                              </button>
+                            {% endunless %}
+                            <template>
+                              {%- if block.settings.video_type == 'external' -%}
+                                {%- if block.settings.video_link.type == 'youtube' -%}
+                                  {% liquid
+                                    assign youtubeURL = 'https://www.youtube.com/embed/' | append: block.settings.video_link.id | append: '?enablejsapi=1'
+
+                                    if block.settings.muted
+                                      assign youtubeURL = youtubeURL | append: '&mute=1'
+
+                                      if block.settings.autoplay
+                                        assign youtubeURL = youtubeURL | append: '&autoplay=1'
+                                      endif
+                                    endif
+
+                                    if block.settings.loop
+                                      assign youtubeURL = youtubeURL | append: '&loop=1&playlist=' | append: block.settings.video_link.id
+                                    endif
+                                  %}
+                                  <iframe
+                                    src="{{ youtubeURL }}"
+                                    class="js-youtube"
+                                    allow="autoplay; encrypted-media"
+                                    allowfullscreen
+                                    title="{{ block.settings.video_title | escape }}"
+                                  ></iframe>
+                                {%- else -%}
+                                  {% liquid
+                                    assign vimeoURL = 'https://player.vimeo.com/video/' | append: block.settings.video_link.id
+                                    assign hasParam = false
+                                    assign vimeoParam = ''
+
+                                    if block.settings.muted
+                                      assign hasParam = true
+                                      assign vimeoParam = vimeoParam | append: '&muted=1'
+
+                                      if block.settings.autoplay
+                                        assign vimeoParam = vimeoParam | append: '&autoplay=1'
+                                      endif
+                                    endif
+
+                                    if block.settings.loop
+                                      assign hasParam = true
+                                      assign vimeoParam = vimeoParam | append: '&loop=1'
+                                    endif
+
+                                    if hasParam
+                                      assign vimeoURL = vimeoURL | append: '?' | append: vimeoParam
+                                    endif
+                                  %}
+                                  <iframe
+                                    src="{{ vimeoURL }}"
+                                    class="js-vimeo"
+                                    allow="autoplay; encrypted-media"
+                                    allowfullscreen
+                                    title="{{ block.settings.video_title | escape }}"
+                                  ></iframe>
+                                {%- endif -%}
+                              {%- else -%}
+                                {% liquid
+                                  assign video_url = 'https://cdn.shopify.com/videos/c/o/v/fbb140fd46e3429eba459e1549dbbe38.mp4'
+                                  for source in block.settings.shopify_video.sources
+                                    assign format = source.format
+                                    if format == 'mp4'
+                                      assign video_url = source.url
+                                      break
+                                    endif
+                                  endfor
+                                %}
+                                <video
+                                  src="{{ video_url }}"
+                                  playsinline
+                                  {% if block.settings.show_controls %}
+                                    controls
+                                  {% endif %}
+                                  {% if block.settings.loop %}
+                                    loop
+                                  {% endif %}
+                                  {% if block.settings.muted %}
+                                    muted
+                                    {% if block.settings.autoplay %} autoplay{% endif %}
+                                  {% endif %}
+                                ></video>
+                              {%- endif -%}
+                            </template>
+                          </video-component>
+                        </div>
+                      </div>
+                    </div>
+                  {% when 'product' %}
+                    {{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+                    {%- assign product = block.settings.product -%}
+                    {% if product.title.size > 0 %}
+                      {% liquid
+                        case settings.pcard_layout
+                          when '1'
+                            render 'product-card-1', product: product, index: forloop.index, animated: animated, animation_effect: animation_effect
+                          when '2'
+                            render 'product-card-2', product: product, index: forloop.index, animated: animated, animation_effect: animation_effect
+                          when '3'
+                            render 'product-card-3', product: product, index: forloop.index, animated: animated, animation_effect: animation_effect
+                          when '4'
+                            render 'product-card-4', product: product, index: forloop.index, animated: animated, animation_effect: animation_effect
+                          when '5'
+                            render 'product-card-5', product: product, index: forloop.index, animated: animated, animation_effect: animation_effect
+                        endcase
+                      %}
+                    {% else %}
+                      {% comment %}
+                        No product yet. Show onboarding one.
+                      {% endcomment %}
+                      <div
+                        class="m-product-card m-product-card--placeholder{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                        {% if animated %}
+                          data-cascade
+                          style="--animation-order: {{ forloop.index }};"
+                        {% endif %}
+                      >
+                        <div class="m-product-card__media" style="--aspect-ratio: 1/1;">
+                          {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+                          {{
+                            'product-'
+                            | append: current
+                            | placeholder_svg_tag: 'm-placeholder-svg m:object-cover m:w-full m:h-full'
+                          }}
+                        </div>
+                        <div class="m-product-card__name{% if settings.uppercase_prd_name %} m:uppercase{% endif %}">
+                          {{ 'homepage.onboarding.product_title' | t }}
+                        </div>
+                        <div class="m-product-card__price">
+                          <p class="m-price">$19.99</p>
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% when 'product_form' %}
+                    {% liquid
+                      assign product = block.settings.product
+                      assign current_variant = product.selected_or_first_available_variant
+                      assign section_onboarding = false
+                      if product == empty
+                        assign section_onboarding = true
+                      endif
+                    %}
+
+                    <div
+                      class="m-main-product--wrapper m-main-product--info"
+                      data-section_onboarding="{{ section_onboarding }}"
+                    >
+                      <div
+                        class="m-product-info--wrapper{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                        {% if animated %}
+                          data-cascade
+                          style="--animation-order: {{ forloop.index }};"
+                        {% endif %}
+                      >
+                        {% if block.settings.show_vendor %}
+                          <div class="main-product__block main-product__block-vendor">
+                            <span>{{ product.vendor }}</span>
+                          </div>
+                        {% endif %}
+                        <div class="main-product__block main-product__block-title">
+                          <a class="m-product-title m:text-2xl md:m:text-3xl m:font-medium" href="{{ product.url }}">
+                            {% unless section_onboarding %}
+                              {{ product.title }}
+                            {% else %}
+                              {{ 'homepage.onboarding.product_title' | t }}
+                            {% endunless %}
+                          </a>
+                        </div>
+                        {% if block.settings.show_price %}
+                          <div class="main-product__block main-product__block-price">
+                            {% unless section_onboarding %}
+                              {% render 'product-prices', product: product, price_class: 'm:text-xl' %}
+                            {% else %}
+                              <span class="m:text-xl m:color-price-regular">{{ 1999 | money }}</span>
+                            {% endunless %}
+                          </div>
+                        {% endif %}
+                        {% if block.settings.show_product_review %}
+                          <div class="main-product__block main-product__block-rating">
+                            {% render 'product-reviews-app__badge', product: product %}
+                          </div>
+                        {% endif %}
+                        {% unless section_onboarding %}
+                          <div class="main-product__block main-product__block-description rte">
+                            {{ product.description }}
+                          </div>
+                        {% else %}
+                          <div class="main-product__block main-product__block-description rte">
+                            {{ 'homepage.onboarding.product_description' | t }}
+                          </div>
+                        {% endunless %}
+                        {% unless section_onboarding %}
+                          {%- liquid
+                            assign product_form_id = 'product-form-' | append: section.id
+                            assign product_form_class = 'product-form-' | append: section.id
+                          -%}
+                          {% render 'product-form',
+                            section_id: section.id,
+                            product: product,
+                            section: block,
+                            product_form_id: product_form_id,
+                            product_form_class: product_form_class,
+                            current_variant: current_variant,
+                            enable_dynamic_checkout: block.settings.enable_payment_button,
+                            show_quantity_selector: block.settings.show_quantity_selector,
+                            enableCardButton: block.settings.show_add_to_cart
+                          %}
+                        {% else %}
+                          <div class="main-product__block main-product__block-buy_buttons">
+                            <button type="submit" class="m-add-to-cart m-button m-button--primary m:w-full">
+                              <span>{{ 'products.product.add_to_cart' | t }}</span>
+                            </button>
+                          </div>
+                        {% endunless %}
+                      </div>
+                      {% if product.options_with_values.size > 0 %}
+                        <script src="{{ 'variant-picker.js' | asset_url }}" defer="defer"></script>
+                      {% endif %}
+                    </div>
+                  {% when 'image_card' %}
+                    {{ 'component-image-card.css' | asset_url | stylesheet_tag }}
+                    {% render 'image-card',
+                      block: block,
+                      grid_columns: 'm:w-full',
+                      stack_on_mobile: scrollMobile,
+                      image_card_class: 'm-hover-box m-hover-box--scale-up',
+                      index: 1,
+                      section_index: section.index,
+                      enable_preload_image: block.settings.enable_preload_image,
+                      animated: animated,
+                      animation_effect: animation_effect,
+                      color_scheme: block.settings.color_scheme,
+                      parent_color_scheme: section.settings.content_color_scheme
+                    %}
+                  {% when 'video_card' %}
+                    {{ 'component-image-card.css' | asset_url | stylesheet_tag }}
+                    {% render 'video-card',
+                      block: block,
+                      grid_columns: 'm:w-full',
+                      stack_on_mobile: scrollMobile,
+                      index: forloop.index,
+                      animated: animated,
+                      animation_effect: animation_effect,
+                      color_scheme: block.settings.color_scheme,
+                      parent_color_scheme: section.settings.content_color_scheme
+                    %}
+                  {% when 'product_bundles' %}
+                    {{ 'component-product-bundles.css' | asset_url | stylesheet_tag }}
+                    <script src="{{ 'product-bundles.js' | asset_url }}" defer="defer"></script>
+                    <m-product-bundle
+                      class="product-bundles{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      data-section-id="{{ section.id }}"
+                      data-block-id="{{ block.id }}"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      <div class="m-richtext m-richtext--{{ block.settings.text_size | replace: 'h3', 'small' }}">
+                        {% if block.settings.subheading != blank %}
+                          <span class="m-richtext__subtitle m:block {{ block.settings.text_size | replace: 'h2', 'h5' | replace: 'h3', 'h6' }}">
+                            {{- block.settings.subheading -}}
+                          </span>
+                        {% endif %}
+                        {% if block.settings.title != blank %}
+                          <h3 class="m-richtext__title {{ block.settings.text_size }}">{{ block.settings.title }}</h3>
+                        {% endif %}
+                      </div>
+                      <div class="product-bundles__list">
+                        {% liquid
+                          assign products = 'product_1,product_2,product_3,product_4,product_5' | split: ','
+                          assign total_price = 0
+                          assign has_product = false
+                          assign image_ratio = block.settings.image_ratio
+                          assign show_reviews = block.settings.show_reviews
+                        %}
+                        {% for product_id in products %}
+                          {% liquid
+                            assign product = block.settings[product_id]
+                            assign selected_variant = product.selected_or_first_available_variant
+                          %}
+                          {%- capture item_id -%}{{ block.id }}-{{ forloop.index }}{%- endcapture -%}
+                          {% if product != empty %}
+                            {% liquid
+                              assign has_product = true
+                              if selected_variant.available
+                                assign total_price = total_price | plus: selected_variant.price
+                              endif
+                            %}
+                            {% render 'product-card-bundle',
+                              product: product,
+                              image_ratio: image_ratio,
+                              show_reviews: show_reviews,
+                              block_id: item_id,
+                              index: forloop.index
+                            %}
+                          {% endif %}
+                        {% endfor %}
+                        {% unless has_product %}
+                          {% for i in (1..3) %}
+                            <div
+                              class="product-bundles__item m:display-flex m:items-center{% if block.settings.show_reviews %} product-bundles__item--has-reviews{% endif %}"
+                              data-index="{{ forloop.index0 }}"
+                            >
+                              <span class="product-bundles__item-index m:inline-flex m:justify-center m:items-center">
+                                {{- forloop.index -}}
+                              </span>
+                              <div class="product-bundles__item-image m:blocks-radius-md">
+                                {{ 'product-' | append: forloop.index | placeholder_svg_tag: 'm-placeholder-svg' }}
+                              </div>
+                              <div class="product-bundles__item-info m:display-flex m:flex-wrap md:m:flex-nowrap">
+                                <div class="product-bundles__item-details m:w-full">
+                                  <h3 class="h6">{{ 'homepage.onboarding.product_title' | t }}</h3>
+                                </div>
+                                <div class="product-bundles__item-prices md:m:text-right m:color-price-regular">
+                                  <p>
+                                    <span data-regular-price>{{ 1999 | money }}</span>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        {% endunless %}
+                      </div>
+                      <div class="product-bundles__cta" id="Total-{{ block.id }}">
+                        {%- liquid
+                          assign bundle_price = '$59.97'
+                          if has_product
+                            assign bundle_price = total_price | money
+                          endif
+                        -%}
+                        <button
+                          class="m-button m-button--primary m-spinner-button m:w-full m:display-flex m:justify-center m:items-center"
+                          data-add-bundle
+                          {% unless has_product %}
+                            disabled
+                          {% endunless %}
+                        >
+                          <span>{{ 'products.product.add_to_cart' | t }}</span>
+                          <span class="m-button-word-separator">|</span>
+                          <span data-total-price="{{ total_price }}">{{ bundle_price }}</span>
+                          <span class="m-spinner-icon">
+                            <svg
+                              class="animate-spin m-svg-icon--medium"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <circle  cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          </span>
+                        </button>
+                      </div>
+                      <div class="product-bundles__error"></div>
+                    </m-product-bundle>
+                  {% when 'lookbook' %}
+                    {{ 'lookbook.css' | asset_url | stylesheet_tag }}
+                    {% render 'lookbook-card',
+                      block: block,
+                      image_aspect_ratio: 'original',
+                      index: 1,
+                      enable_preload_image: block.settings.enable_preload_image,
+                      animated: animated,
+                      animation_effect: animation_effect
+                    %}
+                  {% when 'countdown' %}
+                    <div
+                      class="m-countdown m-countdown--custom-content{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %} m:justify-{{ block.settings.align }}"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      <div class="m-countdown__inner m:text-{{ block.settings.text_alignment }} m-richtext m-richtext--large">
+                        {% if block.settings.subheading != blank %}
+                          <p class="m-richtext__subtitle m-countdown__subtitle m:text-inherit h6">
+                            {{ block.settings.subheading }}
+                          </p>
+                        {% endif %}
+                        {% if block.settings.heading != blank %}
+                          <h3 class="m-richtext__title m-countdown__heading {{ block.settings.heading_size }}">
+                            {{ block.settings.heading }}
+                          </h3>
+                        {% endif %}
+                        {% if block.settings.text != blank %}
+                          <div class="m-richtext__description m-countdown__description rte m:text-color-subtext h6">
+                            {{ block.settings.text }}
+                          </div>
+                        {% endif %}
+                        {% render 'countdown-timer', time: block.settings.time, extra_classes: 'm:text-color-body' %}
+                        {% if block.settings.button_label != blank %}
+                          <div class="m-richtext__button m-countdown__button">
+                            <a
+                              class="m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ block.settings.button_size }} m:block"
+                              href="{{ block.settings.button_link }}"
+                            >
+                              {{- block.settings.button_label -}}
+                            </a>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% when 'html' %}
+                    {% if block.settings.code != blank %}
+                      {{ block.settings.code }}
+                    {% endif %}
+                  {% when 'liquid' %}
+                    {% if block.settings.custom_liquid != blank %}
+                      {{ block.settings.custom_liquid }}
+                    {% endif %}
+                  {% when 'newsletter' %}
+                    {%- liquid
+                      assign form_style = block.settings.form_design | replace: '1', 'bordered' | replace: '2', 'minimal'
+                    -%}
+                    <div
+                      class="newsletter-form m:text-{{ block.settings.align_text }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      {% if block.settings.heading != blank %}
+                        <h3 class="newsletter-form__title {{ block.settings.text_size }}">
+                          {{ block.settings.heading }}
+                        </h3>
+                      {% endif %}
+                      {% if block.settings.description != blank %}
+                        <div class="newsletter-form__description rte m:text-color-subtext">
+                          {{ block.settings.description }}
+                        </div>
+                      {% endif %}
+                      <div class="newsletter-form__form">
+                        {% render 'newsletter-form',
+                          style: form_style,
+                          custom_id: block.id,
+                          button_label: block.settings.submit_button,
+                          placeholder: block.settings.placeholder,
+                          button_style: 'm-buttom--primary'
+                        %}
+                      </div>
+                    </div>
+                  {% when 'social' %}
+                    <div
+                      class="social-profiles m:text-center{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      {% if block.settings.heading != blank %}
+                        <h3 class="social-profiles__title">{{ block.settings.heading }}</h3>
+                      {% endif %}
+                      {% if block.settings.description != blank %}
+                        <div class="social-profiles__description rte m:text-color-subtext">
+                          {{ block.settings.description }}
+                        </div>
+                      {% endif %}
+                      <div class="social-profiles__list m:text-center m:display-flex m:justify-center">
+                        {% render 'social-media-links', extra_classes: 'm:text-color-body' %}
+                      </div>
+                    </div>
+                  {%- when 'article' -%}
+                    {{ 'component-article-card.css' | asset_url | stylesheet_tag }}
+                    {%- assign article = articles[block.settings.article] -%}
+                    {%- if article != empty -%}
+                      {% render 'article-card',
+                        article: article,
+                        view: 'grid',
+                        items_per_row: 1,
+                        index: forloop.index,
+                        animated: animated,
+                        animation_effect: animation_effect
+                      %}
+                    {%- else -%}
+                      {% render 'article-card-placeholder',
+                        index: forloop.index,
+                        animated: animated,
+                        animation_effect: animation_effect
+                      %}
+                    {%- endif -%}
+                  {% when 'image_with_text' %}
+                    <div
+                      class="image-with-text{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      <div class="m:flex m:flex-wrap {% if block.settings.layout == 'right' %} m:flex-row-reverse {% endif %}">
+                        <div class="m:column img__box-{{ block.id }} m:w-full lg:m:w-{{ block.settings.image_column_size }}/12">
+                          {%- liquid
+                            assign tag = 'div'
+                            if block.settings.link
+                              assign tag = 'a'
+                            endif
+                          -%}
+                          <{{ tag }}
+                            {% if block.settings.link %}
+                              href="{{ block.settings.link }}"
+                            {% endif %}
+                            class="image__box{% if block.settings.hover_effect %} m-hover-box m-hover-box--scale-up{% endif %} m:blocks-radius"
+                          >
+                            {% if block.settings.image != blank %}
+                              {% render 'responsive-image',
+                                image: block.settings.image,
+                                section_index: section.index,
+                                index: 1,
+                                enable_preload_image: block.settings.enable_preload_image,
+                                image_class: 'm:w-full m:h-full'
+                              %}
+                            {% else %}
+                              {{ 'image' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full m:object-cover' }}
+                            {% endif %}
+                          </{{ tag }}>
+                        </div>
+                        <div class="m:column content__box-{{ block.id }} m:display-flex m:items-center m:w-full lg:m:w-{{ 12 | minus: block.settings.image_column_size }}/12">
+                          <div class="m-richtext m-richtext--{{ block.settings.text_size }} m:w-full m:text-{{ block.settings.content_alignment }}">
+                            {% if block.settings.sub_title != blank %}
+                              <p class="m-richtext__subtitle {{ subtext_size }}">{{ block.settings.sub_title }}</p>
+                            {% endif %}
+                            {% if block.settings.title != blank %}
+                              <h3 class="m-richtext__title rte {{ heading_size }}">{{ block.settings.title }}</h3>
+                            {% endif %}
+                            {% if block.settings.text != blank %}
+                              <div class="m-richtext__description m:text-color-subtext rte {{ subtext_size }}">
+                                {{ block.settings.text }}
+                              </div>
+                            {% endif %}
+                            {% if block.settings.button_label != blank %}
+                              <div class="m-richtext__button content__button">
+                                <a
+                                  href="{{ block.settings.button_link | default: "#" }}"
+                                  class="m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ block.settings.button_size }}"
+                                >
+                                  {{- block.settings.button_label -}}
+                                </a>
+                              </div>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% when 'text_card_with_image' %}
+                    <div
+                      class="text-card-with-image m:display-flex m:flex-col{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                      {% if animated %}
+                        data-cascade
+                        style="--animation-order: {{ forloop.index }};"
+                      {% endif %}
+                    >
+                      <div class="text-card-with-image__media m-hover-box m-hover-box--scale-up m:relative m:blocks-radius">
+                        {% if block.settings.link != blank -%}
+                          <a
+                            href="{{ block.settings.link }}"
+                            class="m-hidden-link"
+                            aria-label="{{ block.settings.title | strip_html | default: 'Text card with image' }}"
+                          ></a>
+                        {%- endif %}
+                        {% if block.settings.image != blank %}
+                          {% render 'responsive-image',
+                            image: block.settings.image,
+                            section_index: section.index,
+                            index: 1,
+                            enable_preload_image: block.settings.enable_preload_image,
+                            wrapper_class: 'm:w-full m:h-full'
+                          %}
+                        {% else %}
+                          {{ 'image' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full m:object-cover' }}
+                        {% endif %}
+                      </div>
+                      <div class="text-card-with-image__content m-richtext m-richtext--small m:text-{{ block.settings.text_alignment }}">
+                        {% if block.settings.title != blank %}
+                          <h3 class="m-richtext__title rte {{ heading_size }}">{{ block.settings.title }}</h3>
+                        {% endif %}
+                        {% if block.settings.text != blank %}
+                          <div class="m-richtext__description m:text-color-subtext rte">
+                            {{ block.settings.text }}
+                          </div>
+                        {% endif %}
+                        {% if block.settings.button_label != blank %}
+                          <div class="m-richtext__button">
+                            <a
+                              href="{{ block.settings.link | default: "#" }}"
+                              class="m-button {{ block.settings.button_style }} {{ block.settings.button_size }}"
+                            >
+                              {{- block.settings.button_label -}}
+                            </a>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% when 'handpicked_products' %}
+                    {{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+                    <script src="{{ 'handpicked-products.js' | asset_url }}" defer="defer"></script>
+                    {% liquid
+                      assign title = block.settings.title
+                      assign sub_title = block.settings.sub_title
+                      assign text = block.settings.text
+                      assign button_label = block.settings.button_label
+                      assign content_empty = false
+                      if title == blank and sub_title == blank and text == blank and button_label == blank
+                        assign content_empty = true
+                      endif
+
+                      assign product_list = block.settings.product_list
+                      assign card_style = block.settings.pcard_layout
+                      assign image_ratio = block.settings.pcard_image_ratio
+                      assign show_vendor = block.settings.show_vendor
+                      assign hide_title = block.settings.hide_title
+                      assign use_scroll_mobile = block.settings.use_scroll_mobile
+                      assign enable_slider = block.settings.enable_slider
+                      assign product_to_show = block.settings.product_to_show | default: 8
+
+                      if card_style == null or card_style == blank
+                        assign card_style = settings.pcard_layout
+                      endif
+                    %}
+                    <m-handpicked-products
+                      class="handpicked-products m-slider--pagination-fraction"
+                      id="custom-content-handpicked-products-{{ block.id }}"
+                      data-id="{{ block.id }}"
+                      data-enable-slider="{{ enable_slider }}"
+                      {% if enable_slider %}
+                        data-show-pagination="{{ block.settings.show_pagination }}"
+                        data-show-navigation="{{ block.settings.show_navigation }}"
+                        data-pagination-type="fraction"
+                      {% endif %}
+                      data-items="{{ block.settings.items_per_row }}"
+                      data-use-scroll-mobile="{{ use_scroll_mobile }}"
+                      style="
+                        --column-gap: {{ block.settings.item_gap }}px;
+                        --column-gap-mobile: {{ block.settings.item_gap_mobile }}px;
+                        --row-gap: {{ block.settings.item_gap | plus: 10 }}px;
+                        --items: {{ block.settings.items_per_row }};
+                      "
+                    >
+                      {% unless content_empty %}
+                        <div
+                          class="handpicked-products__header m-richtext m-richtext--{{ block.settings.text_size }} m:text-{{ block.settings.content_alignment }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                          {% if animated %}
+                            data-cascade
+                            style="--animation-order: {{ forloop.index }};"
+                          {% endif %}
+                        >
+                          {% if block.settings.subtitle != blank %}
+                            <p class="m-richtext__subtitle {{ subtext_size }}">{{ block.settings.subtitle }}</p>
+                          {% endif %}
+                          {% if block.settings.title != blank %}
+                            <h3 class="m-richtext__title rte {{ heading_size }}">{{ block.settings.title }}</h3>
+                          {% endif %}
+                          {% if block.settings.text != blank %}
+                            <div class="m-richtext__description rte m:text-color-subtext {{ subtext_size }}">
+                              {{ block.settings.text }}
+                            </div>
+                          {% endif %}
+                          {% if block.settings.button_label != blank %}
+                            <a
+                              href="{{ block.settings.button_link | default: "#" }}"
+                              class="m-richtext__button m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ block.settings.button_size }}"
+                            >
+                              {{- block.settings.button_label -}}
+                            </a>
+                          {% endif %}
+                        </div>
+                      {% endunless %}
+
+                      <div class="handpicked-products__wrapper m-mixed-layout{% if use_scroll_mobile %} m-mixed-layout--mobile-scroll{% endif %}">
+                        <div
+                          class="{% if enable_slider %}swiper-container{% endif %}"
+                          data-products-container
+                        >
+                          <div class="{% if enable_slider %}swiper-wrapper{% endif %} m:grid m:grid-2-cols md:grid-{{ block.settings.items_per_row | divided_by: 2.0 | ceil }}-cols xl:m:grid-{{ block.settings.items_per_row }}-cols m-mixed-layout__inner">
+                            {% if product_list != blank %}
+                              {% for product in product_list limit: product_to_show %}
+                                <div class="swiper-slide m:column">
+                                  {% liquid
+                                    case card_style
+                                      when '1'
+                                        render 'product-card-1', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                                      when '2'
+                                        render 'product-card-2', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                                      when '3'
+                                        render 'product-card-3', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                                      when '4'
+                                        render 'product-card-4', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                                      when '5'
+                                        render 'product-card-5', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                                    endcase
+                                  %}
+                                </div>
+                              {% endfor %}
+                            {% else %}
+                              {% for i in (1..product_to_show) %}
+                                <div class="swiper-slide m:column m:text-{{ settings.pcard_alignment }}">
+                                  <div
+                                    class="m-product-card m-product-card--placeholder{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                                    {% if animated %}
+                                      data-cascade
+                                      style="--animation-order: {{ forloop.index }};"
+                                    {% endif %}
+                                  >
+                                    <div class="m-product-card__media" style="--aspect-ratio: 1/1;">
+                                      {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+                                      {{
+                                        'product-'
+                                        | append: current
+                                        | placeholder_svg_tag: 'm-placeholder-svg m:object-cover m:w-full m:h-full'
+                                      }}
+                                    </div>
+                                    <div class="m-product-card__name{% if settings.uppercase_prd_name %} m:uppercase{% endif %}">
+                                      {{ 'homepage.onboarding.product_title' | t }}
+                                    </div>
+                                    <div class="m-product-card__price">
+                                      <p class="m-price">$19.99</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              {% endfor %}
+                            {% endif %}
+                          </div>
+                        </div>
+                        {% if enable_slider %}
+                          {% if block.settings.show_pagination or block.settings.show_navigation %}
+                            {% render 'slider-controls',
+                              position: 'bottom-center',
+                              absolute: false,
+                              container: section.settings.container,
+                              show_pagination: block.settings.show_pagination,
+                              show_nav: block.settings.show_navigation,
+                              pagination_type: 'fraction'
+                            %}
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </m-handpicked-products>
+
+                  {% when 'image_comparison' %}
+                    {{ 'image-comparison.css' | asset_url | stylesheet_tag }}
+                    <script src="{{ 'image-comparison.js' | asset_url }}" defer="defer"></script>
+                    {% liquid
+                      assign title = block.settings.title
+                      assign sub_title = block.settings.sub_title
+                      assign text = block.settings.text
+                      assign content_empty = false
+                      if title == blank and sub_title == blank and text == blank
+                        assign content_empty = true
+                      endif
+
+                      assign layout = block.settings.layout
+                      assign image_height = block.settings.image_height
+
+                      if image_height == 'adapt'
+                        assign aspect_ratio = block.settings.before_image.aspect_ratio | default: 2.333
+                        assign aspect_ratio_mobile = block.settings.before_image_mobile.aspect_ratio | default: aspect_ratio
+                      endif
+
+                      assign text_color = block.settings.text_color
+                      assign heading_color = ''
+                      assign desc_color = 'm:text-color-subtext'
+                      if text_color != 'inherit'
+                        assign heading_color = heading_color | append: 'm:text-' | append: text_color
+                        assign desc_color = 'm:text-' | append: text_color
+                      endif
+                      assign product = block.settings.product
+                    %}
+                    <div class="image-comparison">
+                      {% unless content_empty %}
+                        <div
+                          class="image-comparison__header m-richtext m-richtext--{{ block.settings.text_size }} m:text-{{ block.settings.content_alignment }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                          {% if animated %}
+                            data-cascade
+                            style="--animation-order: {{ forloop.index }};"
+                          {% endif %}
+                        >
+                          {% if block.settings.subtitle != blank %}
+                            <p class="m-richtext__subtitle m:text-{{ text_color }} {{ subtext_size }}">
+                              {{ block.settings.subtitle }}
+                            </p>
+                          {% endif %}
+                          {% if block.settings.title != blank %}
+                            <h3 class="m-richtext__title rte {{ heading_size }} {{ heading_color }}">
+                              {{ block.settings.title }}
+                            </h3>
+                          {% endif %}
+                          {% if block.settings.text != blank %}
+                            <div class="m-richtext__description rte {{ desc_color }} {{ subtext_size }}">
+                              {{ block.settings.text }}
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endunless %}
+
+                      <m-image-comparison
+                        class="m-image-comparison{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %} m:blocks-radius m:block"
+                        data-layout="{{ layout }}"
+                        {% if animated %}
+                          data-animation
+                        {% endif %}
+                      >
+                        {% liquid
+                          assign image = block.settings.before_image
+                          assign image_mobile = block.settings.before_image_mobile
+                          assign heading = block.settings.before_heading
+                          assign image_class = ''
+                          if image_mobile != blank
+                            assign image_class = image_class | append: ' has-mobile-image'
+                          endif
+                          assign loading = 'lazy'
+                          assign fetchpriority = 'low'
+                          if section.index < 2
+                            assign loading = 'eager'
+                            assign fetchpriority = 'high'
+                          endif
+                        %}
+                        {% if animated %}<span class="m-image-comparison__slider-animation"></span>{% endif %}
+                        <div class="m-image-comparison__before m-image-comparison--media">
+                          {% if heading != blank %}
+                            <p class="m-image-comparison__heading h6 m:blocks-radius-md">{{ heading }}</p>
+                          {% endif %}
+                          <div
+                            class="m-image-comparison__wrapper m-image-comparison--{{ image_height }}{{ image_class }}"
+                            {% if image_height == 'adapt' %}
+                              style="--aspect-ratio: {{ aspect_ratio }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }}"
+                            {% endif %}
+                          >
+                            {% liquid
+                              assign image_alt = image.alt | default: 'image comparison before'
+                            %}
+                            {% if image != blank %}
+                              {% assign image_height = image.width | divided_by: image.aspect_ratio %}
+                              {{
+                                image
+                                | image_url: width: 1500
+                                | image_tag:
+                                  loading: loading,
+                                  fetchpriority: fetchpriority,
+                                  class: 'm-image-comparison__image-desktop',
+                                  width: image.width,
+                                  height: image_height,
+                                  sizes: '100vw',
+                                  widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+                                  alt: image_alt
+                              }}
+                            {% else %}
+                              {{
+                                'lifestyle-1'
+                                | placeholder_svg_tag: 'm-placeholder-svg m-image-comparison__image-desktop'
+                              }}
+                            {% endif %}
+                            {% if image_mobile != blank %}
+                              {% assign image_mobile_height = image_mobile.width
+                                | divided_by: image_mobile.aspect_ratio
+                              %}
+                              {{
+                                image_mobile
+                                | image_url: width: 750
+                                | image_tag:
+                                  loading: loading,
+                                  fetchpriority: fetchpriority,
+                                  class: 'm-image-comparison__image-mobile',
+                                  width: image_mobile.width,
+                                  height: image_mobile_height,
+                                  sizes: '100vw',
+                                  widths: '375, 550, 750',
+                                  alt: image_mobile.alt
+                                | escape
+                              }}
+                            {% endif %}
+                          </div>
+                        </div>
+
+                        {% liquid
+                          assign image = block.settings.after_image
+                          assign image_mobile = block.settings.after_image_mobile
+                          assign heading = block.settings.after_heading
+                          assign image_class = ''
+                          if image_mobile != blank
+                            assign image_class = image_class | append: ' has-mobile-image'
+                          endif
+                        %}
+                        <div class="m-image-comparison__after m-image-comparison--media">
+                          {% if heading != blank %}
+                            <p class="m-image-comparison__heading h6 m:blocks-radius-md">{{ heading }}</p>
+                          {% endif %}
+                          <div
+                            class="m-image-comparison__wrapper m-image-comparison--{{ image_height }}{{ image_class }}"
+                            {% if image_height == 'adapt' %}
+                              style="--aspect-ratio: {{ aspect_ratio }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }}"
+                            {% endif %}
+                          >
+                            {% liquid
+                              assign image_alt_after = image.alt | default: 'image comparison after'
+                            %}
+                            {% if image != blank %}
+                              {% assign image_height = image.width | divided_by: image.aspect_ratio %}
+                              {{
+                                image
+                                | image_url: width: 1500
+                                | image_tag:
+                                  loading: loading,
+                                  fetchpriority: fetchpriority,
+                                  class: 'm-image-comparison__image-desktop',
+                                  width: image.width,
+                                  height: image_height,
+                                  sizes: '100vw',
+                                  widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+                                  alt: image_alt_after
+                              }}
+                            {% else %}
+                              {{
+                                'lifestyle-2'
+                                | placeholder_svg_tag: 'm-placeholder-svg m-image-comparison__image-desktop'
+                              }}
+                            {% endif %}
+                            {% if image_mobile != blank %}
+                              {% assign image_mobile_height = image_mobile.width
+                                | divided_by: image_mobile.aspect_ratio
+                              %}
+                              {{
+                                image_mobile
+                                | image_url: width: 750
+                                | image_tag:
+                                  loading: loading,
+                                  fetchpriority: fetchpriority,
+                                  class: 'm-image-comparison__image-mobile',
+                                  width: image_mobile.width,
+                                  height: image_mobile_height,
+                                  sizes: '100vw',
+                                  widths: '375, 550, 750',
+                                  alt: image_mobile.alt
+                                | escape
+                              }}
+                            {% endif %}
+                          </div>
+                        </div>
+
+                        <button class="m-image-comparison__button" aria-label="Drag">
+                          <span>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              aria-hidden="true"
+                              focusable="false"
+                              fill="none"
+                              viewBox="0 0 11 16"
+                            >
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0.5C0 0.223858 0.223858 0 0.5 0C0.776142 0 1 0.223858 1 0.5V15.5C1 15.7761 0.776142 16 0.5 16C0.223858 16 0 15.7761 0 15.5V0.5ZM5 0.5C5 0.223858 5.22386 0 5.5 0C5.77614 0 6 0.223858 6 0.5V15.5C6 15.7761 5.77614 16 5.5 16C5.22386 16 5 15.7761 5 15.5V0.5ZM11 0.5C11 0.223858 10.7761 0 10.5 0C10.2239 0 10 0.223858 10 0.5V15.5C10 15.7761 10.2239 16 10.5 16C10.7761 16 11 15.7761 11 15.5V0.5Z" fill="currentColor"></path>
+                            </svg>
+                          </span>
+                        </button>
+                      </m-image-comparison>
+                      {% if product != blank %}
+                        <div class="m-image-comparison__product{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+                          <h4 class="h6 m-image-comparison__product-title">
+                            <a class="m-link-underline" href="{{ product.url }}">{{ product.title }}</a>
+                          </h4>
+                          <div class="m-image-comparison__product-price">
+                            {% render 'product-prices', product: product %}
+                          </div>
+                        </div>
+                      {% endif %}
+                    </div>
+                {% endcase %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        {% if scrollMobile %}</div>{% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom content",
+  "class": "shopify-section-custom-content",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/TSRzH7)"
+    },
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Custom content"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color_scheme",
+      "id": "content_color_scheme",
+      "label": "Content color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Background settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image_mobile",
+      "label": "Background image mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable parallax effect",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "parallax_direction",
+      "label": "Parallax direction",
+      "default": "vertical",
+      "options": [
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "zoom",
+          "label": "Zoom"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Gap"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Column gap",
+      "default": 30,
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Column gap mobile",
+      "default": 16,
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_scroll_mobile",
+      "label": "Enable horizontal scroll",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_preload_image",
+      "label": "Enable preload image",
+      "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "Talk about your brand"
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.</p>"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "align_text",
+          "label": "Horizontal alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "options": [
+            {
+              "value": "white",
+              "label": "Light"
+            },
+            {
+              "value": "black",
+              "label": "Dark"
+            },
+            {
+              "value": "inherit",
+              "label": "Inherit"
+            }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "header",
+          "content": "Button settings"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Image link"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            },
+            {
+              "value": "zoom-fade",
+              "label": "Zoom fade"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_preload_image",
+          "label": "Enable preload image",
+          "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+        }
+      ]
+    },
+    {
+      "type": "video",
+      "name": "Video",
+      "settings": [
+        {
+          "type": "select",
+          "id": "video_type",
+          "label": "Video type",
+          "default": "shopify",
+          "options": [
+            {
+              "value": "shopify",
+              "label": "Shopify hosted"
+            },
+            {
+              "value": "external",
+              "label": "External"
+            }
+          ]
+        },
+        {
+          "type": "video",
+          "id": "shopify_video",
+          "label": "Shopify hosted"
+        },
+        {
+          "type": "video_url",
+          "id": "video_link",
+          "label": "Video link",
+          "accept": ["youtube", "vimeo"],
+          "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
+          "info": "Accepts YouTube or Vimeo links"
+        },
+        {
+          "type": "select",
+          "id": "ratio",
+          "label": "Video ratio",
+          "default": "16:9",
+          "options": [
+            {
+              "value": "16:9",
+              "label": "16:9"
+            },
+            {
+              "value": "21:9",
+              "label": "21:9"
+            },
+            {
+              "value": "4:3",
+              "label": "4:3"
+            },
+            {
+              "value": "3:4",
+              "label": "3:4"
+            },
+            {
+              "value": "1:1",
+              "label": "1:1"
+            },
+            {
+              "value": "4:5",
+              "label": "4:5"
+            },
+            {
+              "value": "9:16",
+              "label": "9:16"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Cover image"
+        },
+        {
+          "type": "textarea",
+          "id": "video_title",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "default": "medium",
+          "options": [
+            {
+              "label": "Medium",
+              "value": "medium"
+            },
+            {
+              "label": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "options": [
+            {
+              "label": "Dark",
+              "value": "black"
+            },
+            {
+              "label": "Light",
+              "value": "white"
+            },
+            {
+              "label": "Inherit",
+              "value": "inherit"
+            }
+          ],
+          "default": "white"
+        },
+        {
+          "type": "select",
+          "id": "play_style",
+          "label": "Play button style",
+          "options": [
+            {
+              "label": "Outline",
+              "value": "outline"
+            },
+            {
+              "label": "Solid",
+              "value": "solid"
+            }
+          ],
+          "default": "solid"
+        },
+        {
+          "type": "select",
+          "id": "play_size",
+          "label": "Play button size",
+          "options": [
+            {
+              "label": "Medium",
+              "value": "medium"
+            },
+            {
+              "label": "Large",
+              "value": "large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "checkbox",
+          "id": "autoplay",
+          "label": "Autoplay",
+          "default": false,
+          "info": "Only work if the muted box is checked"
+        },
+        {
+          "type": "checkbox",
+          "id": "loop",
+          "label": "Loop",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "muted",
+          "label": "Muted",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_controls",
+          "label": "Show controls",
+          "default": false,
+          "info": "Only work when use Shopify hosted video type"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "start",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "product_form",
+      "name": "Product form",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_quantity_selector",
+          "label": "Show quantity selector",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_vendor",
+          "label": "Show vendor",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_price",
+          "label": "Show price",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_add_to_cart",
+          "label": "Show cart button",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_product_review",
+          "label": "Show review",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_payment_button",
+          "label": "Show dynamic checkout button",
+          "info": "Each customer will see their preferred payment method from those available on your store, such as PayPal or Apple Pay. [Learn more](https://help.shopify.com/manual/using-themes/change-the-layout/dynamic-checkout)",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "article",
+      "name": "Article",
+      "settings": [
+        {
+          "type": "article",
+          "id": "article",
+          "label": "Article"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "image_card",
+      "name": "Image card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "Color scheme"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            {
+              "value": "top_left",
+              "label": "Top left"
+            },
+            {
+              "value": "top_center",
+              "label": "Top center"
+            },
+            {
+              "value": "top_right",
+              "label": "Top right"
+            },
+            {
+              "value": "center_left",
+              "label": "Middle left"
+            },
+            {
+              "value": "center_center",
+              "label": "Middle center"
+            },
+            {
+              "value": "center_right",
+              "label": "Middle right"
+            },
+            {
+              "value": "bottom_left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom_center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "bottom_right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "center_center"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Content alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "info": "Work only when contents above image.",
+          "options": [
+            {
+              "value": "white",
+              "label": "Light"
+            },
+            {
+              "value": "black",
+              "label": "Dark"
+            },
+            {
+              "value": "inherit",
+              "label": "Inherit"
+            }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Image link"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Image card"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Sub heading"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "header",
+          "content": "Button settings"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Button label"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "checkbox",
+          "id": "button_fixed",
+          "label": "Fixed on bottom",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_content_above",
+          "label": "Use content above image",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_preload_image",
+          "label": "Enable preload image",
+          "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+        }
+      ]
+    },
+    {
+      "type": "video_card",
+      "name": "Video card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "Color scheme"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            {
+              "value": "top_left",
+              "label": "Top left"
+            },
+            {
+              "value": "top_center",
+              "label": "Top center"
+            },
+            {
+              "value": "top_right",
+              "label": "Top right"
+            },
+            {
+              "value": "center_left",
+              "label": "Middle left"
+            },
+            {
+              "value": "center_center",
+              "label": "Middle center"
+            },
+            {
+              "value": "center_right",
+              "label": "Middle right"
+            },
+            {
+              "value": "bottom_left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom_center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "bottom_right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "center_center"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Content alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "h3",
+              "label": "Small"
+            },
+            {
+              "value": "h2",
+              "label": "Medium"
+            },
+            {
+              "value": "h1",
+              "label": "Large"
+            }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "info": "Work only when contents above image.",
+          "options": [
+            {
+              "value": "white",
+              "label": "Light"
+            },
+            {
+              "value": "black",
+              "label": "Dark"
+            },
+            {
+              "value": "inherit",
+              "label": "Inherit"
+            }
+          ],
+          "default": "inherit"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "video",
+          "id": "shopify_video",
+          "label": "Select video"
+        },
+        {
+          "type": "select",
+          "id": "video_ratio",
+          "label": "Video ratio",
+          "default": "1:1",
+          "options": [
+            {
+              "value": "16:9",
+              "label": "16:9"
+            },
+            {
+              "value": "21:9",
+              "label": "21:9"
+            },
+            {
+              "value": "4:3",
+              "label": "4:3"
+            },
+            {
+              "value": "3:4",
+              "label": "3:4"
+            },
+            {
+              "value": "1:1",
+              "label": "1:1"
+            },
+            {
+              "value": "4:5",
+              "label": "4:5"
+            },
+            {
+              "value": "9:16",
+              "label": "9:16"
+            }
+          ]
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Card link"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Video card"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Sub heading"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "header",
+          "content": "Button settings"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Button label"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "checkbox",
+          "id": "button_fixed",
+          "label": "Fixed on bottom",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_content_above",
+          "label": "Use content above image",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "lookbook",
+      "name": "Lookbook item",
+      "settings": [
+        {
+          "type": "header",
+          "content": "General"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "Color scheme",
+          "info": "Color scheme for product cards hovered"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "header",
+          "content": "Product 1"
+        },
+        {
+          "type": "range",
+          "id": "top_1",
+          "label": "Offset top",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 9
+        },
+        {
+          "type": "range",
+          "id": "left_1",
+          "label": "Offset left",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 63
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Select product"
+        },
+        {
+          "type": "header",
+          "content": "Product 2"
+        },
+        {
+          "type": "range",
+          "id": "top_2",
+          "label": "Offset top",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 26
+        },
+        {
+          "type": "range",
+          "id": "left_2",
+          "label": "Offset left",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 50
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Select product"
+        },
+        {
+          "type": "header",
+          "content": "Product 3"
+        },
+        {
+          "type": "range",
+          "id": "top_3",
+          "label": "Offset top",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 61
+        },
+        {
+          "type": "range",
+          "id": "left_3",
+          "label": "Offset left",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 48
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Select product"
+        },
+        {
+          "type": "header",
+          "content": "Product 4"
+        },
+        {
+          "type": "range",
+          "id": "top_4",
+          "label": "Offset top",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "left_4",
+          "label": "Offset left",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "product",
+          "id": "product_4",
+          "label": "Select product"
+        },
+        {
+          "type": "header",
+          "content": "Product 5"
+        },
+        {
+          "type": "range",
+          "id": "top_5",
+          "label": "Offset top",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "left_5",
+          "label": "Offset left",
+          "min": 0,
+          "max": 100,
+          "unit": "%",
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "product",
+          "id": "product_5",
+          "label": "Select product"
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_preload_image",
+          "label": "Enable preload image",
+          "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+        }
+      ]
+    },
+    {
+      "type": "product_bundles",
+      "name": "Product bundles",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "Product bundle"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "h3",
+              "label": "Medium"
+            },
+            {
+              "value": "h2",
+              "label": "Large"
+            }
+          ],
+          "default": "h2"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_reviews",
+          "label": "Show reviews badge"
+        },
+        {
+          "type": "header",
+          "content": "Product settings"
+        },
+        {
+          "type": "select",
+          "id": "image_ratio",
+          "label": "Image aspect ratio",
+          "default": "original",
+          "options": [
+            {
+              "value": "original",
+              "label": "Original aspect ratio"
+            },
+            {
+              "value": "1/1",
+              "label": "1:1"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Products"
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product 3"
+        },
+        {
+          "type": "product",
+          "id": "product_4",
+          "label": "Product 4"
+        },
+        {
+          "type": "product",
+          "id": "product_5",
+          "label": "Product 5"
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "countdown",
+      "name": "Countdown timer",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "align",
+          "label": "Horizontal alignment",
+          "default": "end",
+          "options": [
+            {
+              "value": "start",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "end",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "time",
+          "label": "End time",
+          "default": "2023-12-26 23:00:00",
+          "info": "Date format: YYYY-MM-DD HH:MM:ss"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            {
+              "value": "h3",
+              "label": "Medium"
+            },
+            {
+              "value": "h2",
+              "label": "Large"
+            }
+          ],
+          "default": "h3"
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "header",
+          "content": "Button settings"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "social",
+      "name": "Social profiles",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Go to Theme settings > Store contact to update the social links."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Follow us on",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "name": "Newsletter form",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Subscribe to our newsletter"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Heading text size",
+          "default": "h3",
+          "options": [
+            {
+              "value": "h3",
+              "label": "Medium"
+            },
+            {
+              "value": "h2",
+              "label": "Large"
+            }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Be the first to know about new collections and exclusive offers.</p>"
+        },
+        {
+          "type": "select",
+          "id": "form_design",
+          "label": "Form style",
+          "default": "1",
+          "options": [
+            {
+              "value": "1",
+              "label": "Bordered"
+            },
+            {
+              "value": "2",
+              "label": "Minimal"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "placeholder",
+          "label": "Email placeholder text",
+          "default": "Enter your email address"
+        },
+        {
+          "type": "text",
+          "id": "submit_button",
+          "label": "Button label",
+          "default": "Subscribe"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "align_text",
+          "label": "Horizontal alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "name": "Custom HTML",
+      "settings": [
+        {
+          "type": "html",
+          "id": "code",
+          "label": "HTML"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "liquid",
+      "name": "Custom liquid",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "custom_liquid",
+          "label": "Custom liquid"
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "image_with_text",
+      "name": "Image with text",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Image settings"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Image link"
+        },
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Image alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "image_column_size",
+          "label": "Image container width",
+          "default": "6",
+          "options": [
+            {
+              "value": "2",
+              "label": "16%"
+            },
+            {
+              "value": "3",
+              "label": "25%"
+            },
+            {
+              "value": "4",
+              "label": "33%"
+            },
+            {
+              "value": "5",
+              "label": "41%"
+            },
+            {
+              "value": "6",
+              "label": "50%"
+            },
+            {
+              "value": "7",
+              "label": "58%"
+            },
+            {
+              "value": "8",
+              "label": "66%"
+            },
+            {
+              "value": "9",
+              "label": "75%"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "hover_effect",
+          "label": "Hover effect",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Content settings"
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "Image with text"
+        },
+        {
+          "type": "textarea",
+          "id": "sub_title",
+          "label": "Subheading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Pair large text with an image to give focus to your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "content": "Button settings",
+          "type": "header"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Collection"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--link"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_preload_image",
+          "label": "Enable preload image",
+          "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+        }
+      ]
+    },
+    {
+      "type": "text_card_with_image",
+      "name": "Text card with image",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "content": "Card settings",
+          "type": "header"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Card link"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Image settings"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "header",
+          "content": "Content settings"
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "Talk about your brand"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "small"
+        },
+        {
+          "content": "Button settings",
+          "type": "header"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Collection"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--link"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_preload_image",
+          "label": "Enable preload image",
+          "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+        }
+      ]
+    },
+    {
+      "type": "handpicked_products",
+      "name": "Handpicked products",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Vertical alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "start",
+              "label": "Top"
+            },
+            {
+              "value": "center",
+              "label": "Middle"
+            },
+            {
+              "value": "end",
+              "label": "Bottom"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Header"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Sub heading"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Handpicked products"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Products"
+        },
+        {
+          "id": "product_list",
+          "type": "product_list",
+          "label": "Products"
+        },
+        {
+          "type": "header",
+          "content": "Settings"
+        },
+        {
+          "type": "range",
+          "id": "product_to_show",
+          "label": "Products to show",
+          "min": 2,
+          "max": 12,
+          "step": 1,
+          "default": 6
+        },
+        {
+          "type": "range",
+          "id": "items_per_row",
+          "label": "Products per row",
+          "min": 2,
+          "max": 6,
+          "step": 1,
+          "default": 2
+        },
+        {
+          "type": "range",
+          "id": "item_gap",
+          "label": "Column gap",
+          "min": 0,
+          "max": 50,
+          "step": 2,
+          "default": 30,
+          "unit": "px"
+        },
+        {
+          "type": "header",
+          "content": "Product card settings"
+        },
+        {
+          "type": "select",
+          "id": "pcard_layout",
+          "label": "Design layout",
+          "default": "",
+          "options": [
+            {
+              "value": "",
+              "label": "Use global settings"
+            },
+            {
+              "value": "1",
+              "label": "Style 1"
+            },
+            {
+              "value": "2",
+              "label": "Style 2"
+            },
+            {
+              "value": "3",
+              "label": "Style 3"
+            },
+            {
+              "value": "4",
+              "label": "Style 4"
+            },
+            {
+              "value": "5",
+              "label": "Style 5"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "pcard_image_ratio",
+          "label": "Image aspect ratio",
+          "default": "",
+          "options": [
+            {
+              "value": "",
+              "label": "Use global settings"
+            },
+            {
+              "value": "original",
+              "label": "Original aspect ratio"
+            },
+            {
+              "value": "1/1",
+              "label": "1:1"
+            },
+            {
+              "value": "3/4",
+              "label": "3:4"
+            },
+            {
+              "value": "4/3",
+              "label": "4:3"
+            },
+            {
+              "value": "16/9",
+              "label": "16:9"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "show_vendor",
+          "label": "Show product vendors",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_title",
+          "label": "Hide product title",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Slider settings"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_slider",
+          "label": "Enable slider",
+          "default": true,
+          "info": "Only applies to screens > 767px"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_pagination",
+          "label": "Show pagination",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_navigation",
+          "label": "Show navigation",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Mobile settings"
+        },
+        {
+          "type": "checkbox",
+          "label": "Use horizontal scrollbar",
+          "id": "use_scroll_mobile",
+          "default": true,
+          "info": "Uncheck to display as grid"
+        },
+        {
+          "type": "range",
+          "id": "item_gap_mobile",
+          "label": "Column gap",
+          "min": 0,
+          "max": 30,
+          "step": 2,
+          "default": 16,
+          "unit": "px"
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "image_comparison",
+      "name": "Before/after image slider",
+      "settings": [
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Container width",
+          "default": "50%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select product"
+        },
+        {
+          "type": "textarea",
+          "id": "subtitle",
+          "label": "Sub heading"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Before/after image slider"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "options": [
+            {
+              "value": "white",
+              "label": "Light"
+            },
+            {
+              "value": "black",
+              "label": "Dark"
+            },
+            {
+              "value": "inherit",
+              "label": "Inherit"
+            }
+          ],
+          "default": "black"
+        },
+        {
+          "type": "header",
+          "content": "Layout settings"
+        },
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Layout",
+          "default": "horizontal",
+          "options": [
+            {
+              "value": "horizontal",
+              "label": "Horizontal"
+            },
+            {
+              "value": "vertical",
+              "label": "Vertical"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "image_height",
+          "label": "Image height",
+          "default": "adapt",
+          "options": [
+            {
+              "label": "Adapt to image",
+              "value": "adapt"
+            },
+            {
+              "label": "Small",
+              "value": "small"
+            },
+            {
+              "label": "Medium",
+              "value": "medium"
+            },
+            {
+              "label": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Before image settings"
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "before_image"
+        },
+        {
+          "type": "image_picker",
+          "label": "Image mobile",
+          "id": "before_image_mobile"
+        },
+        {
+          "type": "text",
+          "id": "before_heading",
+          "label": "Heading",
+          "default": "Before"
+        },
+        {
+          "type": "header",
+          "content": "After image settings"
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "after_image"
+        },
+        {
+          "type": "image_picker",
+          "label": "Image mobile",
+          "id": "after_image_mobile"
+        },
+        {
+          "type": "text",
+          "id": "after_heading",
+          "label": "Heading",
+          "default": "After"
+        },
+        {
+          "type": "header",
+          "content": "Advanced settings"
+        },
+        {
+          "type": "text",
+          "id": "block_custom_class",
+          "label": "Custom classes"
+        },
+        {
+          "type": "header",
+          "content": "Animations"
+        },
+        {
+          "type": "select",
+          "id": "animations",
+          "label": "Visible in the view animation",
+          "default": "inherit",
+          "options": [
+            {
+              "value": "inherit",
+              "label": "Inherit global setting"
+            },
+            {
+              "value": "fade-in",
+              "label": "Fade in"
+            },
+            {
+              "value": "fade-in-up",
+              "label": "Fade in up"
+            },
+            {
+              "value": "fade-in-left",
+              "label": "Fade in left"
+            },
+            {
+              "value": "fade-in-right",
+              "label": "Fade in right"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom content",
+      "category": "Advanced layout",
+      "blocks": [
+        {
+          "type": "text",
+          "settings": {
+            "width": "100%",
+            "align_text": "center"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

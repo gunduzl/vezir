@@ -1,0 +1,138 @@
+{% layout none %}
+
+<div class="m-product-card">
+  <product-form class="m-product-form" data-product-id="{{ product.id }}">
+    {% form 'product',
+      product,
+      class: 'm-product-form',
+      novalidate: 'novalidate',
+      data-product-id: product.id,
+      data-product-handle: product.handle
+    %}
+      <input hidden name="id" required value="{{ product.selected_or_first_available_variant.id }}">
+
+      <a
+        class="m-product-card__media m:block"
+        href="{{ product.url | within: collection }}"
+      >
+        <div class="m-product-card__main-image">
+          {% if product.featured_image != blank %}
+            {% render 'responsive-image', image: product.featured_image %}
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag: 'm-placeholder-svg' }}
+          {% endif %}
+        </div>
+        <div class="m-product-card__action m-product-card__action--top m:hidden md:m:flex">
+          {% render 'tooltip', type: 'remove-from-compare', product: product %}
+        </div>
+      </a>
+      <div class="m-product-card__content m:text-left">
+        <div class="m-product-card__info">
+          {% if product.type %}
+            <p class="m-product-card__type">{{ product.type }}</p>
+          {% endif %}
+          <h3 class="m-product-card__title">
+            <a href="{{ product.url }}" class="m-product-card__name">
+              {{ product.title }}
+            </a>
+          </h3>
+          <div class="m-product-card__price">
+            {% render 'product-prices', product: product %}
+          </div>
+        </div>
+
+        <div class="m-product-card__action-wrapper">
+          <button
+            type="submit"
+            name="add"
+            class="m-add-to-cart m-spinner-button m-button m-button--primary{% unless product.available %} disabled{% endunless %}"
+            style="height: 44px;"
+          >
+            <span class="m-spinner-icon">
+              <svg
+                class="animate-spin m-svg-icon m-svg-icon--medium"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            <span class="m-add-to-cart--text">
+              {% if product.available %}
+                {{ 'products.product.add_to_cart' | t }}
+              {% else %}
+                {{ 'products.product.sold_out' | t }}
+              {% endif %}
+            </span>
+          </button>
+          <div class="m-product-form-message"></div>
+        </div>
+
+        <div class="m-compare-list">
+          <div class="m-product-attribute">
+            <div class="m-product-attribute__col-left">
+              {{ 'products.product.availability' | t }}
+            </div>
+            {%- assign color = 'warning' -%}
+            {% if product.available %}
+              {%- assign color = 'success' -%}
+            {% endif %}
+
+            <div class="m-product-attribute__col-right m:color-{{ color }} m:display-flex m:justify-end m:flex-wrap">
+              {% if product.available %}
+                <svg
+                  class="m-svg-icon--medium"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="m-product-status">{{ 'products.product.in_stock' | t }}</span>
+              {% else %}
+                <svg
+                  class="m-svg-icon--medium"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                <span class="m-product-status">{{ 'products.product.unavailable' | t }}</span>
+              {% endif %}
+            </div>
+          </div>
+          {% if product.vendor %}
+            <div class="m-product-attribute">
+              <div class="m-product-attribute__col-left">
+                {{ 'products.product.brand' | t }}
+              </div>
+              <div class="m-product-attribute__col-right m:text-right">
+                {{ product.vendor }}
+              </div>
+            </div>
+          {% endif %}
+          {%- for option in product.options_with_values -%}
+            {% assign option_name = option.name | downcase %}
+            {% if option_name == 'color' or option_name == 'colour' %}
+              <div class="m-product-attribute">
+                <div class="m-product-attribute__col-left">
+                  {{ 'products.product.colors' | t }}
+                </div>
+                <div class="m-product-attribute__col-right m:text-right">
+                  {% for value in option.values %}
+                    {{ value }}
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endform %}
+  </product-form>
+</div>

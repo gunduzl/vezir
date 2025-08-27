@@ -1,0 +1,466 @@
+{{ 'newsletter.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign blocks = section.blocks
+
+  assign form_layout = section.settings.form_layout
+  assign show_icon = section.settings.show_icon
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign text_color = section.settings.text_color
+  assign heading_color = ''
+  assign desc_color = 'm:text-color-subtext'
+  if text_color != 'inherit'
+    assign heading_color = heading_color | append: 'm:text-' | append: text_color
+    assign desc_color = 'm:text-' | append: text_color
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign classes = 'm-section m-newsletter-section m-newsletter-section--' | append: form_layout | append: ' m-gradient m-color-' | append: section.settings.color_scheme
+  if form_layout == 'with_image' and blocks.size <= 0
+    assign classes = classes | append: ' m-newsletter-section--no-image'
+  endif
+  assign classes = classes | append: ' ' | append: section.settings.custom_class
+%}
+{% style %}
+  #m-newsletter-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+<section
+  id="m-newsletter-{{ section.id }}"
+  class="{{ classes }}"
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    <div class="m-newsletter-section__wrapper{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+      {% if form_layout == 'with_image' %}
+        {% for block in blocks %}
+          {% if block.type == 'image' %}
+            {% liquid
+              case block.settings.image_width
+                when '16%'
+                  assign block_width = 'm:w-full md:m:w-1/2 xl:m:w-1/6'
+                  assign form_width = 'm:w-full md:m:w-1/2 xl:m:w-5/6'
+                when '25%'
+                  assign block_width = 'm:w-full md:m:w-1/2 xl:m:w-1/4'
+                  assign form_width = 'm:w-full md:m:w-1/2 xl:m:w-3/4'
+                when '33%'
+                  assign block_width = 'm:w-full md:m:w-1/2 xl:m:w-1/3'
+                  assign form_width = 'm:w-full md:m:w-1/2 xl:m:w-2/3'
+                when '50%'
+                  assign block_width = 'm:w-full md:m:w-1/2 xl:m:w-1/2'
+                  assign form_width = 'm:w-full md:m:w-1/2 xl:m:w-1/2'
+                when '66%'
+                  assign block_width = 'm:w-full md:m:w-1/2 xl:m:w-2/3'
+                  assign form_width = 'm:w-full md:m:w-1/2 xl:m:w-1/3'
+                when '75%'
+                  assign block_width = 'm:w-full md:m:w-1/2 xl:m:w-3/4'
+                  assign form_width = 'm:w-full md:m:w-1/2 xl:m:w-1/4'
+                when '83%'
+                  assign block_width = 'm:w-full md:m:w-1/2 xl:m:w-10/12'
+                  assign form_width = 'm:w-full md:m:w-1/2 xl:m:w-2/12'
+                when '100%'
+                  assign block_width = 'm:w-full'
+                  assign form_width = 'm:w-full'
+              endcase
+            %}
+
+            <div class="m-newsletter-section__image {{ block_width }} m:blocks-radius">
+              {% if block.settings.image != blank %}
+                {% render 'responsive-image',
+                  image: block.settings.image,
+                  section_index: section.index,
+                  index: forloop.index,
+                  enable_preload_image: block.settings.enable_preload_image,
+                  aspect_ratio: '21/9',
+                  wrapper_class: 'm:h-full'
+                %}
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full' }}
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      <div class="m-newsletter-section__inner{% if form_layout == 'with_image' %}{% if blocks.size <= 0 %} lg:m:w-1/3 m:w-full{% endif %} {{ form_width }}{% else %} m:w-full{% endif %}">
+        <div class="m-newsletter-section__content{% if form_layout == 'with_image' %} m:h-full m:flex m:flex-col m:justify-between{% endif %}{% if form_layout == 'horizontal' %} sm:m:flex m:justify-between{% endif %}">
+          <div class="m-newsletter-section__header m:text-center m:flex m:flex-wrap m:flex-col m:items-center{% if form_layout == 'horizontal' %} sm:m:text-left sm:m:items-start m:flex-1{% else %} m:justify-center{% endif %}">
+            {% if form_layout != 'horizontal' and show_icon %}
+              {% if section.settings.icon_img != blank %}
+                <span class="m-newsletter-section__icon" style="width: {{ section.settings.icon_img_width }}px;">
+                  {%- render 'responsive-image', image: section.settings.icon_img -%}
+                </span>
+              {% else %}
+                <span class="m-newsletter-section__icon m:text-{{ section.settings.text_color }}">
+                  <svg
+                    class="m-svg-icon"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                  >
+                    <path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"/>
+                  </svg>
+                </span>
+              {% endif %}
+            {% endif %}
+            {%- if section.settings.heading != blank -%}
+              <h2 class="m-newsletter-section__heading {{ heading_color }} {{ section.settings.text_size }}">
+                {{ section.settings.heading }}
+              </h2>
+            {%- endif -%}
+            {%- if section.settings.description != blank -%}
+              <div class="m-newsletter-section__description rte m:w-full {{ desc_color }}">
+                {{ section.settings.description }}
+              </div>
+            {%- endif -%}
+          </div>
+
+          {% liquid
+            assign button_type = 'icon'
+            assign form_style = section.settings.form_design | replace: '1', 'bordered' | replace: '2', 'minimal'
+
+            if section.settings.submit_button != blank
+              assign button_type = 'text'
+            endif
+          %}
+          <div class="m-newsletter-section__form m:w-full{% if form_layout == 'horizontal' %} sm:m:w-1/2{% endif %}{% if form_layout == 'vertical' %} md:m:w-7/12 xl:m:w-4/12{% endif %}">
+            {% render 'newsletter-form',
+              custom_id: section.id,
+              style: form_style,
+              button_type: button_type,
+              show_agreement: section.settings.show_agreement,
+              agree_text: settings.agree_text,
+              button_label: section.settings.submit_button,
+              placeholder: section.settings.email_placeholder
+            %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/bG7XiL)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "w-full",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "select",
+      "id": "form_layout",
+      "label": "Form layout",
+      "default": "vertical",
+      "options": [
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "with_image",
+          "label": "Form with image"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "form_design",
+      "label": "Form style",
+      "default": "1",
+      "options": [
+        {
+          "value": "1",
+          "label": "Bordered"
+        },
+        {
+          "value": "2",
+          "label": "Minimal"
+        }
+      ]
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Stay up to date with all fashion news<br> and exclusive offers"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "text_size",
+      "label": "Text size",
+      "options": [
+        {
+          "value": "h3",
+          "label": "Small"
+        },
+        {
+          "value": "h2",
+          "label": "Medium"
+        },
+        {
+          "value": "h1",
+          "label": "Large"
+        }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Email placeholder text",
+      "default": "Enter your email"
+    },
+    {
+      "type": "text",
+      "id": "submit_button",
+      "label": "Button label",
+      "default": "Subscribe",
+      "info": "Leave blank to use icon"
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "black",
+          "label": "Dark"
+        },
+        {
+          "value": "white",
+          "label": "Light"
+        },
+        {
+          "value": "inherit",
+          "label": "Inherit"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icon",
+      "label": "Show icon",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_img",
+      "label": "Icon image"
+    },
+    {
+      "type": "text",
+      "id": "icon_img_width",
+      "label": "Icon image width (px)",
+      "default": "30"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_agreement",
+      "label": "Show \"Terms & conditions\" checkbox",
+      "default": false
+    },
+    {
+      "type": "paragraph",
+      "content": "Any customers who sign up will have an account created for them in Shopify. [View customers](/admin/customers?query=&accepts_marketing=1)"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "select",
+          "id": "image_width",
+          "label": "Width",
+          "default": "66%",
+          "options": [
+            {
+              "value": "16%",
+              "label": "16%"
+            },
+            {
+              "value": "25%",
+              "label": "25%"
+            },
+            {
+              "value": "33%",
+              "label": "33%"
+            },
+            {
+              "value": "50%",
+              "label": "50%"
+            },
+            {
+              "value": "66%",
+              "label": "66%"
+            },
+            {
+              "value": "75%",
+              "label": "75%"
+            },
+            {
+              "value": "83%",
+              "label": "83%"
+            },
+            {
+              "value": "100%",
+              "label": "100%"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_preload_image",
+          "label": "Enable preload image",
+          "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

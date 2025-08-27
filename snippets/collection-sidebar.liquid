@@ -1,0 +1,89 @@
+{%- assign st = section.settings -%}
+{% liquid
+  assign storefront_filters_enabled = false
+  if st.filters_type == 'storefront_filters' 
+    assign storefront_filters_enabled = true
+  endif
+%}
+
+{%- if st.show_filter or st.show_sorting -%}
+  {%- assign position = st.sidebar -%}
+  {%- assign sidebar_title = st.sidebar_title -%}
+
+  <div class="m-sidebar{% unless show_filter %} m:hidden{% endunless %}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}" data-type="{{ position }}">
+    <div class="m-sidebar--content{% if sidebar_title == blank %} m-sidebar--blank-title{% endif %}">
+      {%- if sidebar_title != blank -%}
+        <h3 class="m-sidebar--title">{{ sidebar_title }}</h3>
+      {%- endif -%}
+      <div class="m-sidebar--close{% if position != 'fixed' %} xl:m:hidden{% endif %}">
+        <svg class="m-svg-icon--large" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </div>
+      <div class="m-filter--wrapper{% if storefront_filters_enabled %} m:flex m:flex-col m-storefront--enabled{% endif %}">
+        {%- if st.filters_type == 'storefront_filters' -%}
+          {%- for block in section.blocks -%}
+            {% case block.type %}
+              {% when 'collections' %}
+                {% liquid
+                  assign menu = linklists[block.settings.menu]
+                  assign use_accordion = block.settings.use_accordion
+                  assign open_filtergroup = block.settings.open_filtergroup
+                  assign show_image = block.settings.show_image
+                %}
+                <div class="m-filter--widget m-filter--widget-{{ block.type }}{% if use_accordion %} m-accordion--item{% endif %}{% if use_accordion and open_filtergroup %} open{% endif %}" 
+                  data-block-type="collections"
+                  style="order: {{ forloop.index }}"
+                >
+                  <h4 class="m-filter--widget-title h5{% if use_accordion %} m-accordion--item-button {% endif %}">
+                    {{ block.settings.title }}
+                    {% if use_accordion %}
+                      <span class="m-accordion--item-icon">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M13.5306 6.53073L8.5306 11.5307C8.46092 11.6007 8.37813 11.6561 8.28696 11.694C8.1958 11.7318 8.09806 11.7513 7.99935 11.7513C7.90064 11.7513 7.8029 11.7318 7.71173 11.694C7.62057 11.6561 7.53778 11.6007 7.4681 11.5307L2.4681 6.53073C2.3272 6.38984 2.24805 6.19874 2.24805 5.99948C2.24805 5.80023 2.3272 5.60913 2.4681 5.46823C2.60899 5.32734 2.80009 5.24818 2.99935 5.24818C3.19861 5.24818 3.3897 5.32734 3.5306 5.46823L7.99997 9.93761L12.4693 5.46761C12.6102 5.32671 12.8013 5.24756 13.0006 5.24756C13.1999 5.24756 13.391 5.32671 13.5318 5.46761C13.6727 5.60851 13.7519 5.7996 13.7519 5.99886C13.7519 6.19812 13.6727 6.38921 13.5318 6.53011L13.5306 6.53073Z" fill="currentColor"/>
+                        </svg>
+                      </span>
+                    {% endif %}
+                  </h4>
+                  <div class="m-filter--widget-content {% if use_accordion %} m-accordion--item-content{% endif %}"{%- if open_filtergroup -%} style="opacity: 1;"{%- endif -%}>
+                    {% if menu.links != blank %}
+                    <ul class="m-link-lists">
+                      {% for link in menu.links %}
+                        {% if link.url contains '/collections/' %}
+                        <li class="m-link-lists--item{% if link.active %} active{% endif %}" data-tag-filter>
+                          <a href="{{ link.url }}" title="{{ link.title }}" class="m-link{% if show_image and link.object.image != blank %} m:block{% endif %}" data-collection-link>
+                            {% if show_image and link.object.image != blank %}
+                              {% render 'responsive-image', image: link.object.image, alt: link.title, aspect_ratio: '1/1' %}
+                            {% endif %}
+                            <span>{{ link.title }}</span>
+                          </a>
+                        </li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                  </div>
+                </div>
+              {% when 'banner_promotion' %}
+                {{ 'component-image-card.css' | asset_url | stylesheet_tag }} 
+                <div class="m-banner-promotion m-filter--widget"
+                  style="order: {{ forloop.index }}"
+                >
+                  {% render 'image-card', 
+                    block: block, 
+                    index: forloop.index,
+                    color_scheme: block.settings.color_scheme,
+                    stack_on_mobile: false,
+                    image_card_class: 'm-hover-box m-hover-box--scale-up',
+                    animated: animated, 
+                    animation_effect: animation_effect
+                  %}
+                </div>
+            {% endcase %}
+          {%- endfor -%}
+          {% render 'storefront-filters', section: section, results: collection %}
+        {%- else -%}
+          {% render 'filter-by-tags', section: section %}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}

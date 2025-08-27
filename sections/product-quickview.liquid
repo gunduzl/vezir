@@ -1,0 +1,198 @@
+<div id="MainProduct-quick-view__content">
+  {{ 'product.css' | asset_url | stylesheet_tag }}
+  {% if section.settings.show_zoom_button %}
+    {{ 'photoswipe.css' | asset_url | stylesheet_tag }}
+    {{ 'component-photoswipe.css' | asset_url | stylesheet_tag }}
+  {% endif %}
+
+  {%- if product.quantity_price_breaks_configured? -%}
+    {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'show-more.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  {%- liquid
+    assign current_variant = product.selected_or_first_available_variant
+    assign product_form_id = 'product-form-' | append: section.id
+    assign product_form_class = 'product-form-' | append: section.id
+    assign first_3d_model = product.media | where: 'media_type', 'model' | first
+  -%}
+
+  {%- if first_3d_model -%}
+    <link
+      id="ModelViewerStyle"
+      rel="stylesheet"
+      href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+      media="print"
+      onload="this.media='all'"
+    >
+  {%- endif -%}
+  {%- capture variant_option_none_text -%}
+  {%- render 'new-locale', key: 'products.product.choose_an_option' -%}
+{%- endcapture -%}
+
+  <product-info
+    data-section-type="product-page"
+    data-section-id="{{ section.id }}"
+    data-layout="4"
+    data-product-handle="{{ product.handle }}"
+    data-url="{{ product.url }}"
+    data-update-url="false"
+    data-product-id="{{ product.id }}"
+    data-variant-option-none-text="{{ variant_option_none_text }}"
+    data-show-featured-media="{{ section.settings.show_featured_media }}"
+    data-view-mode="quick-view"
+    class="m-product-quickview m:block m:w-full"
+    data-color-scheme="m-color-{{ settings.drawer_popup_color_scheme }}"
+  >
+    <div class="m-main-product--wrapper m:display-flex">
+      <product-recently-viewed data-product-id="{{ product.id }}" class="m:hidden"></product-recently-viewed>
+      <div class="m-product-quickview--media m:w-full md:m:w-1/2">
+        {% render 'product-media',
+          product: product,
+          section: section,
+          media_layout: 'layout-4',
+          show_nav: true,
+          show_thumbnails: false,
+          context: 'quick-view'
+        %}
+      </div>
+      <div class="m-product-quickview--info m-scrollbar--vertical m:display-flex m:w-full md:m:w-1/2">
+        <div class="m-product-info--wrapper m:w-full">
+          <div class="main-product__block main-product__block-title">
+            <div class="product-block-group product-block-group--title">
+              <h1 class="m-product-title">
+                <a href="{{ product.url }}">{{ product.title }}</a>
+              </h1>
+            </div>
+          </div>
+          <div class="main-product__block main-product__block-price" id="Price-{{ section.id }}" role="status">
+            {% render 'product-prices',
+              use_variant: true,
+              product: product,
+              show_sale_badge: true,
+              sale_badge_type: 'text',
+              price_text_size: 'm:text-xl md:m:text-2xl'
+            %}
+          </div>
+          <div class="main-product__block main-product__block-description">
+            {{ product.description | strip_html | truncatewords: 15 }}
+            <a class="m-product-quickview--viewmore m:block" href="{{ product.url }}">
+              {{- 'products.product.view_details' | t -}}
+            </a>
+          </div>
+
+          <div class="main-product__block main-product__block-inventory_status">
+            {{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+            {% liquid
+              assign inventory_threshold = settings.low_inventory_threshold
+              assign inventory_visibility = settings.inventory_visibility
+
+              assign available = current_variant.available
+              assign inventory_quantity = current_variant.inventory_quantity
+              assign inventory_policy = current_variant.inventory_policy
+
+              assign status = ''
+              assign show = false
+              assign show_count = false
+
+              if inventory_policy == 'continue'
+                assign status = 'instock'
+                if inventory_quantity <= 0
+                  assign status = 'backordered'
+                endif
+              else
+                if inventory_quantity <= 0
+                  assign status = 'outofstock'
+                else
+                  assign status = 'normal'
+                  if inventory_quantity <= inventory_threshold
+                    assign status = 'low'
+                  endif
+                endif
+              endif
+
+              unless current_variant.inventory_management != blank
+                assign status = 'instock'
+              endunless
+
+              if inventory_visibility == 'always'
+                assign show = true
+                if settings.inventory_hide_backordered and status == 'backordered'
+                  assign show = false
+                endif
+              else
+                if status == 'low'
+                  assign show = true
+                endif
+              endif
+            %}
+            <div id="Inventory-{{ section.id }}">
+              <div
+                class="m-product-inventory{% if show %} m:block{% else %} m:hidden{% endif %}"
+                data-status="{{ status }}"
+              >
+                <div class="m-product-inventory__inner">
+                  <span class="m-product-inventory__text">
+                    <span class="m-product-inventory__pin"></span>
+                    <span class="m-product-inventory__status">
+                      {% liquid
+                        case status
+                          when 'normal'
+                            if show_count
+                              render 'new-locale', key: 'products.product.inventory_quantity_html', param: '{{ quantity }}', value: inventory_quantity
+                            else
+                              echo 'products.product.in_stock' | t
+                            endif
+                          when 'instock'
+                            echo 'products.product.in_stock' | t
+                          when 'outofstock'
+                            render 'new-locale', key: 'products.product.out_of_stock'
+                          when 'low'
+                            if show_count
+                              render 'new-locale', key: 'products.product.inventory_low_quantity_html', param: '{{ quantity }}', value: inventory_quantity
+                            else
+                              render 'new-locale', key: 'products.product.low_stock'
+                            endif
+                          when 'backordered'
+                            render 'new-locale', key: 'products.product.backordered'
+                        endcase
+                      %}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% render 'product-form',
+            section: section,
+            section_id: section.id,
+            product: product,
+            product_form_id: product_form_id,
+            product_form_class: product_form_class,
+            current_variant: current_variant,
+            show_quantity_selector: true,
+            show_sizeguide: false,
+            enable_dynamic_checkout: true,
+            template: 'quickview'
+          %}
+        </div>
+      </div>
+    </div>
+  </product-info>
+
+  {% if product.media.size > 0 %}
+    <script src="{{ 'product-media.js' | asset_url }}" defer="defer"></script>
+  {% endif %}
+  {%- if first_3d_model -%}
+    <script type="application/json" id="ModelJSON-{{ product.id }}">
+      {{ product.media | where: 'media_type', 'model' | json }}
+    </script>
+    <script src="{{ 'product-model.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+  {%- if product.options_with_values.size > 0 -%}
+    <script src="{{ 'variant-picker.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+</div>

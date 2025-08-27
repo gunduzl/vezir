@@ -1,0 +1,414 @@
+{{ 'collection-header.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign text_alignment = section.settings.text_alignment
+  assign bg_image = section.settings.bg_image
+  assign layout = section.settings.layout
+  assign enable_parallax = false
+  assign show_breadcrumb = true
+  if layout == 'without_breadcrumb'
+    assign show_breadcrumb = false
+  endif
+
+  for block in section.blocks
+    assign selected_collection = collections[block.settings.collection]
+    if selected_collection.handle == collection.handle
+      assign bg_image = block.settings.image
+    endif
+  endfor
+
+  assign collection_desc = collection.description
+  if collection.handle == 'all'
+    assign collection_desc = section.settings.collection_all_desc
+  endif
+
+  assign custom_class = ''
+  if bg_image == blank
+    assign custom_class = ' m-collection-page-header--no-image'
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign text_color = section.settings.text_color
+
+  assign heading_color = ''
+  assign desc_color = 'm:text-color-subtext'
+  if text_color != 'inherit'
+    assign heading_color = heading_color | append: 'm:text-' | append: text_color
+    assign desc_color = 'm:text-' | append: text_color
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign img_pos = section.settings.image_position
+
+  if section.settings.enable_parallax and img_pos == 'background'
+    assign enable_parallax = true
+  endif
+
+  assign custom_class = custom_class | append: ' m-collection-page-header--image-' | append: img_pos
+
+  assign main_classes = 'm-collection-page-header' | append: custom_class
+  assign main_classes = main_classes | append: ' m-collection-page-header--' | append: section.id
+  if enable_parallax
+    assign main_classes = main_classes | append: ' m-gradient m-color-' | append: section.settings.color_scheme
+  endif
+  if animated and section.settings.enable_bg_zoom_effect and img_pos == 'background'
+    assign main_classes = main_classes | append: ' m:overflow-hidden m-scroll-trigger animate--zoom-fade'
+  endif
+
+  assign image_height = bg_image.width | divided_by: bg_image.aspect_ratio | round
+  assign lazy_load = 'eager'
+  assign fetchpriority = 'high'
+  unless section.index < 3
+    assign lazy_load = 'lazy'
+    assign fetchpriority = 'low'
+  endunless
+  assign alt_image = bg_image.alt | default: 'collection-banner-image'
+
+  assign color_scheme_first = settings.color_schemes | first
+  assign color_scheme_inherit = false
+  if section.settings.color_scheme == color_scheme_first
+    assign color_scheme_inherit = true
+  endif
+%}
+{% if enable_parallax %}
+  <script src="{{ 'parallax.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+
+{%- style -%}
+  .m-collection-page-header--{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --align-items: {{ section.settings.vertical_alignment }};
+    {% if bg_image != blank %}--bg-image: url({{ bg_image | image_url }});{% endif %}
+  }
+{%- endstyle -%}
+
+<div class="{{ main_classes }}" data-section-type="collection-header" data-section-id="{{ section.id }}">
+  <m-collection-header class="m:block m:w-full" data-enable-parallax="{{ enable_parallax }}">
+    {% if bg_image != blank and enable_parallax %}
+      <m-parallax
+        class="m-parallax m:block"
+        data-enable-parallax="{{ enable_parallax }}"
+        data-direction="{{ section.settings.parallax_direction }}"
+      >
+        <div class="m-parallax__wrapper m-image m:relative m:w-full m:h-full">
+          <div class="m-parallax__image m:h-full">
+            {{
+              bg_image
+              | image_url: width: 3840
+              | image_tag:
+                loading: lazy_load,
+                fetchpriority: fetchpriority,
+                width: bg_image.width,
+                height: image_height,
+                sizes: '100vw',
+                widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+                alt: alt_image
+            }}
+          </div>
+        </div>
+      </m-parallax>
+    {% endif %}
+    <div class="{{ container }}">
+      <div class="m-collection-page-header__wrapper m:overflow-hidden{% unless enable_parallax %} m-gradient m-color-{{ section.settings.color_scheme }}{% endunless %}{% unless color_scheme_inherit %} m:blocks-radius{% endunless %}">
+        {% if bg_image != blank and enable_parallax == false %}
+          <div class="m-collection-page-header__background m-image{% if color_scheme_inherit %} m:blocks-radius{% endif %}">
+            {{
+              bg_image
+              | image_url: width: 3840
+              | image_tag:
+                loading: lazy_load,
+                fetchpriority: fetchpriority,
+                width: bg_image.width,
+                height: image_height,
+                sizes: '100vw',
+                widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+                alt: alt_image
+            }}
+          </div>
+        {% endif %}
+        <div class="m-collection-page-header__inner m-section-py m:text-{{ text_color }} m:text-{{ text_alignment }}">
+          {% if show_breadcrumb and layout == 'inside' %}
+            {% assign justify = text_alignment | replace: 'right', 'end' | replace: 'left', 'start' %}
+            {% render 'breadcrumb',
+              container: '',
+              justify: justify,
+              animated: animated,
+              animation_effect: animation_effect
+            %}
+          {% endif %}
+          <h1 class="m-collection-page-header__title h2 {{ heading_color }}{% if section.settings.upper_title %} m:uppercase{% else %} m:capitalize{% endif %}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            {{ collection.title }}
+          </h1>
+          {% if section.settings.show_desc and collection_desc != blank %}
+            <div class="m-collection-page-header__description rte {{ desc_color }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+              {{ collection_desc }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </m-collection-header>
+</div>
+
+{% if layout == 'outside_no_border' or layout == 'outside' and show_breadcrumb %}
+  <div class="m-collection-page__breadcrumb" data-layout="{{ layout }}">
+    {% render 'breadcrumb', container: container, animated: animated, animation_effect: animation_effect %}
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Collection banner",
+  "class": "shopify-section-collection-banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Breadcrumb"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "outside",
+      "options": [
+        {
+          "value": "outside",
+          "label": "Breadcrumb outside"
+        },
+        {
+          "value": "outside_no_border",
+          "label": "Breadcrumb outside no border"
+        },
+        {
+          "value": "inside",
+          "label": "Breadcrumb inside"
+        },
+        {
+          "value": "without_breadcrumb",
+          "label": "Without breadcrumb"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "default": "top",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "background",
+          "label": "Use image as background"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable parallax effect",
+      "default": false,
+      "info": "Works only if the Image position is set to \"Use image as background\""
+    },
+    {
+      "type": "select",
+      "id": "parallax_direction",
+      "label": "Parallax direction",
+      "default": "vertical",
+      "options": [
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "zoom",
+          "label": "Zoom"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Content settings"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Content alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_color",
+      "label": "Text color",
+      "options": [
+        {
+          "label": "Dark",
+          "value": "black"
+        },
+        {
+          "label": "Light",
+          "value": "white"
+        },
+        {
+          "label": "Inherit",
+          "value": "inherit"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "checkbox",
+      "id": "upper_title",
+      "label": "Uppercase title",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_desc",
+      "label": "Show description",
+      "default": false
+    },
+    {
+      "type": "richtext",
+      "id": "collection_all_desc",
+      "label": "Description for all products"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_bg_zoom_effect",
+      "label": "Enable background zoom effect",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "banner",
+      "name": "Custom banner",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection",
+          "info": "Choose a collection to show this banner."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

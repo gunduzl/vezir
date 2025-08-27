@@ -1,0 +1,593 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumb": {
+      "type": "breadcrumb",
+      "settings": {
+        "container": "container",
+        "text_alignment": "center",
+        "hide_current": false,
+        "hide_on_mb": false,
+        "animations": "inherit"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "badge_ChqgGj": {
+          "type": "badge",
+          "settings": {}
+        },
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_saving": false,
+            "sale_badge_type": "percentage"
+          }
+        },
+        "short_description_3iQnzA": {
+          "type": "short_description",
+          "settings": {}
+        },
+        "visitors_DjEp79": {
+          "type": "visitors",
+          "settings": {
+            "color_scheme": "footer",
+            "live_views_text": "{count_number} people are viewing this right now",
+            "live_views_range": "20-30",
+            "live_view_duration": "10",
+            "live_view_icon_blinks": true
+          }
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "size_title": "Size"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_atc_button": true,
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {
+            "show_atcp": true,
+            "show_ask_a_question": true,
+            "show_social": true
+          }
+        },
+        "collapsible_tab_3wGtjd": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Description",
+            "content": "",
+            "liquid": "{{ product.metafields.descriptor.short_description}}",
+            "default_open": false
+          }
+        },
+        "collapsible_tab_K9efPa": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Shipping Infomation",
+            "content": "<p>Efficient Shipping Information for a Seamless Shopping Experience</p>",
+            "liquid": "",
+            "default_open": false
+          }
+        },
+        "collapsible_tab_etx8kW": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Returns Policy",
+            "content": "<p>Enhance Your Shopping Experience with Our Simplified and Fair Returns Policy.</p>",
+            "liquid": "",
+            "default_open": false
+          }
+        },
+        "shipping_VBJFtx": {
+          "type": "shipping",
+          "settings": {
+            "show_delivery_times": true,
+            "deliver_text": "Estimated Delivery:",
+            "deliver_days": "7",
+            "date_format": "%b %d",
+            "show_shipping_text": true,
+            "shipping_text": "<p><strong>Free Shipping & Returns: </strong>On all orders over $75</p>"
+          }
+        },
+        "trust_badge_NyBMd4": {
+          "type": "trust_badge",
+          "settings": {
+            "trust_badges_text": "<p>Guarantee safe & secure checkout</p>",
+            "trust_badges_image": "shopify://shop_images/trust_965c85b7-ca37-4190-bea4-b7f926fd38d7.png",
+            "trust_badges_image_width": "60%",
+            "position": "below"
+          }
+        }
+      },
+      "block_order": [
+        "badge_ChqgGj",
+        "title",
+        "price",
+        "short_description_3iQnzA",
+        "visitors_DjEp79",
+        "variant_picker",
+        "buy_buttons",
+        "addons",
+        "collapsible_tab_3wGtjd",
+        "collapsible_tab_K9efPa",
+        "collapsible_tab_etx8kW",
+        "shipping_VBJFtx",
+        "trust_badge_NyBMd4"
+      ],
+      "custom_css": [
+        ".main-product__block-collapsible_tab {margin-top: 10px;}",
+        ".main-product__block-collapsible_tab + .main-product__block-collapsible_tab {margin-top: 0;}",
+        ".m-collapsible--button {padding-top: 20px; padding-bottom: 20px;}"
+      ],
+      "settings": {
+        "container": "container-fluid",
+        "layout": "layout-2",
+        "show_atwl": true,
+        "enable_history_state": true,
+        "enable_variant_group_images": false,
+        "disable_selected_variant_default": false,
+        "show_featured_media": true,
+        "show_zoom_button": true,
+        "enable_video_autoplay": false,
+        "show_nav_media_mobile": false,
+        "show_pagination_mobile": true,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
+        "enable_dynamic_checkout": false,
+        "sticky_atc_compare": false
+      }
+    },
+    "product-details-tabs": {
+      "type": "product-details-tabs",
+      "blocks": {
+        "description": {
+          "type": "description",
+          "settings": {
+            "header": "Product description"
+          }
+        },
+        "tab": {
+          "type": "tab",
+          "settings": {
+            "header": "Shipping & Return",
+            "content": "<p>Shipping cost is based on weight. Just add products to your cart and use the Shipping Calculator to see the shipping price.</p><p>We want you to be 100% satisfied with your purchase. Items can be returned or exchanged within 30 days of delivery.</p>",
+            "content_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "description",
+        "tab"
+      ],
+      "disabled": true,
+      "custom_css": [
+        ".m-tabs__header {justify-content: flex-start;}"
+      ],
+      "settings": {
+        "container": "container",
+        "color_scheme": "",
+        "default_open": true,
+        "padding_top": 0,
+        "padding_bottom": 50,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "icon_box_9UtNky": {
+      "type": "icon-box",
+      "blocks": {
+        "iconbox_pJbJGA": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Keep Earth Clean",
+            "description": "<p>Materials play a leading role in the overall impacts<br/> of a product contributing roughly 60% of its<br/> environmental footprint.</p>",
+            "link": "",
+            "button_label": "",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        },
+        "iconbox_RW46nE": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Man-Made Cellulosic Fibers",
+            "description": "<p>Materials play a leading role in the overall impacts<br/> of a product contributing roughly 60% of its<br/> environmental footprint.</p>",
+            "link": "",
+            "button_label": "",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        },
+        "iconbox_EiwgTg": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Do Right By People",
+            "description": "<p>Materials play a leading role in the overall impacts<br/> of a product contributing roughly 60% of its<br/> environmental footprint.</p>",
+            "link": "",
+            "button_label": "",
+            "button_style": "m-button--plain",
+            "button_size": ""
+          }
+        }
+      },
+      "block_order": [
+        "iconbox_pJbJGA",
+        "iconbox_RW46nE",
+        "iconbox_EiwgTg"
+      ],
+      "custom_css": [
+        ".m-icon-box__heading {font-weight: 400;}",
+        ".m-section__header {--m-section-header-spacing-bottom: 60px;}"
+      ],
+      "settings": {
+        "container": "container",
+        "color_scheme": "",
+        "heading": "We are proudly Australian",
+        "heading_size": "h3",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "item_per_row": 3,
+        "item_gap": 30,
+        "item_gap_mobile": 10,
+        "card_style": "vertical",
+        "image_max_width": "60px",
+        "content_alignment": "center",
+        "hover_effect": "scaling-up",
+        "enable_slider": false,
+        "show_pagination": false,
+        "show_navigation": false,
+        "use_scroll_mobile": true,
+        "use_grid_column_mb": false,
+        "padding_top": 40,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "image_with_text_n33U47": {
+      "type": "image-with-text",
+      "settings": {
+        "heading": "",
+        "heading_size": "h3",
+        "subheading": "",
+        "container": "container-fluid",
+        "color_scheme": "footer",
+        "item_gap": 100,
+        "item_gap_mobile": 30,
+        "layout": "right",
+        "image_column_size": "6",
+        "image_overlap": true,
+        "show_image_reverse": false,
+        "hover_effect": false,
+        "image_animation": "parallax",
+        "link": "",
+        "link_2": "",
+        "second_image_offset_top": 14,
+        "title": "Dresses you’ll turn<br> to again and again.",
+        "sub_title": "The Dress Edit",
+        "text": "<p>This piece features a cord collar, button-front closure, and two front <br/>pockets in durable organic cotton canvas.  <br/></p><p>Did You Know? Organic cotton uses crop rotation, cover crops,<br/> and organic fertilizers instead of toxic chemical fertilizers or<br/> pesticides—which means cleaner water, lower water usage, lower <br/>pesticide use, healthier soil, and a safer working environment for <br/>cotton farmers, compared to conventional.</p>",
+        "text_size": "medium",
+        "content_alignment": "left",
+        "button_label": "",
+        "button_link": "",
+        "button_style": "m-button--link",
+        "button_size": "",
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "custom_content_bFWCiW": {
+      "type": "custom-content",
+      "blocks": {
+        "text_DjhXPY": {
+          "type": "text",
+          "settings": {
+            "title": "Happy Customers",
+            "subheading": "",
+            "text": "<p>A world of luxury without labels. Show us your world & tag <strong>@minimog</strong></p>",
+            "width": "100%",
+            "alignment": "center",
+            "align_text": "center",
+            "text_size": "medium",
+            "text_color": "inherit",
+            "button_label": "",
+            "button_link": "",
+            "button_style": "m-button--primary",
+            "button_size": "",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "text_DjhXPY"
+      ],
+      "settings": {
+        "heading": "",
+        "heading_size": "h3",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container-fluid",
+        "color_scheme": "scheme-b63a1d7f-9675-416a-aae9-64449198d05f",
+        "content_color_scheme": "scheme-b63a1d7f-9675-416a-aae9-64449198d05f",
+        "enable_parallax": false,
+        "parallax_direction": "vertical",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "custom_class": ""
+      }
+    },
+    "scrolling_promotion_ViawXq": {
+      "type": "scrolling-promotion",
+      "blocks": {
+        "testimonial_hrijcR": {
+          "type": "testimonial",
+          "settings": {
+            "text": "<p>“Cotton top with ruffled sleeves and embroidery.”</p>",
+            "author": "Nathan J.",
+            "icon": "5-stars"
+          }
+        },
+        "testimonial_gdUYUA": {
+          "type": "testimonial",
+          "settings": {
+            "text": "<p>“It runs true to size and I love that the neutral collars match many different sets.”</p>",
+            "author": "Christa G.",
+            "icon": "5-stars"
+          }
+        },
+        "testimonial_z4ACmz": {
+          "type": "testimonial",
+          "settings": {
+            "text": "<p>“Cotton top with ruffled sleeves and embroidery.”</p>",
+            "author": "Christa G.",
+            "icon": "5-stars"
+          }
+        },
+        "testimonial_RRNmDq": {
+          "type": "testimonial",
+          "settings": {
+            "text": "<p>“Absolutely love these joggers - so flattering and fantastic quality!”</p>",
+            "author": "Janie H.",
+            "product": "bardot-bottom",
+            "icon": "5-stars"
+          }
+        },
+        "testimonial_JyxDkh": {
+          "type": "testimonial",
+          "settings": {
+            "text": "<p>“Absolutely love these joggers - so flattering and fantastic quality!”</p>",
+            "author": "Janie H.",
+            "icon": "5-stars"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_hrijcR",
+        "testimonial_gdUYUA",
+        "testimonial_z4ACmz",
+        "testimonial_RRNmDq",
+        "testimonial_JyxDkh"
+      ],
+      "settings": {
+        "container": "w-full",
+        "direction": "left",
+        "speed": 30,
+        "item_gap": 80,
+        "item_gap_mobile": 30,
+        "color_scheme": "scheme-b63a1d7f-9675-416a-aae9-64449198d05f",
+        "padding_top": 60,
+        "padding_bottom": 0,
+        "custom_class": ""
+      }
+    },
+    "empty_space_WtAVGr": {
+      "type": "empty-space",
+      "settings": {
+        "container": "w-full",
+        "color_scheme": "",
+        "show_divider_line": true,
+        "divider_style": "solid",
+        "divider_height": 1,
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "custom_class": ""
+      }
+    },
+    "custom_content_tLXyFQ": {
+      "type": "custom-content",
+      "blocks": {
+        "text_paWdxy": {
+          "type": "text",
+          "settings": {
+            "title": "The Urban Lifestyle",
+            "subheading": "",
+            "text": "<p>Our new cozy collection is made with environmentally friendly materials and <br/>simple to care for so you can stay cozy wherever .</p>",
+            "width": "100%",
+            "alignment": "center",
+            "align_text": "center",
+            "text_size": "large",
+            "text_color": "inherit",
+            "button_label": "Shop Now",
+            "button_style": "m-button--primary",
+            "button_size": "",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "text_paWdxy"
+      ],
+      "custom_css": [
+        "@media (max-width: 767px) {br {display: none; }}"
+      ],
+      "settings": {
+        "heading": "",
+        "heading_size": "h3",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container-fluid",
+        "color_scheme": "",
+        "content_color_scheme": "",
+        "enable_parallax": false,
+        "parallax_direction": "vertical",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": ""
+      }
+    },
+    "hotspots_image_XjaniW": {
+      "type": "hotspots-image",
+      "blocks": {
+        "hotpot_XgJrdN": {
+          "type": "hotspot",
+          "settings": {
+            "top": 46,
+            "left": 26,
+            "m_top": 66,
+            "m_left": 11,
+            "heading": "Waterproof",
+            "text": "<p>Clean lines meet rich leather in this architectural style, featuring a modern square toe, cushioned insole for extra comfort.</p>"
+          }
+        },
+        "hotpot_MpQAtL": {
+          "type": "hotspot",
+          "settings": {
+            "top": 36,
+            "left": 63,
+            "m_top": 19,
+            "m_left": 46,
+            "heading": "Ethical is Beautiful",
+            "text": "<p>Clean lines meet rich leather in this architectural style, featuring a modern square toe, cushioned insole for extra comfort.</p>"
+          }
+        },
+        "hotpot_47HmCD": {
+          "type": "hotspot",
+          "settings": {
+            "top": 68,
+            "left": 61,
+            "m_top": 78,
+            "m_left": 42,
+            "heading": "Made in Italy.",
+            "text": "<p>Clean lines meet rich leather in this architectural style, featuring a modern square toe, cushioned insole for extra comfort.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "hotpot_XgJrdN",
+        "hotpot_MpQAtL",
+        "hotpot_47HmCD"
+      ],
+      "settings": {
+        "container": "container-fluid",
+        "color_scheme": "",
+        "image_max_width": 32,
+        "heading_size": "h4",
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "",
+        "animations": "inherit",
+        "enable_bg_zoom_effect": true
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "container": "container-fluid",
+        "color_scheme": "",
+        "remove_params": false,
+        "heading": "You Might Also Like",
+        "heading_size": "h3",
+        "text_align": "center",
+        "limit": 8,
+        "columns": 5,
+        "column_gap": 30,
+        "enable_slider": true,
+        "use_scroll_mobile": true,
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "recent-viewed-products": {
+      "type": "recent-viewed-products",
+      "settings": {
+        "container": "container-fluid",
+        "color_scheme": "",
+        "heading": "Recently Viewed Products",
+        "heading_size": "h3",
+        "text_align": "center",
+        "limit": 8,
+        "columns": 5,
+        "column_gap": 30,
+        "pcard_layout": "",
+        "pcard_image_ratio": "",
+        "show_vendor": false,
+        "hide_title": false,
+        "enable_slider": true,
+        "show_pagination": false,
+        "show_navigation": false,
+        "mobile_disable_slider": false,
+        "use_scroll_mobile": true,
+        "item_gap_mobile": 16,
+        "padding_top": 0,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    }
+  },
+  "order": [
+    "breadcrumb",
+    "main",
+    "product-details-tabs",
+    "icon_box_9UtNky",
+    "image_with_text_n33U47",
+    "custom_content_bFWCiW",
+    "scrolling_promotion_ViawXq",
+    "empty_space_WtAVGr",
+    "custom_content_tLXyFQ",
+    "hotspots_image_XjaniW",
+    "product-recommendations",
+    "recent-viewed-products"
+  ]
+}

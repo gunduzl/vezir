@@ -1,0 +1,329 @@
+{{ 'component-collection-card.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign items_per_row = section.settings.items_per_row
+  assign items_per_row_tablet = items_per_row | divided_by: 2.0 | ceil
+  if items_per_row == 3
+    assign items_per_row_tablet = 3
+  endif
+%}
+
+{% render 'page-title',
+  title: section.settings.title,
+  size: 'large',
+  description: section.settings.description,
+  text_alignment: section.settings.header_alignment,
+  show_breadcrumb: false
+%}
+
+<div
+  class="m-section m-collection-list-template"
+  data-animation_effect="{{ settings.animations }}"
+  style="--column-gap: {{ section.settings.item_gap }}px; --column-gap-mobile: {{ section.settings.mobile_gap }}px; --row-gap: {{ section.settings.item_gap }}px;"
+>
+  <div class="{{ container }}">
+    <div class="m-collection-list-template__wrapper m:grid m:grid-{{ section.settings.mobile_columns }}-cols sm:m:grid-2-cols md:m:grid-{{ items_per_row_tablet }}-cols xl:m:grid-{{ items_per_row }}-cols">
+      {% if section.settings.display_type == 'all' %}
+        {% for collection in collections %}
+          {%- liquid
+            assign collection_image = collection.products.first.featured_image
+            if collection.featured_image != blank
+              assign collection_image = collection.featured_image
+            endif
+          -%}
+          {% render 'collection-card',
+            section: section,
+            collection: collection,
+            card_style: section.settings.card_style,
+            text_alignment: section.settings.text_alignment,
+            image: collection_image,
+            show_product_count: section.settings.show_product_count,
+            image_rounded: section.settings.image_rounded,
+            hover_effect: section.settings.hover_effect,
+            title: collection.title,
+            index: forloop.index,
+            animated: animated,
+            animation_effect: animation_effect
+          %}
+        {% endfor %}
+      {% else %}
+        {% for block in section.blocks %}
+          {% liquid
+            assign collection = collections[block.settings.collection]
+            assign featuredImage = collection.image
+
+            if block.settings.image != blank
+              assign featuredImage = block.settings.image
+            endif
+          %}
+          {% render 'collection-card',
+            section: section,
+            collection: collection,
+            card_style: section.settings.card_style,
+            text_alignment: section.settings.text_alignment,
+            image: featuredImage,
+            show_product_count: section.settings.show_product_count,
+            image_rounded: section.settings.image_rounded,
+            hover_effect: section.settings.hover_effect,
+            title: collection.title,
+            index: forloop.index,
+            animated: animated,
+            animation_effect: animation_effect
+          %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collections list page",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "All of your collections are listed by default. To customize your list, choose 'Selected' and add collections. [Watch tutorial](https://foxecom.link/gFSv60)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "select",
+      "id": "display_type",
+      "label": "Select collections to show",
+      "default": "all",
+      "options": [
+        {
+          "value": "all",
+          "label": "All"
+        },
+        {
+          "value": "selected",
+          "label": "Selected"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Page title",
+      "default": "All collections"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Grid settings"
+    },
+    {
+      "type": "range",
+      "id": "items_per_row",
+      "label": "Collections per row",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Column gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 30,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "select",
+      "id": "mobile_columns",
+      "label": "Columns",
+      "default": "2",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "mobile_gap",
+      "label": "Column gap mobile",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Card settings"
+    },
+    {
+      "type": "select",
+      "id": "card_style",
+      "label": "Card style",
+      "default": "standard",
+      "options": [
+        {
+          "value": "standard",
+          "label": "Standard"
+        },
+        {
+          "value": "inside",
+          "label": "Content inside"
+        },
+        {
+          "value": "inside-2",
+          "label": "Button only"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "hover_effect",
+      "label": "Hover effect",
+      "default": "scaling-up",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "scaling-down",
+          "label": "Scaling down"
+        },
+        {
+          "value": "scaling-up",
+          "label": "Scaling up"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "label": "Show product count",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "count_inline_title",
+      "label": "Product count inline",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "image_rounded",
+      "label": "Image rounded",
+      "default": false,
+      "info": "Don't work well with \"Content inside\" layout"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection_item",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Select image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

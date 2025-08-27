@@ -1,0 +1,213 @@
+{% liquid
+  case type
+    when 'wishlist'
+      assign icon_name = '<svg class="m-svg-icon--medium" viewBox="0 0 15 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.1929 1.1123C13.8492 1.67741 14.2867 2.35189 14.5054 3.13574C14.7242 3.90137 14.7333 4.63965 14.5328 5.35059C14.3323 6.06152 13.9859 6.6722 13.4937 7.18262L8.70857 12.0498C8.4169 12.3415 8.07055 12.4873 7.66951 12.4873C7.26846 12.4873 6.92211 12.3415 6.63044 12.0498L1.84529 7.18262C1.3531 6.6722 1.00675 6.06152 0.806225 5.35059C0.605704 4.62142 0.614819 3.87402 0.833569 3.1084C1.05232 2.34277 1.48982 1.67741 2.14607 1.1123C2.92992 0.456055 3.8505 0.173503 4.90779 0.264648C5.98331 0.337565 6.90388 0.756836 7.66951 1.52246C8.43513 0.756836 9.34659 0.337565 10.4039 0.264648C11.4794 0.173503 12.4091 0.456055 13.1929 1.1123ZM12.564 6.25293C13.0927 5.70605 13.357 5.04069 13.357 4.25684C13.357 3.45475 13.0289 2.74382 12.3726 2.12402C11.8258 1.68652 11.1877 1.49512 10.4586 1.5498C9.74763 1.60449 9.13695 1.89616 8.62654 2.4248L7.66951 3.38184L6.71248 2.4248C6.20206 1.89616 5.58227 1.60449 4.8531 1.5498C4.14216 1.49512 3.51326 1.68652 2.96638 2.12402C2.31013 2.74382 1.98201 3.45475 1.98201 4.25684C1.98201 5.04069 2.24633 5.70605 2.77498 6.25293L7.58748 11.1201C7.64216 11.193 7.69685 11.193 7.75154 11.1201L12.564 6.25293Z" fill="currentColor"/></svg>'
+      assign icon_name_active = '<svg class="m-svg-icon--medium" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z"/></svg>'
+      assign class = 'm-wishlist-button'
+      assign content_class = 'm-wishlist-button-text'
+
+      assign content = 'products.product.add_to_wishlist' | t
+      assign revert_text = 'products.product.remove_from_wishlist' | t
+
+    when 'quickview'
+      assign icon_name = '<svg class="m-svg-icon--medium" viewBox="0 0 17 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.64216 2.3623C9.49893 2.3623 10.219 2.66309 10.8023 3.26465C11.4039 3.84798 11.7047 4.56803 11.7047 5.4248C11.7047 6.26335 11.4039 6.9834 10.8023 7.58496C10.219 8.16829 9.49893 8.45996 8.64216 8.45996C7.80362 8.45996 7.08357 8.16829 6.48201 7.58496C5.89867 6.9834 5.60701 6.26335 5.60701 5.4248C5.60701 5.13314 5.64346 4.85059 5.71638 4.57715C5.95336 4.70475 6.19945 4.76855 6.45466 4.76855C6.87393 4.76855 7.2294 4.62272 7.52107 4.33105C7.83096 4.02116 7.98591 3.65658 7.98591 3.2373C7.98591 2.9821 7.92211 2.736 7.79451 2.49902C8.06794 2.40788 8.3505 2.3623 8.64216 2.3623ZM16.4351 5.01465C16.4898 5.14225 16.5172 5.27897 16.5172 5.4248C16.5172 5.57064 16.4898 5.70736 16.4351 5.83496C15.6695 7.29329 14.594 8.46908 13.2086 9.3623C11.8232 10.2373 10.301 10.6748 8.64216 10.6748C7.54841 10.6748 6.49112 10.4743 5.47029 10.0732C4.46768 9.65397 3.57445 9.08887 2.7906 8.37793C2.00675 7.64876 1.35961 6.80111 0.849194 5.83496C0.794507 5.70736 0.767163 5.57064 0.767163 5.4248C0.767163 5.27897 0.794507 5.14225 0.849194 5.01465C1.61482 3.55632 2.69034 2.38965 4.07576 1.51465C5.46117 0.621419 6.98331 0.174805 8.64216 0.174805C10.301 0.174805 11.8232 0.621419 13.2086 1.51465C14.594 2.38965 15.6695 3.55632 16.4351 5.01465ZM8.64216 9.3623C9.99112 9.3623 11.2398 9.01595 12.3883 8.32324C13.5549 7.6123 14.4755 6.64616 15.15 5.4248C14.4755 4.20345 13.5549 3.24642 12.3883 2.55371C11.2398 1.84277 9.99112 1.4873 8.64216 1.4873C7.2932 1.4873 6.03539 1.84277 4.86873 2.55371C3.72029 3.24642 2.80883 4.20345 2.13435 5.4248C2.57185 6.22689 3.12784 6.92871 3.80232 7.53027C4.4768 8.11361 5.22419 8.56934 6.04451 8.89746C6.88305 9.20736 7.74893 9.3623 8.64216 9.3623Z" fill="currentColor"/></svg>'
+      assign class = 'm-product-quickview-button m-spinner-button'
+      assign content_class = ''
+
+      assign content = 'products.product.quick_view' | t
+
+    when 'compare'
+      assign icon_name = '<svg class="m-svg-icon--medium" viewBox="0 0 15 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.4508 10.3623L12.2906 12.3584C12.0719 12.5589 11.8258 12.6045 11.5523 12.4951C11.2789 12.3857 11.1422 12.1852 11.1422 11.8936V10.7998H10.2945C10.2034 10.7998 10.1213 10.7633 10.0484 10.6904L7.58748 8.03809L8.62654 6.91699L10.814 9.26855H11.1422V7.95605C11.1422 7.66439 11.2789 7.46387 11.5523 7.35449C11.8258 7.22689 12.0719 7.27246 12.2906 7.49121L14.4508 9.43262C14.5784 9.56022 14.6422 9.71517 14.6422 9.89746C14.6422 10.0798 14.5784 10.2347 14.4508 10.3623ZM0.970288 3.58105C0.879142 3.58105 0.797111 3.55371 0.724194 3.49902C0.669507 3.42611 0.642163 3.34408 0.642163 3.25293V2.37793C0.642163 2.28678 0.669507 2.21387 0.724194 2.15918C0.797111 2.08626 0.879142 2.0498 0.970288 2.0498H4.00544C4.09659 2.0498 4.17862 2.08626 4.25154 2.15918L6.71248 4.81152L5.67341 5.93262L3.48591 3.58105H0.970288ZM14.4508 2.43262C14.5784 2.56022 14.6422 2.71517 14.6422 2.89746C14.6422 3.07975 14.5784 3.2347 14.4508 3.3623L12.2906 5.3584C12.0719 5.55892 11.8258 5.60449 11.5523 5.49512C11.2789 5.38574 11.1422 5.18522 11.1422 4.89355V3.58105H10.814L4.25154 10.6904C4.17862 10.7633 4.09659 10.7998 4.00544 10.7998H0.970288C0.751538 10.7998 0.642163 10.6904 0.642163 10.4717V9.59668C0.642163 9.37793 0.751538 9.26855 0.970288 9.26855H3.48591L10.0484 2.15918C10.1213 2.08626 10.2034 2.0498 10.2945 2.0498H11.1422V0.956055C11.1422 0.664388 11.2789 0.463867 11.5523 0.354492C11.8258 0.245117 12.0719 0.29069 12.2906 0.491211L14.4508 2.43262Z" fill="currentColor"/></svg>'
+      assign icon_name_active = '<svg class="m-svg-icon--medium" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 168v-16c0-13.255 10.745-24 24-24h360V80c0-21.367 25.899-32.042 40.971-16.971l80 80c9.372 9.373 9.372 24.569 0 33.941l-80 80C409.956 271.982 384 261.456 384 240v-48H24c-13.255 0-24-10.745-24-24zm488 152H128v-48c0-21.314-25.862-32.08-40.971-16.971l-80 80c-9.372 9.373-9.372 24.569 0 33.941l80 80C102.057 463.997 128 453.437 128 432v-48h360c13.255 0 24-10.745 24-24v-16c0-13.255-10.745-24-24-24z"/></svg>'
+      assign class = 'm-compare-button'
+      assign content_class = 'm-compare-button-text'
+
+      assign content = 'products.product.add_to_compare' | t
+      assign revert_text = 'products.product.remove_from_compare' | t
+
+    when 'remove-from-compare'
+      assign icon_name = '<svg class="m-svg-icon--medium" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'
+      assign class = 'm-compare-remove-button'
+      assign content_class = ''
+
+      assign content = 'products.product.remove_from_compare' | t
+
+    when 'zoom-in'
+      assign icon_name = '<svg class="m-svg-icon--medium" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" stroke="currentColor"><path d="M319.8 204v8c0 6.6-5.4 12-12 12h-84v84c0 6.6-5.4 12-12 12h-8c-6.6 0-12-5.4-12-12v-84h-84c-6.6 0-12-5.4-12-12v-8c0-6.6 5.4-12 12-12h84v-84c0-6.6 5.4-12 12-12h8c6.6 0 12 5.4 12 12v84h84c6.6 0 12 5.4 12 12zm188.5 293L497 508.3c-4.7 4.7-12.3 4.7-17 0l-129-129c-2.3-2.3-3.5-5.3-3.5-8.5v-8.5C310.6 395.7 261.7 416 208 416 93.8 416 1.5 324.9 0 210.7-1.5 93.7 93.7-1.5 210.7 0 324.9 1.5 416 93.8 416 208c0 53.7-20.3 102.6-53.7 139.5h8.5c3.2 0 6.2 1.3 8.5 3.5l129 129c4.7 4.7 4.7 12.3 0 17zM384 208c0-97.3-78.7-176-176-176S32 110.7 32 208s78.7 176 176 176 176-78.7 176-176z"/></svg>'
+      assign class = 'm-product-media__zoom-in'
+      assign content_class = ''
+
+      assign content = 'products.product.zoom_in' | t
+
+    when 'add-to-cart'
+      capture content
+        render 'new-locale', key: 'products.product.select_options'
+      endcapture
+
+      if product.has_only_default_variant
+        assign class = 'm-add-to-cart'
+        capture content
+          render 'new-locale', key: 'products.product.add_to_cart'
+        endcapture
+      endif
+
+      if product.has_only_default_variant == false and settings.select_option_button_action == 'popup'
+        assign class = 'm-product-quickview-button m-spinner-button'
+      endif
+
+      unless product.available
+        assign class = class | append: ' disabled'
+      endunless
+    else
+      assign icon_name = 'star'
+      assign class = 'hidden'
+      assign content_class = 'hidden'
+
+      capture content
+        render 'new-locale', key: 'general.tooltip.not_found'
+      endcapture
+  endcase
+
+  assign variant_id = product.first_available_variant.id
+  assign selected_variant_id = ''
+  if section.settings.change_product_variant_on_fitlering
+    assign variant_id = product.selected_or_first_available_variant.id
+    assign selected_variant_id = product.selected_variant.id
+  endif
+%}
+{% if type == 'add-to-cart' %}
+  {%- if product.has_only_default_variant -%}
+    <product-form class="m-product-form" data-product-id="{{ product.id }}">
+      {%- form 'product',
+        product,
+        id: product_form_id,
+        data-product-id: product.id,
+        class: 'product-card-form',
+        novalidate: 'novalidate'
+      -%}
+        <input type="hidden" name="id" value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}">
+        <button
+          class="m-tooltip m-spinner-button m-button--icon {{ class }} {{ class_name | default: 'm-tooltip--left' }} m-tooltip--style-{{ style | default: '1' }}"
+          data-product-handle="{{ product.handle }}"
+          name="add"
+          aria-label="{{ content }}"
+        >
+          <span class="m-spinner-icon">
+            <svg
+              class="animate-spin m-svg-icon--medium"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+          <span>
+            <svg
+              class="m-svg-icon--medium"
+              fill="currentColor"
+              stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 448 512"
+            >
+              <path d="M352 128C352 57.42 294.579 0 224 0 153.42 0 96 57.42 96 128H0v304c0 44.183 35.817 80 80 80h288c44.183 0 80-35.817 80-80V128h-96zM224 48c44.112 0 80 35.888 80 80H144c0-44.112 35.888-80 80-80zm176 384c0 17.645-14.355 32-32 32H80c-17.645 0-32-14.355-32-32V176h48v40c0 13.255 10.745 24 24 24s24-10.745 24-24v-40h160v40c0 13.255 10.745 24 24 24s24-10.745 24-24v-40h48v256z"/>
+            </svg>
+          </span>
+          {%- if style == 2 -%}
+            <span class="m-tooltip-icon--active">
+              {{ icon_name_active }}
+            </span>
+          {%- endif -%}
+          <span
+            class="m-tooltip__content {{ content_class }}"
+            data-atc-text
+            data-revert-text="{{ revert_text | default: '' }}"
+          >
+            {{ content }}
+          </span>
+        </button>
+      {%- endform -%}
+    </product-form>
+  {%- else -%}
+    <button
+      class="m-tooltip m-button--icon {{ class }} {{ class_name | default: 'm-tooltip--left' }} m-tooltip--style-{{ style | default: '1' }}"
+      data-product-handle="{{ product.handle }}"
+      aria-label="{{ content }}"
+    >
+      {% if settings.select_option_button_action == 'popup' %}
+        <span class="m-spinner-icon">
+          <svg
+            class="animate-spin m-svg-icon--medium"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </span>
+        <span class="m-tooltip-icon quick-add" data-product-handle="{{ product.handle }}">
+          <svg
+            class="m-svg-icon--medium"
+            fill="currentColor"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+          >
+            <path d="M352 128C352 57.42 294.579 0 224 0 153.42 0 96 57.42 96 128H0v304c0 44.183 35.817 80 80 80h288c44.183 0 80-35.817 80-80V128h-96zM224 48c44.112 0 80 35.888 80 80H144c0-44.112 35.888-80 80-80zm176 384c0 17.645-14.355 32-32 32H80c-17.645 0-32-14.355-32-32V176h48v40c0 13.255 10.745 24 24 24s24-10.745 24-24v-40h160v40c0 13.255 10.745 24 24 24s24-10.745 24-24v-40h48v256z"/>
+          </svg>
+        </span>
+      {% else %}
+        <a class="m-tooltip-icon" href="{{ product.url }}" aria-label="{{ content }}">
+          <svg
+            class="m-svg-icon--medium"
+            fill="currentColor"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 448 512"
+          >
+            <path d="M352 128C352 57.42 294.579 0 224 0 153.42 0 96 57.42 96 128H0v304c0 44.183 35.817 80 80 80h288c44.183 0 80-35.817 80-80V128h-96zM224 48c44.112 0 80 35.888 80 80H144c0-44.112 35.888-80 80-80zm176 384c0 17.645-14.355 32-32 32H80c-17.645 0-32-14.355-32-32V176h48v40c0 13.255 10.745 24 24 24s24-10.745 24-24v-40h160v40c0 13.255 10.745 24 24 24s24-10.745 24-24v-40h48v256z"/>
+          </svg>
+        </a>
+      {% endif %}
+      {%- if style == 2 -%}
+        <span class="m-tooltip-icon--active">{{ icon_name_active }}</span>
+      {%- endif -%}
+      <span
+        class="m-tooltip__content {{ content_class }}"
+        data-atc-text
+        data-revert-text="{{ revert_text | default: '' }}"
+      >
+        {{- content -}}
+      </span>
+    </button>
+  {%- endif -%}
+{% else %}
+  <button
+    class="m-tooltip m-button--icon {{ class }} {{ class_name | default: 'm-tooltip--left' }} m-tooltip--style-{{ style | default: '1' }}"
+    type="button"
+    data-product-handle="{{ product.handle }}"
+    aria-label="{{ content }}"
+  >
+    {%- if type == 'quickview' -%}
+      <span class="m-spinner-icon">
+        <svg class="animate-spin m-svg-icon--medium" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </span>
+    {%- endif -%}
+    <span class="m-tooltip-icon m:block">{{ icon_name }}</span>
+    {%- if style == 2 -%}
+      <span class="m-tooltip-icon--active">{{ icon_name_active }}</span>
+    {%- endif -%}
+    <span
+      class="m-tooltip__content {{ content_class }}"
+      data-atc-text
+      data-revert-text="{{ revert_text | default: '' }}"
+    >
+      {{- content -}}
+    </span>
+  </button>
+{% endif %}

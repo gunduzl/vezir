@@ -1,0 +1,359 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "aa1ffe58-248f-44be-845e-2880e9989dde": {
+      "type": "custom-code",
+      "settings": {
+        "custom_css": ".sf__custom__with_image .m-custom-content__wrapper {\n  display: flex;\n  align-items: center;\n}\n.sf__custom__with_image .sf__custom-header {\n  line-height: 1.16;\n}\n.sf__custom__with_image .prod__description {\n  color: rgb(var(--color-foreground-secondary));\n  line-height: 1.625;\n}\n.sf__custom__with_image h6 {\n  font-size: 24px;\n}\n.sf__custom__with_image .img_box {\n  flex: 0 0 48px;\n}\n.sf__custom-section-collapse .sf__custom-collapse h2 {\n  line-height: 1.16;\n  margin-bottom: 30px;\n}\n.sf__custom-section-collapse .sf__tab-item input:checked+.sf__tab-item-label {\n  border-bottom-color: #DDDDDD;\n}\n.sf__custom-section-collapse .sf__tab-item-label {\n  border-bottom-color: #DDDDDD;\n  font-size: 1.25rem;\n  font-weight: 600;\n  line-height: 1.6;\n  padding: 6px 0;\n}\n.sf__custom-section-collapse .sf__tab-item-label::before {\n  right: 5.5px;\n}\n.sf__custom-section-collapse .sf__custom-collapse .prod__description {\n  color: rgb(var(--color-foreground-secondary));\n  line-height: 2.25;\n}\n.sf__custom-section-collapse .sf__tab-item {\n  margin-bottom: 30px;\n}\n@media (min-width: 768px) {\n  .sf__custom-left .m-custom-content__block-inner {\n    padding-right: 5rem;\n  }\n  .sf__custom-right .m-custom-content__block-inner {\n    padding-left: 5rem;\n  }\n  .sf__custom-collapse .m-custom-content__block-inner {\n    padding: 3.125rem;\n    max-width: 546px;\n    max-height: 600px;\noverflow: scroll;\n  }\n  .sf__custom-section-collapse {\n    position: relative;\n  }\n  .sf__custom-collapse .m-custom-content__block-inner {\n    position: absolute;\n    top: 100px;\n    right: 250px;\n    background-color: #ffffff;\n    border-radius:1.25rem;\n  }\n}\n@media (min-width: 1280px) {\n  .sf__custom__with_image .sf__custom-header {\n    font-size: 48px;\n  }\n}"
+      }
+    },
+    "163418101120bbaa64": {
+      "type": "breadcrumb",
+      "settings": {
+        "container": "container",
+        "text_alignment": "center",
+        "hide_current": false,
+        "hide_on_mb": false,
+        "animations": "inherit"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_saving": false,
+            "sale_badge_type": "percentage"
+          }
+        },
+        "a4f7df4b-4ebd-4a72-bb51-1985ecf2bef8": {
+          "type": "foxkit_countdown_timer",
+          "settings": {}
+        },
+        "a7c33681-2e92-4afe-af6c-09be8f611b30": {
+          "type": "short_description",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "size_title": "Size"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_atc_button": true,
+            "show_dynamic_checkout": false,
+            "show_gift_card_recipient": true
+          }
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {
+            "show_atcp": true,
+            "show_ask_a_question": true,
+            "show_social": true
+          }
+        },
+        "8d14dba6-9d11-41a4-ba50-95d3edca5c0c": {
+          "type": "foxkit_stock_countdown",
+          "disabled": true,
+          "settings": {}
+        },
+        "52e8c641-6529-4e4d-96e6-45d3815a7f84": {
+          "type": "shipping",
+          "settings": {
+            "show_delivery_times": true,
+            "deliver_text": "Estimated Delivery:",
+            "deliver_days": "7",
+            "date_format": "%b %d",
+            "show_shipping_text": true,
+            "shipping_text": "<p><strong>Free Shipping & Returns: </strong>On all orders over $75</p>"
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "a4f7df4b-4ebd-4a72-bb51-1985ecf2bef8",
+        "a7c33681-2e92-4afe-af6c-09be8f611b30",
+        "variant_picker",
+        "buy_buttons",
+        "addons",
+        "8d14dba6-9d11-41a4-ba50-95d3edca5c0c",
+        "52e8c641-6529-4e4d-96e6-45d3815a7f84"
+      ],
+      "settings": {
+        "container": "container",
+        "layout": "layout-6",
+        "show_atwl": false,
+        "enable_history_state": true,
+        "enable_variant_group_images": false,
+        "show_featured_media": true,
+        "show_zoom_button": true,
+        "enable_video_autoplay": false,
+        "show_nav_media_mobile": false,
+        "show_pagination_mobile": true,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
+        "enable_dynamic_checkout": false,
+        "sticky_atc_compare": true
+      }
+    },
+    "1632107321cfdc5197": {
+      "type": "custom-content",
+      "blocks": {
+        "bf9f057a-252b-44f5-85e1-5f8899d8e94a": {
+          "type": "html",
+          "settings": {
+            "code": "<h2 class=\"sf__custom-header mb-6\">Different Sound Experiences</h2>\n<p class=\"sf__custom-description prod__description text-color-subtext\">Enjoy rich, immersive sound in every room. Each speaker is carefully hand tuned by our engineers to give you the best quality listening experience in your space. Hear the difference.</p>\n<ul class=\"sf__custom-list\">\n  <li class=\"flex justify-between mt-8\">\n    <div class=\"img_box\"><img src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-6.svg?v=1631810887\"></div>\n    <div class=\"content_box rte pl-8\">\n      <h6 class=\"mb-2\">Different Sound Experiences</h6>\n      <p class=\"prod__description\">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fnt occaecat cupidatat non</p>\n    </div>\n  </li>\n  <li class=\"flex justify-between mt-10\">\n    <div class=\"img_box\"><img src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-7.svg?v=1631810887\"></div>\n    <div class=\"content_box rte pl-8\">\n      <h6 class=\"mb-2\">Sound Performance</h6>\n      <p class=\"prod__description\">Leae dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla sint occaecat cupidatat non</p>\n    </div>\n  </li>\n  <li class=\"flex justify-between mt-10\">\n    <div class=\"img_box\"><img src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-8.svg?v=1631810887\"></div>\n    <div class=\"content_box rte pl-8\">\n      <h6 class=\"mb-2\">Active Room Compensation</h6>\n      <p class=\"prod__description\">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fnt occaecat cupidatat non</p>\n    </div>\n  </li>\n</ul>",
+            "width": "50%",
+            "block_custom_class": "sf__custom-left",
+            "animations": "inherit"
+          }
+        },
+        "1632107321cfdc5197-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "bf9f057a-252b-44f5-85e1-5f8899d8e94a",
+        "1632107321cfdc5197-1"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container-fluid",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "sf__custom__with_image"
+      }
+    },
+    "1632108447382846c2": {
+      "type": "custom-content",
+      "blocks": {
+        "1632108447382846c2-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        },
+        "51f3ee5a-1691-4d15-8190-d13e9a68d632": {
+          "type": "html",
+          "settings": {
+            "code": "<h2 class=\"sf__custom-header mb-6\">Product Specifications</h2>\n<p class=\"sf__custom-description prod__description\">Enjoy rich, immersive sound in every room. Each speaker is carefully hand tuned by our engineers to give you the best quality listening experience in your space. Hear the difference.</p>\n<ul class=\"sf__custom-list mt-6\">\n  <li class=\"flex mb-4\">\n    <label class=\"flex-1 font-medium\">Recommended Room Size</label>\n    <p class=\"flex-1 prod__description\">10-80 m²</p>\n  </li>\n  <li class=\"flex mb-4\">\n    <label class=\"flex-1 font-medium\">Speaker Configuration</label>\n    <p class=\"flex-1 prod__description\">2 x 5,25” woofer drivers</p>\n  </li>\n  <li class=\"flex mb-4\">\n    <label class=\"flex-1 font-medium\">Frequency Range</label>\n    <p class=\"flex-1 prod__description\">26 - 23,000 Hz</p>\n  </li>\n  <li class=\"flex mb-4\">\n    <label class=\"flex-1 font-medium\">Weight</label>\n    <p class=\"flex-1 prod__description\">7.2 kg</p>\n  </li>\n  <li class=\"flex mb-4\">\n    <label class=\"flex-1 font-medium\">Dimensions</label>\n    <p class=\"flex-1 prod__description\">20 W x 38 H x 20 D cm</p>\n  </li>\n  <li class=\"flex mb-4\">\n    <label class=\"flex-1 font-medium\">Bass Capability</label>\n    <p class=\"flex-1 prod__description\">88 dB SPL</p>\n  </li>\n  <li class=\"flex mb-4\">\n    <label class=\"flex-1 font-medium\">Amplifier</label>\n    <p class=\"flex-1 prod__description\">2 x 200 watt class D for bass 2ohm</p>\n  </li>\n</ul>",
+            "width": "50%",
+            "block_custom_class": "sf__custom-right",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "1632108447382846c2-1",
+        "51f3ee5a-1691-4d15-8190-d13e9a68d632"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container-fluid",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "sf__custom__with_image"
+      }
+    },
+    "product-details-tabs": {
+      "type": "product-details-tabs",
+      "blocks": {
+        "description": {
+          "type": "description",
+          "settings": {
+            "header": "Product description"
+          }
+        },
+        "tab": {
+          "type": "tab",
+          "settings": {
+            "header": "Shipping & Return",
+            "content": "<p>Shipping cost is based on weight. Just add products to your cart and use the Shipping Calculator to see the shipping price.</p><p>We want you to be 100% satisfied with your purchase. Items can be returned or exchanged within 30 days of delivery.</p>",
+            "content_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "description",
+        "tab"
+      ],
+      "disabled": true,
+      "settings": {
+        "container": "container",
+        "default_open": true,
+        "animations": "inherit"
+      }
+    },
+    "1632119012258c1f2d": {
+      "type": "custom-content",
+      "blocks": {
+        "d7990260-329f-4087-84aa-b0d2b0092f5f": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "100%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        },
+        "80c16b6d-0faf-4516-b6d6-77faa12452d3": {
+          "type": "html",
+          "settings": {
+            "code": "<div class=\"sf__tabs-custom\">\n  <h2>More detail</h2>\n  <div class=\"sf__tab-item\">\n    <input type=\"checkbox\" id=\"chck1\" checked>\n    <label class=\"sf__tab-item-label\" for=\"chck1\">Package contents</label>\n    <ul class=\"sf__tab-item-content\">\n      <li class=\"prod__description\">Beosound Balance</li>\n      <li class=\"prod__description\">Fabric power cable</li>\n      <li class=\"prod__description\">Quick start guide</li>\n      <li class=\"prod__description\">User Guide</li>\n      <li class=\"prod__description\">Warranty</li>\n    </ul>\n  </div>\n  <div class=\"sf__tab-item\">\n    <input type=\"checkbox\" id=\"chck2\">\n    <label class=\"sf__tab-item-label\" for=\"chck2\">Power</label>\n    <ul class=\"sf__tab-item-content\">\n      <li class=\"prod__description\">Beosound Balance</li>\n      <li class=\"prod__description\">Fabric power cable</li>\n      <li class=\"prod__description\">Quick start guide</li>\n      <li class=\"prod__description\">User Guide</li>\n      <li class=\"prod__description\">Warranty</li>\n    </ul>\n  </div>\n  <div class=\"sf__tab-item\">\n    <input type=\"checkbox\" id=\"chck3\">\n    <label class=\"sf__tab-item-label\" for=\"chck3\">Connectivity</label>\n    <ul class=\"sf__tab-item-content\">\n      <li class=\"prod__description\">Beosound Balance</li>\n      <li class=\"prod__description\">Fabric power cable</li>\n      <li class=\"prod__description\">Quick start guide</li>\n      <li class=\"prod__description\">User Guide</li>\n      <li class=\"prod__description\">Warranty</li>\n    </ul>\n  </div>\n</div>",
+            "width": "100%",
+            "block_custom_class": "sf__custom-collapse",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "d7990260-329f-4087-84aa-b0d2b0092f5f",
+        "80c16b6d-0faf-4516-b6d6-77faa12452d3"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "w-full",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "sf__custom-section-collapse"
+      }
+    },
+    "16321193015b384c59": {
+      "type": "custom-content",
+      "blocks": {
+        "16321193015b384c59-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        },
+        "f4187321-1b9b-4382-b0f4-6bd90e3c51e0": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "16321193015b384c59-1",
+        "f4187321-1b9b-4382-b0f4-6bd90e3c51e0"
+      ],
+      "settings": {
+        "heading": "Different sound experiences for different needs.",
+        "subheading": "",
+        "description": "Orders are typically shipped within 1-2 business days. Tracking information is<br> provided for all orders EXCEPT orders of single cards",
+        "header_alignment": "center",
+        "container": "container-fluid",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": ""
+      }
+    },
+    "163214992002cf024a": {
+      "type": "product-reviews",
+      "settings": {
+        "container": "container-narrow",
+        "heading": "Reviews",
+        "custom_liquid": ""
+      }
+    },
+    "163221161150addf60": {
+      "type": "product-recommendations",
+      "settings": {
+        "container": "container",
+        "heading": "You Might Also Like",
+        "text_align": "left",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true,
+        "use_scroll_mobile": true,
+        "animations": "inherit"
+      }
+    },
+    "16322116198620330d": {
+      "type": "recent-viewed-products",
+      "settings": {
+        "container": "container",
+        "heading": "Recently Viewed Products",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true
+      }
+    }
+  },
+  "order": [
+    "aa1ffe58-248f-44be-845e-2880e9989dde",
+    "163418101120bbaa64",
+    "main",
+    "1632107321cfdc5197",
+    "1632108447382846c2",
+    "product-details-tabs",
+    "1632119012258c1f2d",
+    "16321193015b384c59",
+    "163214992002cf024a",
+    "163221161150addf60",
+    "16322116198620330d"
+  ]
+}

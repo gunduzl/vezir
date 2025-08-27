@@ -1,0 +1,121 @@
+{%- liquid
+  capture primary_locale
+    for locale in shop.published_locales
+      if locale.primary == true
+        echo locale.iso_code
+      endif
+    endfor
+  endcapture
+
+  assign money_format = shop.money_format
+  if settings.currency_code_enabled
+    assign money_format = shop.money_with_currency_format | strip_html
+  endif
+-%}
+
+{%- capture theme_data -%}
+window.MinimogTheme = {};
+window.MinimogLibs = {};
+window.MinimogStrings = {
+  addToCart: {{ 'products.product.add_to_cart' | t | json }},
+  soldOut: {{ 'products.product.sold_out' | t | json }},
+  unavailable: {{ 'products.product.unavailable' | t | json }},
+  inStock: {{ 'products.product.in_stock' | t | json }},
+  lowStock: '{% render 'new-locale', key: 'products.product.low_stock' %}',
+  inventoryQuantityHtml: '{% render 'new-locale', key: 'products.product.inventory_quantity_html' %}',
+  inventoryLowQuantityHtml: '{% render 'new-locale', key: 'products.product.inventory_low_quantity_html' %}',
+  checkout: {{ 'cart.general.checkout' | t | json }},
+  viewCart: {{ 'cart.general.viewcart' | t | json }},
+  cartRemove: {{ 'cart.general.remove' | t | json }},
+  zipcodeValidate: {{ 'cart.general.zipcode_validate' | t | json }},
+  noShippingRate: {{ 'cart.general.no_found_shipping_rate' | t | json }},
+  shippingRatesResult: {{ 'cart.general.shipping_rates_result' | t | json }},
+  recommendTitle: {{ 'cart.general.recommend_title' | t | json }},
+  shipping: {{ 'cart.general.shipping' | t | json }},
+  add: {{ 'general.foxkit.add' | t | json }},
+  itemAdded: {{ 'general.notifications.item_added' | t | json }},
+  requiredField: {{ 'general.notifications.required_field' | t | json }},
+  hours: {{ 'general.time.hours' | t | json }},
+  mins: {{ 'general.time.mins' | t | json }},
+  outOfStock: "{% render 'new-locale', key: 'products.product.out_of_stock' %}",
+  sold: "{% render 'new-locale', key: 'products.product.sold' %}",
+  available: "{% render 'new-locale', key: 'products.product.available' %}",
+  preorder: "{% render 'new-locale', key: 'products.product.preorder' %}",
+  sold_out_items_message: "{{ 'products.product.sold_out_items_message' | t }}",
+  unitPrice: {{ 'products.product.unit_price_label' | t | json }},
+  unitPriceSeparator: {{ 'general.accessibility.unit_price_separator' | t | json }},
+  cartError: "{% render 'new-locale', key: 'cart.general.cart_error' %}",
+  quantityError: "{{ 'products.product.not_enough_items_message' | t: quantity: '{{ quantity }}' }}",
+  selectVariant: "{% render 'new-locale', key: 'products.product.select_variant' %}",
+  valideDateTimeDelivery: "{% render 'new-locale', key: 'cart.general.delivery_error' %}"
+};
+window.MinimogThemeStyles = {
+  product: "{{ 'product.css' | asset_url | prepend: 'https:' }}"
+};
+window.MinimogThemeScripts = {
+  productModel: "{{ 'product-model.js' | asset_url | prepend: 'https:' }}",
+  productMedia: "{{ 'product-media.js' | asset_url | prepend: 'https:' }}",
+  variantsPicker: "{{ 'variant-picker.js' | asset_url | prepend: 'https:' }}",
+  productInfo: "{{ 'product-info.js' | asset_url | prepend: 'https:' }}"
+};
+
+window.MinimogSettings = {
+  design_mode: {{ request.design_mode | json }},
+  requestPath: {{ request.path | json }},
+  template: {{ template | json }},
+  templateName: {{ template.name | json }},
+  {%- if template.name == "product" -%}
+    productHandle: {{ product.handle | json }},
+    productId: {{ product.id | json }},
+  {%- endif -%}
+  currency_code: {{ shop.currency | json }},
+  money_format: {{ money_format | json }},
+  base_url: window.location.origin + Shopify.routes.root,
+  money_with_currency_format: {{ shop.money_with_currency_format | strip_html | json }},
+  theme: {
+    id: {{ theme.id }},
+    name: {{ theme.name | json }},
+    role: {{ theme.role | json }},
+    version: "5.7.0",
+    online_store_version: "2.0",
+    preview_url: "{{ shop.url }}?preview_theme_id={{ theme.id }}",
+  },
+  shop_domain: {{ shop.secure_url | json }},
+  shop_locale: {
+    published: {{ shop.published_locales | json }},
+    current: {{ request.locale.iso_code | json }},
+    primary: {{ primary_locale | strip_newlines | strip | json }},
+  },
+  routes: {
+    root: {{ routes.root_url | json }},
+    cart: {{ routes.cart_url | json }},
+    product_recommendations_url: {{ routes.product_recommendations_url | json }},
+    cart_add_url: '{{ routes.cart_add_url }}',
+    cart_change_url: '{{ routes.cart_change_url }}',
+    cart_update_url: '{{ routes.cart_update_url }}',
+    predictive_search_url: '{{ routes.predictive_search_url }}',
+    search_url: '{{ routes.search_url }}'
+  },
+  hide_unavailable_product_options: true,
+  pcard_image_ratio: {{ settings.pcard_image_ratio | json }},
+  cookie_consent_allow: {{ settings.cookie_consent_allow | json }},
+  cookie_consent_message: {{ settings.cookie_consent_message | json }},
+  cookie_consent_placement: {{ settings.cookie_consent_placement | json }},
+  cookie_consent_learnmore_link: {{ settings.cookie_consent_learnmore_link | json }},
+  cookie_consent_learnmore: {{ settings.cookie_consent_learnmore | json }},
+  cookie_consent_theme: {{ settings.cookie_consent_theme | json }},
+  cookie_consent_decline: {{ settings.cookie_consent_decline | json }},
+  show_cookie_consent: {{ settings.show_cookie_consent | json }},
+  product_colors: {{ settings.product_colors | json }},
+  use_ajax_atc: {{ settings.use_ajax_atc | json }},
+  discount_code_enable: {{ settings.discount_code_enable | json }},
+  enable_cart_drawer: {{ settings.enable_cart_drawer | json }},
+  pcard_show_lowest_prices: {{ settings.pcard_show_lowest_prices | json }},
+  date_now: {{ 'now' | date: '%Y/%m/%d %k:%M:00%z (%Z)' | json }},
+  foxKitBaseUrl: "{{ shop.metafields['foxecom-bs-kit'].baseUrl.value | default: 'foxkit.app' }}"
+};
+{%- endcapture -%}
+
+<script>
+  {{- theme_data | strip | strip_newlines -}}
+</script>

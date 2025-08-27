@@ -1,0 +1,60 @@
+{% liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign cart_qty = cart | item_count_for_variant: selected_variant.id
+%}
+<m-quantity-input
+  class="m-quantity {{ class }}"
+  data-product-id="{{ product.id }}"
+  data-section-id="{{ section_id }}"
+>
+  <button
+    class="m-quantity__button m:display-flex m:items-center m:justify-center"
+    type="button"
+    aria-label="{{ 'products.product.decrease_quantity' | t: title: product.title }}"
+    name="minus"
+  >
+    <svg
+      fill="currentColor"
+      stroke="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 384 512"
+    >
+      <path d="M376 232H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h368c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+    </svg>
+  </button>
+  <input
+    id="Quantity-{{ section_id }}"
+    class="m-quantity__input form-field form-field--no-border m:text-center"
+    type="number"
+    name="quantity"
+    inputmode="numeric"
+    autocomplete="off"
+    data-quantity-variant-id="{{ selected_variant.id }}"
+    data-cart-quantity="{{ cart_qty }}"
+    aria-label="{{ 'products.product.product_quantity' | t }}"
+    data-min="{{ selected_variant.quantity_rule.min }}"
+    min="{{ selected_variant.quantity_rule.min }}"
+    {% if selected_variant.quantity_rule.max != null %}
+      data-max="{{ selected_variant.quantity_rule.max }}"
+      max="{{ selected_variant.quantity_rule.max }}"
+    {% endif %}
+    step="{{ selected_variant.quantity_rule.increment }}"
+    value="{{ selected_variant.quantity_rule.min }}"
+    form="{{ product_form_id }}"
+  >
+  <button
+    class="m-quantity__button m:display-flex m:items-center m:justify-center"
+    type="button"
+    aria-label="{{ 'products.product.increase_quantity' | t: title: product.title }}"
+    name="plus"
+  >
+    <svg
+      fill="currentColor"
+      stroke="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 384 512"
+    >
+      <path d="M376 232H216V72c0-4.42-3.58-8-8-8h-32c-4.42 0-8 3.58-8 8v160H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h160v160c0 4.42 3.58 8 8 8h32c4.42 0 8-3.58 8-8V280h160c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+    </svg>
+  </button>
+</m-quantity-input>

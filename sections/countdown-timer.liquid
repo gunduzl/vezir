@@ -1,0 +1,464 @@
+{{ 'countdown-timer.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign loading = 'lazy'
+  assign fetchpriority = 'low'
+  if section.index < 2 or section.settings.enable_preload_image
+    assign loading = 'eager'
+    assign fetchpriority = 'high'
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign background_image = section.settings.background_image
+  assign mb_image = section.settings.mb_image
+  assign background_in_container = section.settings.background_in_container
+  assign use_image_as_background = section.settings.use_image_as_background
+
+  assign classes = 'm-section m-countdown-section'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign inner_classes = 'm-countdown m-countdown-section__inner m:flex m:flex-col m:justify-center m:items-' | append: section.settings.align
+  if animated
+    assign inner_classes = inner_classes | append: ' m-scroll-trigger animate--' | append: animation_effect
+  endif
+  unless background_in_container
+    assign classes = classes | append: ' m-gradient m-color-' | append: section.settings.color_scheme
+  else
+    assign inner_classes = inner_classes | append: ' m-countdown-section__inner--container m-section-py' | append: ' m-gradient m-color-' | append: section.settings.color_scheme
+  endunless
+%}
+
+<style>
+  #m-countdown-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+
+{% capture background_desktop %}
+  {% if background_image != blank%}
+    <m-parallax
+      class="m-parallax md:m:block m:hidden"
+      data-enable-parallax="{{ section.settings.enable_parallax }}"
+      data-direction="{{ section.settings.parallax_direction }}"
+    >
+      <div class="m-parallax__wrapper m-image m:relative m:w-full m:h-full">
+        <div class="m-parallax__image m:h-full">
+          {% liquid
+            assign image_height = background_image.width | divided_by: background_image.aspect_ratio | round
+          %}
+          {{
+            background_image
+            | image_url: width: 3840
+            | image_tag:
+              loading: loading,
+              fetchpriority: fetchpriority,
+              width: background_image.width,
+              height: image_height,
+              sizes: '100vw',
+              widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+              alt: background_image.alt
+            | escape
+          }}
+        </div>
+      </div>
+    </m-parallax>
+  {% endif %}
+{% endcapture %}
+{% capture background_mobile %}
+  {% if mb_image != blank %}
+    <m-parallax
+      class="m-parallax{% unless use_image_as_background %} m-countdown-section__bg-mobile{% endunless %} m:block md:m:hidden m:w-full"
+      data-enable-parallax="{{ section.settings.enable_parallax }}"
+      data-direction="{{ section.settings.parallax_direction }}"
+    >
+      <div class="m-parallax__wrapper m-image m:relative m:w-full m:h-full">
+        <div class="m-parallax__image m:h-full">
+          {%- liquid
+            assign bg_image_height = mb_image.width | divided_by: mb_image.aspect_ratio | round
+          -%}
+          {{
+            mb_image
+            | image_url: width: 1100
+            | image_tag:
+              loading: loading,
+              fetchpriority: fetchpriority,
+              width: mb_image.width,
+              height: bg_image_height,
+              sizes: '100vw',
+              widths: '375, 550, 750, 1100',
+              alt: mb_image.alt
+            | escape
+          }}
+        </div>
+      </div>
+    </m-parallax>
+  {% endif %}
+{% endcapture %}
+<section
+  id="m-countdown-{{ section.id }}"
+  data-section-type="countdown-timer"
+  data-section-id="{{ section.id }}"
+  class="{{ classes }}"
+>
+  {% unless background_in_container %}
+    {{ background_desktop }}
+  {% endunless %}
+  {% if use_image_as_background and background_in_container == false %}
+    {{ background_mobile }}
+  {% endif %}
+  <div class="{{ container }} m-section-my{% unless background_in_container %} m-section-py{% endunless %}">
+    <div class="{{ inner_classes }}">
+      {% unless use_image_as_background %}
+        {{ background_mobile }}
+      {% endunless %}
+      {% if background_in_container %}
+        {{ background_desktop }}
+      {% endif %}
+      {% if use_image_as_background and background_in_container %}
+        {{ background_mobile }}
+      {% endif %}
+      <div class="m-countdown__inner m:text-center">
+        {% if section.settings.heading != blank or section.settings.description != blank %}
+          <div class="m-countdown__header">
+            {% if section.settings.heading != blank %}
+              <h2 class="m-countdown__heading {{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
+            {% endif %}
+            {% if section.settings.description != blank %}
+              <div class="m-coutdown__description rte m:text-color-subtext">{{ section.settings.description }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+        {% render 'countdown-timer', time: section.settings.time, extra_classes: 'm:text-color-body' %}
+        {% if section.settings.button_label != blank %}
+          <div class="m-countdown__button">
+            <a
+              class="m-button {{ section.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }} {{ section.settings.button_size }} m:block"
+              href="{{ section.settings.button_link }}"
+            >
+              {{- section.settings.button_label -}}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Countdown timer",
+  "class": "shopify-section-countdown-time",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/PbyiST)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "select",
+      "id": "align",
+      "label": "Alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "end",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "checkbox",
+      "id": "background_in_container",
+      "label": "Use background in container",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable parallax effect",
+      "default": false,
+      "info": "Works only if the Image position is set to \"Use image as background\""
+    },
+    {
+      "type": "select",
+      "id": "parallax_direction",
+      "label": "Parallax direction",
+      "default": "vertical",
+      "options": [
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        },
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "zoom",
+          "label": "Zoom"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "mb_image",
+      "label": "Image on mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_image_as_background",
+      "label": "Use image as background",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Hurry up! Sale end in"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "text",
+      "id": "time",
+      "label": "End time",
+      "default": "2023-02-26 23:00:00",
+      "info": "Date format: YYYY-MM-DD HH:MM:ss"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "value": "h4",
+          "label": "Small"
+        },
+        {
+          "value": "h3",
+          "label": "Medium"
+        },
+        {
+          "value": "h2",
+          "label": "Large"
+        },
+        {
+          "value": "h1",
+          "label": "Extra large"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Button settings"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop now",
+      "info": "Leave blank to hide button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--white"
+    },
+    {
+      "type": "select",
+      "id": "button_size",
+      "label": "Button size",
+      "options": [
+        {
+          "value": "m-button--small",
+          "label": "Button small"
+        },
+        {
+          "value": "",
+          "label": "Button medium"
+        },
+        {
+          "value": "m-button--large",
+          "label": "Button large"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_preload_image",
+      "label": "Enable preload image",
+      "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown timer",
+      "category": "Promotional"
+    }
+  ]
+}
+{% endschema %}

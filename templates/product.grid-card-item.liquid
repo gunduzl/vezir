@@ -1,0 +1,17 @@
+{{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+{% liquid
+  layout none
+
+  case settings.pcard_layout
+    when '1'
+      render 'product-card-1', column_wrapper: false
+    when '2'
+      render 'product-card-2', column_wrapper: false
+    when '3'
+      render 'product-card-3', column_wrapper: false
+    when '4'
+      render 'product-card-4', column_wrapper: false
+    when '5'
+      render 'product-card-5', column_wrapper: false
+  endcase
+%}

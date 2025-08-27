@@ -1,0 +1,688 @@
+{{ 'product.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign product = section.settings.featured_product
+  assign first_3d_model = product.media | where: 'media_type', 'model' | first
+
+  if product == empty
+    assign section_onboarding = true
+  endif
+
+  assign image_placement = section.settings.image_placement
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign classes = 'm-section m-featured-product m:block'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: first_3d_model | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+
+  assign enable_variant_group_img = false
+  if section.settings.enable_variant_group_images and product.metafields['foxecom-bs-kit']['variant-images'].value.enable
+    assign enable_variant_group_img = true
+  endif
+-%}
+
+{%- if product.quantity_price_breaks_configured? -%}
+  {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'show-more.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- if first_3d_model -%}
+  <link
+    id="ModelViewerStyle"
+    rel="stylesheet"
+    href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+    media="print"
+    onload="this.media='all'"
+  >
+{%- endif -%}
+
+{% capture onboarding %}
+  <div class="m-product-info--wrapper m:text-color-body">
+    <h2 class="main-product__block main-product__block-title">
+      <a class="m-product-title" href="#">
+        {{ 'homepage.onboarding.product_title' | t }}
+      </a>
+    </h2>
+    <div class="main-product__block main-product__block-price">
+      <span class="m:text-xl m:color-price-regular">
+        {{ 1999 | money }}
+      </span>
+    </div>
+    <div class="main-product__block main-product__block-description m-product-description">
+      {{ 'homepage.onboarding.product_description' | t }}
+    </div>
+    <div class="main-product__block main-product__block-buy_buttons">
+      <button type="submit" class="m-add-to-cart m-button m-button--primary m:w-full">
+        <span>{{ 'products.product.add_to_cart' | t }}</span>
+      </button>
+    </div>
+  </div>
+{% endcapture %}
+<style>
+  #m-featured-product-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --column-gap: {{ section.settings.column_gap }}px;
+    --column-gap-mobile: 0px;
+    --row-gap-mobile: {{ section.settings.column_gap_mobile }}px;
+  }
+</style>
+{% capture variant_option_none_text %}
+  {%- render 'new-locale', key: 'products.product.choose_an_option' -%}
+{% endcapture %}
+<product-info
+  id="m-featured-product-{{ section.id }}"
+  data-section-type="featured-product"
+  data-section-id="{{ section.id }}"
+  data-layout="layout-4"
+  data-product-handle="{{ product.handle }}"
+  data-url="{{ product.url }}"
+  data-update-url="false"
+  data-product-id="{{ product.id }}"
+  data-container="{{ container }}"
+  data-enable-variant-group-images="{{ enable_variant_group_img }}"
+  data-variant-option-none-text="{{ variant_option_none_text }}"
+  class="{{ classes }}"
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    <div
+      class="m:flex m:flex-wrap m-main-product--wrapper"
+      data-view="featured-product"
+    >
+      <div class="m:column md:m:w-1/2 m:w-full m-main-product--media{% if image_placement == 'right' %} order-first md:order-last{% endif %}">
+        {% unless section_onboarding %}
+          {% render 'product-media',
+            section: section,
+            media_layout: 'layout-4',
+            product: product,
+            show_thumbnails_mobile: true,
+            context: 'featured-product'
+          %}
+        {% else %}
+          <div
+            class="{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %} m:blocks-radius"
+            style="--aspect-ratio: 1/1;"
+          >
+            {{ 'product-1' | placeholder_svg_tag: 'm-placeholder-svg m:object-cover' }}
+          </div>
+        {% endunless %}
+      </div>
+      <div class="m:column md:m:w-1/2 m:w-full m-main-product--info{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% if section_onboarding %}
+          {{ onboarding }}
+        {% else %}
+          <div class="m-product-info--wrapper m:text-color-body">
+            {% render 'main-product-blocks', product: product, section: section, is_featured: true %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {%- if enable_variant_group_img -%}
+    <script id="variantGroup" type="application/json">
+      {{ product.metafields.foxecom-bs-kit.variant-images.value | json }}
+    </script>
+  {%- endif -%}
+</product-info>
+{% if product.media.size > 0 %}
+  <script src="{{ 'product-media.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+{%- if first_3d_model -%}
+  <script src="{{ 'product-model.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+{% if product.options_with_values.size > 0 %}
+  <script src="{{ 'variant-picker.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+<script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+
+{% if product != blank %}
+  {% render 'product-data', product: product %}
+{% endif %}
+
+<script></script>
+
+{% schema %}
+{
+  "name": "Featured product",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "product",
+      "id": "featured_product",
+      "label": "Product"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_variant_group_images",
+      "label": "Enable variant group images",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Item gap",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "default": 100,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Item gap mobile",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "default": 30,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "image_placement",
+      "label": "Media placement",
+      "options": [
+        {
+          "label": "Left",
+          "value": "left"
+        },
+        {
+          "label": "Right",
+          "value": "right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "title",
+      "name": "Product title",
+      "limit": 1
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_saving",
+          "default": false,
+          "label": "Show saving amount"
+        },
+        {
+          "type": "select",
+          "label": "Type",
+          "id": "sale_badge_type",
+          "default": "percentage",
+          "options": [
+            {
+              "label": "Percentage",
+              "value": "percentage"
+            },
+            {
+              "label": "Text",
+              "value": "text"
+            },
+            {
+              "label": "Fixed amount",
+              "value": "fixed_amount"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variants selector",
+      "limit": 1
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_quantity_selector",
+          "default": true,
+          "label": "Show quantity selector"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_atc_button",
+          "default": true,
+          "label": "Show Add-to-cart button"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_dynamic_checkout",
+          "default": true,
+          "label": "Show dynamic checkout buttons",
+          "info": "Using the payment methods available on your store, customers see their preferred option, like PayPal or Apple Pay. [Learn more](https://help.shopify.com/manual/using-themes/change-the-layout/dynamic-checkout)"
+        }
+      ]
+    },
+    {
+      "type": "meta",
+      "name": "Product meta",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_collections",
+          "label": "Show collections list",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_sku",
+          "label": "Show SKU",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_vendor",
+          "label": "Show product vendor",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "badge",
+      "name": "Custom tags",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Valid formats"
+        },
+        {
+          "type": "paragraph",
+          "content": "tag__hot_[DISPLAY_TEXT]"
+        },
+        {
+          "type": "paragraph",
+          "content": "tag__new_[DISPLAY_TEXT]"
+        },
+        {
+          "type": "paragraph",
+          "content": "tag__sale_[DISPLAY_TEXT]"
+        },
+        {
+          "type": "paragraph",
+          "content": "Example: tag__hot_-50% OFF, tag__new_NEW ARRIVAL"
+        }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Full description",
+      "limit": 1
+    },
+    {
+      "type": "short_description",
+      "name": "Short description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Add a metafield with namespace \"descriptor.short_description\" to display. [Add metafield](https://shopify.com/admin/metafields/product/create)"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "default": "Text block",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "label": "Text style",
+          "id": "text_style",
+          "default": "body",
+          "options": [
+            {
+              "label": "Body text",
+              "value": "body"
+            },
+            {
+              "label": "Subtitle",
+              "value": "subtitle"
+            },
+            {
+              "label": "Uppercase",
+              "value": "uppercase"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "custom_text",
+      "name": "Richtext",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Custom text"
+        }
+      ]
+    },
+    {
+      "type": "custom_liquid",
+      "name": "Custom liquid",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "custom_liquid",
+          "label": "Custom liquid"
+        }
+      ]
+    },
+    {
+      "type": "shipping",
+      "name": "Shipping information",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_delivery_times",
+          "label": "Show delivery estimation",
+          "info": "How delivery times are generated?",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "deliver_text",
+          "label": "Delivery text",
+          "default": "Estimated Delivery:"
+        },
+        {
+          "type": "text",
+          "id": "deliver_days",
+          "label": "Deliver in:",
+          "info": "days (+/- 2 days)",
+          "default": "7"
+        },
+        {
+          "type": "text",
+          "id": "date_format",
+          "label": "Date format",
+          "default": "%b %d",
+          "info": "Example: %m/%d [Learn more about date format here.](http://strftime.net/)"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_shipping_text",
+          "label": "Show Shipping text",
+          "default": true
+        },
+        {
+          "type": "richtext",
+          "id": "shipping_text",
+          "label": "Shipping text",
+          "default": "<p><strong>Free Shipping & Returns: </strong>On all orders over $75</p>"
+        }
+      ]
+    },
+    {
+      "type": "trust_badge",
+      "name": "Trust badge",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "trust_badges_text",
+          "label": "Heading",
+          "default": "<p>Guarantee safe & secure checkout</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "trust_badges_image",
+          "label": "Trust badges image"
+        },
+        {
+          "type": "text",
+          "id": "trust_badges_image_width",
+          "label": "Image width",
+          "default": "100%"
+        },
+        {
+          "type": "select",
+          "label": "Heading position",
+          "id": "position",
+          "default": "below",
+          "options": [
+            {
+              "label": "Text above image",
+              "value": "above"
+            },
+            {
+              "label": "Text below image",
+              "value": "below"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "collapsible_tab",
+      "name": "Collapsible tab",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Collapsible tab"
+        },
+        {
+          "type": "richtext",
+          "label": "Content",
+          "id": "content"
+        },
+        {
+          "type": "liquid",
+          "label": "Content by Liquid",
+          "id": "liquid",
+          "info": "Example: {{ product.description }}"
+        },
+        {
+          "type": "checkbox",
+          "label": "Default open",
+          "id": "default_open",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "inventory_status",
+      "name": "Inventory status",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Inventory thresholds can be changed in \"Theme Settings > Product Inventory\"."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_indicator_bar",
+          "label": "Show inventory indicator bar",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Messages"
+        },
+        {
+          "type": "richtext",
+          "id": "normal_text",
+          "label": "Text for normal inventory"
+        },
+        {
+          "type": "richtext",
+          "id": "low_text",
+          "label": "Text for low inventory",
+          "default": "<p>- Hurry! Limited stock left.</p>"
+        },
+        {
+          "type": "richtext",
+          "id": "outofstock_text",
+          "label": "Text for out of stock"
+        },
+        {
+          "type": "richtext",
+          "id": "backordered_text",
+          "label": "Text for backordered",
+          "default": "<p>Backordered</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured product",
+      "blocks": [
+        {
+          "type": "title"
+        },
+        {
+          "type": "price"
+        },
+        {
+          "type": "variant_picker"
+        },
+        {
+          "type": "buy_buttons"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

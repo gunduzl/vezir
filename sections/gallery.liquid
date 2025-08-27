@@ -1,0 +1,551 @@
+{{ 'gallery.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign layout = section.settings.layout
+  assign enable_swipe_mobile = section.settings.use_scroll_mobile
+
+  assign total_items = section.blocks.size
+  assign columns = section.settings.grid_columns
+
+  if section.settings.layout == 'metro'
+    if columns >= 8
+      assign columns = 8
+    else
+      assign columns = 6
+    endif
+  endif
+
+  if section.settings.layout == 'metro-left'
+    assign columns = 5
+  endif
+
+  assign columns_tablet = columns
+  if columns > 4
+    assign columns_tablet = 4
+  endif
+
+  assign dividend = columns
+  unless layout == 'grid'
+    assign dividend = columns | minus: 2
+  endunless
+
+  assign row = total_items | plus: 0.0 | divided_by: dividend | ceil
+%}
+
+{%- style -%}
+  #m-section-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --column-gap: {{ section.settings.column_gap }}px;
+    --row-gap: {{ section.settings.row_gap }}px;
+    --column-gap-mobile: {{ section.settings.mobile_gap }}px;
+  }
+{%- endstyle -%}
+
+<section
+  data-a="{{ total_items }} {{ dividend }}"
+  id="m-section-{{ section.id }}"
+  class="m-section m-gallery-section m-gallery-section--{{ layout }} m-gradient m-color-{{ section.settings.color_scheme }} {{ section.settings.custom_classs }}"
+>
+  <div class="{{ section.settings.container }} m-section-my m-section-py">
+    {% if section.settings.heading != blank
+      or section.settings.description != blank
+      or section.settings.subheading != blank
+      or section.settings.button_label != blank
+    %}
+      <div class="m-section__header m:text-{{ section.settings.header_alignment }}{% unless layout == 'grid' %} lg:m:hidden{% endunless %}">
+        {% if section.settings.subheading != blank %}
+          <p class="m-section__subheading{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            {{ section.settings.subheading }}
+          </p>
+        {% endif %}
+        {% if section.settings.heading != blank %}
+          <h2 class="m-section__heading {{ section.settings.heading_size | default: 'h3' }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            {{ section.settings.heading }}
+          </h2>
+        {% endif %}
+        {% if section.settings.description != blank %}
+          <div class="m-section__description{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            {{ section.settings.description }}
+          </div>
+        {% endif %}
+        {% if section.settings.button_label != blank %}
+          {% capture arrow %}<svg class="m-rlt-reverse-x" width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.03062 2.4694L12.0306 7.4694C12.1005 7.53908 12.156 7.62187 12.1939 7.71304C12.2317 7.8042 12.2512 7.90194 12.2512 8.00065C12.2512 8.09936 12.2317 8.1971 12.1939 8.28827C12.156 8.37943 12.1005 8.46222 12.0306 8.5319L7.03062 13.5319C6.88973 13.6728 6.69863 13.752 6.49937 13.752C6.30012 13.752 6.10902 13.6728 5.96812 13.5319C5.82723 13.391 5.74807 13.1999 5.74807 13.0007C5.74807 12.8014 5.82723 12.6103 5.96812 12.4694L10.4375 8.00003L5.9675 3.53065C5.8266 3.38976 5.74745 3.19866 5.74745 2.9994C5.74745 2.80015 5.8266 2.60905 5.9675 2.46815C6.10839 2.32726 6.29949 2.2481 6.49875 2.2481C6.69801 2.2481 6.8891 2.32726 7.03 2.46815L7.03062 2.4694Z" fill="currentColor"/>
+            </svg>
+          {% endcapture %}
+          {% liquid
+            assign button_label = section.settings.button_label
+            assign is_button_icon = false
+            if button_label contains '[arrow]'
+              assign is_button_icon = true
+            endif
+          %}
+          <div class="m-section__button{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            <a
+              class="m-button{% if is_button_icon %} m-button--text-with-icon{% endif %} {{ section.settings.button_style }}"
+              {% if section.settings.button_link != blank %}
+                href="{{ section.settings.button_link }}"
+              {% else %}
+                aria-disabled="true"
+              {% endif %}
+            >
+              {{- button_label | replace: '[arrow]', arrow -}}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+    <div class="m-gallery m-gallery--{{ columns }}-columns m-gallery--{{ row }}-rows{% if enable_swipe_mobile %} swipe-mobile swipe-mobile--{{ section.settings.columns_mobile }}-cols{% endif %}">
+      <div class="m-gallery__wrapper m:display-grid m:grid-{{ section.settings.columns_mobile }}-cols md:m:grid-{{ columns_tablet }}-cols lg:m:grid-{{ columns }}-cols{% if enable_swipe_mobile %} swipe-mobile__inner{% endif %}">
+        {% unless layout == 'grid' %}
+          <div class="m-gallery__item m-gallery__info m:text-center m:hidden lg:m:flex m:row-end-{{ row | plus: 1 }}{% if layout == 'metro' %} m:col-{{ columns | divided_by: 2 }}-{{ columns | divided_by: 2 | plus: 2 }}{% else %} m:col-1-3{% endif %} m:blocks-radius m-gradient m-color-{{ section.settings.color_scheme_content }}">
+            {% if section.settings.subheading != blank %}
+              <p class="m-section__subheading{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+                {{ section.settings.subheading }}
+              </p>
+            {% endif %}
+            {% if section.settings.heading != blank %}
+              <h2 class="m-section__heading {{ section.settings.heading_size | default: 'h3' }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+                {{ section.settings.heading }}
+              </h2>
+            {% endif %}
+            {% if section.settings.description != blank %}
+              <div class="m-section__description{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+                {{ section.settings.description }}
+              </div>
+            {% endif %}
+            {% if section.settings.button_label != blank %}
+              {% capture arrow %}<svg class="m-rlt-reverse-x" width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.03062 2.4694L12.0306 7.4694C12.1005 7.53908 12.156 7.62187 12.1939 7.71304C12.2317 7.8042 12.2512 7.90194 12.2512 8.00065C12.2512 8.09936 12.2317 8.1971 12.1939 8.28827C12.156 8.37943 12.1005 8.46222 12.0306 8.5319L7.03062 13.5319C6.88973 13.6728 6.69863 13.752 6.49937 13.752C6.30012 13.752 6.10902 13.6728 5.96812 13.5319C5.82723 13.391 5.74807 13.1999 5.74807 13.0007C5.74807 12.8014 5.82723 12.6103 5.96812 12.4694L10.4375 8.00003L5.9675 3.53065C5.8266 3.38976 5.74745 3.19866 5.74745 2.9994C5.74745 2.80015 5.8266 2.60905 5.9675 2.46815C6.10839 2.32726 6.29949 2.2481 6.49875 2.2481C6.69801 2.2481 6.8891 2.32726 7.03 2.46815L7.03062 2.4694Z" fill="currentColor"/>
+                </svg>
+              {% endcapture %}
+              {% liquid
+                assign button_label = section.settings.button_label
+                assign is_button_icon = false
+                if button_label contains '[arrow]'
+                  assign is_button_icon = true
+                endif
+              %}
+              <div class="m-section__button{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+                <a
+                  class="m-button{% if is_button_icon %} m-button--text-with-icon{% endif %} {{ section.settings.button_style }}"
+                  {% if section.settings.button_link != blank %}
+                    href="{{ section.settings.button_link }}"
+                  {% else %}
+                    aria-disabled="true"
+                  {% endif %}
+                >
+                  {{- button_label | replace: '[arrow]', arrow -}}
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        {% endunless %}
+        {% for block in section.blocks %}
+          <{% if block.settings.link != blank %}a href="{{ block.settings.link }}"{% else %}div{% endif %} class="m-gallery__item m:relative m:block m:blocks-radius{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+            {% if animated %}
+              data-cascade
+              style="--animation-order: {{ forloop.index }};"
+            {% endif %}
+          >
+            <div class="m-gallery__media">
+              {% if block.settings.image != blank %}
+                {% render 'responsive-image',
+                  image: block.settings.image,
+                  wrapper_class: 'm:w-full m:h-full',
+                  aspect_ratio: 1
+                %}
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full m:object-cover' }}
+              {% endif %}
+            </div>
+            {% if section.settings.icon != 'none' and block.settings.link != blank %}
+              <div class="m-gallery__content">
+                <div class="m-gallery__icon">
+                  {% render 'icon', name: section.settings.icon, size: 'large' %}
+                </div>
+              </div>
+            {% endif %}
+          </{% if block.settings.link != blank %}a{% else %}div{% endif %}>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Gallery images",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Gallery images"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "info": "Leave blank to hide the button"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--primary"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "container-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_content",
+      "label": "Header color scheme",
+      "info": "Only work with layout Metro"
+    },
+    {
+      "type": "header",
+      "content": "Social media"
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "instagram",
+          "label": "Instagram"
+        },
+        {
+          "value": "facebook",
+          "label": "Facebook"
+        },
+        {
+          "value": "twitter",
+          "label": "Twitter"
+        }
+      ],
+      "default": "none",
+      "label": "Icon"
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "grid",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "metro",
+          "label": "Metro 1"
+        },
+        {
+          "value": "metro-left",
+          "label": "Metro 2"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Grid settings"
+    },
+    {
+      "type": "range",
+      "id": "grid_columns",
+      "label": "Images per row",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap",
+      "min": 0,
+      "max": 50,
+      "default": 30,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "row_gap",
+      "label": "Row gap",
+      "min": 0,
+      "max": 50,
+      "default": 30,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        }
+      ],
+      "default": "2",
+      "label": "Number of columns on mobile"
+    },
+    {
+      "type": "range",
+      "id": "mobile_gap",
+      "label": "Gap",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "label": "Use horizontal scrollbar",
+      "id": "use_scroll_mobile",
+      "default": true,
+      "info": "Uncheck to display as grid"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Gallery images",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

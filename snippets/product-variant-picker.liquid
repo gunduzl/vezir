@@ -1,0 +1,123 @@
+{% liquid
+  assign is_size = false
+  assign size_title_downcase = size_title | downcase
+  assign picker_types = ''
+  assign option_labels = ''
+
+  for option in product.options_with_values
+    assign found_option = false
+    assign option_design = ''
+    assign option_label = option.name
+
+    for i in (1..5)
+      unless found_option == true
+        assign option_name_key = 'variant_option_title' | append: i
+        assign option_design_key = 'variant_option_design' | append: i
+        assign option_label_key = 'variant_option_display_name' | append: i
+
+        assign option_name = settings[option_name_key]
+        if option_name == option.name
+          assign found_option = true
+          assign option_design = settings[option_design_key]
+          assign option_label = settings[option_label_key] | default: option.name
+        endif
+      endunless
+    endfor
+
+    assign design = option_design | prepend: ','
+    assign option_label = option_label | prepend: ','
+    if found_option == false or option_design == ''
+      assign design = settings.variant_option_design_default | prepend: ','
+    endif
+
+    assign picker_types = picker_types | append: design
+    assign option_labels = option_labels | append: option_label
+  endfor
+  assign picker_types = picker_types | remove_first: ',' | split: ','
+  assign option_labels = option_labels | remove_first: ',' | split: ','
+%}
+
+<variant-picker
+  id="variant-picker-{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-section-id="{{ section.id }}"
+  data-update-url="{{ update_browser_history }}"
+  data-product-url="{{ product.url }}"
+  data-has-only-default-variant="{{ product.has_only_default_variant }}"
+>
+  {%- unless product.has_only_default_variant -%}
+    {%- for option in product.options_with_values -%}
+      {% liquid
+        assign picker_type = picker_types[forloop.index0]
+        assign option_label = option_labels[forloop.index0]
+        assign option_name_downcase = option.name | downcase
+        if size_title_downcase contains option_name_downcase
+          assign is_size = true
+        else
+          assign is_size = false
+        endif
+
+        assign swatch_count = option.values | map: 'swatch' | compact | size
+
+        if swatch_count > 0
+          if picker_type == 'dropdown'
+            assign picker_type = 'swatch_dropdown'
+          elsif picker_type == 'color'
+            assign picker_type = 'swatch_color'
+          endif
+        endif
+      %}
+      <div
+        class="m-product-option m-product-option--{{ picker_type }}"
+        data-picker-type="{{ picker_type }}"
+      >
+        <div
+          data-picker-field="{% if picker_type == 'dropdown' or picker_type == 'swatch_dropdown' %}select{% else %}radio{% endif %}"
+          data-option-name="{{ option.name }}"
+          data-selected-value="{{ option.selected_value }}"
+          class="m-product-option__inner"
+        >
+          <div class="m-product-option--label">
+            <label class="option-label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
+              <span class="option-label--title">{{ option_label }}:</span>
+              <span class="option-label--selected">{{ option.selected_value }}</span>
+            </label>
+            {% if is_size %}
+              <button data-open-sizeguide class="foxkit-sizechart-button m:inline-flex m:items-center m:hidden">
+                <svg
+                  class="m-svg-icon--large"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 640 512"
+                >
+                  <path d="M608 128H32c-17.67 0-32 14.33-32 32v192c0 17.67 14.33 32 32 32h576c17.67 0 32-14.33 32-32V160c0-17.67-14.33-32-32-32zm0 224H32V160h80v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h64v56c0 4.42 3.58 8 8 8h16c4.42 0 8-3.58 8-8v-56h80v192z"/>
+                </svg>
+                <span class="foxkit-sizechart-button--label">{{ 'products.product.size_guide' | t }}</span>
+              </button>
+            {% endif %}
+          </div>
+          <div class="m-product-option--content m:inline-flex m:flex-wrap">
+            {%- case picker_type -%}
+              {% when 'dropdown', 'swatch_dropdown' %}
+                <select
+                  id="Option-{{ section.id }}-{{ forloop.index0 }}"
+                  name="options[{{ option.name | escape }}]"
+                  form="{{ product_form_id }}"
+                >
+                  {% render 'product-variant-options', product: product, option: option, picker_type: picker_type %}
+                </select>
+              {% when 'swatch_color' %}
+                {% render 'product-variant-options', product: product, option: option, picker_type: picker_type %}
+              {% else %}
+                {% render 'product-variant-options', product: product, option: option, picker_type: picker_type %}
+            {%- endcase -%}
+          </div>
+        </div>
+      </div>
+    {%- endfor -%}
+  {%- endunless -%}
+  <script type="application/json" data-selected-variant>
+    {{ product.selected_or_first_available_variant | json }}
+  </script>
+</variant-picker>

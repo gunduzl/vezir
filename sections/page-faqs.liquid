@@ -1,0 +1,183 @@
+{%- liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+  assign classes = 'm-section m-faqs-section'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+-%}
+<section class="{{ classes }}" data-section-id="{{ section.id }}" data-section-type="page-faqs">
+  <div class="{{ container }}">
+    <div class="m-row">
+      {% if section.settings.menu != blank %}
+        <div class="m-faqs-section__menu lg:m:w-3/12{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+          <ul class="m-link-lists--border">
+            {%- for link in linklists[section.settings.menu].links -%}
+            <li class="m-link-lists--item"><a class="m-link{% if link.active %} active{% endif %}" href="{{ link.url }}">{{ link.title }}</a></li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {% endif %}
+      <div class="m-faqs-section__content{% if section.settings.menu != blank %} lg:m:w-9/12{% else %} m:w-full{% endif %}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {% for block in section.blocks %}
+          <div class="m-faqs-section__block m-faqs-section__block-{{ block.type }}">
+            {% case block.type %}
+              {% when 'content' %}
+                {% if block.settings.content != blank %}
+                  {{ block.settings.content }}
+                {% endif %}
+              {% else %}
+                {% if block.settings.title != blank and block.settings.content != blank %}
+                  <collapsible-tab
+                    class="m-collapsible no-js-hidden"
+                    data-block-id="collapsible-tab-{{ block.id }}"
+                    {% if block.settings.open %}open="true"{% endif %}
+                  >
+                    <h3 class="m-collapsible--button" data-trigger>
+                      <span>{{ block.settings.title }}</span>
+                      <span class="m-collapsible--icon">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M13.5306 6.53073L8.5306 11.5307C8.46092 11.6007 8.37813 11.6561 8.28696 11.694C8.1958 11.7318 8.09806 11.7513 7.99935 11.7513C7.90064 11.7513 7.8029 11.7318 7.71173 11.694C7.62057 11.6561 7.53778 11.6007 7.4681 11.5307L2.4681 6.53073C2.3272 6.38984 2.24805 6.19874 2.24805 5.99948C2.24805 5.80023 2.3272 5.60913 2.4681 5.46823C2.60899 5.32734 2.80009 5.24818 2.99935 5.24818C3.19861 5.24818 3.3897 5.32734 3.5306 5.46823L7.99997 9.93761L12.4693 5.46761C12.6102 5.32671 12.8013 5.24756 13.0006 5.24756C13.1999 5.24756 13.391 5.32671 13.5318 5.46761C13.6727 5.60851 13.7519 5.7996 13.7519 5.99886C13.7519 6.19812 13.6727 6.38921 13.5318 6.53011L13.5306 6.53073Z" fill="currentColor"/>
+                        </svg>
+                      </span>
+                    </h3>
+                    <div class="m-collapsible--content" data-content hidden>
+                        <div class="m-collapsible--content__inner rte">
+                          {{ block.settings.content }}
+                        </div>
+                    </div>
+                  </collapsible-tab>
+                {% endif %}
+            {% endcase %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "FAQs",
+  "enabled_on": {
+    "templates": [
+      "page"
+    ]
+  },
+  "class": "faqs-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Select menu"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "content",
+      "name": "Custom content",
+      "settings": [
+        {
+          "type": "html",
+          "id": "content",
+          "label": "Content",
+          "info": "Allow html code"
+        }
+      ]
+    },
+    {
+      "type": "accordion",
+      "name": "Accordion item",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "Question Name"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": "<p>Answer Content</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "open",
+          "label": "Open Tab By Default",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQs",
+      "blocks": [
+        {
+          "type": "accordion"
+        },
+        {
+          "type": "accordion"
+        },
+        {
+          "type": "accordion"
+        },
+        {
+          "type": "accordion"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

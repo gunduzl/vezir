@@ -1,0 +1,40 @@
+{% paginate customer.orders by 20 %}
+
+{% if customer.orders.size != 0 %}
+    <table class="responsive-table m:w-full">
+    <thead>
+      <tr class="m:flex m:text-left">
+        <th class="m:w-1/5">{{ 'customer.orders.order_number' | t }}</th>
+        <th class="m:w-1/5">{{ 'customer.orders.date' | t }}</th>
+        <th class="m:w-1/5">{{ 'customer.orders.payment_status' | t }}</th>
+        <th class="m:w-1/5">{{ 'customer.orders.fulfillment_status' | t }}</th>
+        <th class="m:w-1/5">{{ 'customer.orders.total' | t }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in customer.orders %}
+        <tr class="responsive-table-row md:m:flex m:items-center">
+          <td class="m:w-1/5" data-label="{{ 'customer.orders.order_number' | t }}">
+            <a href="{{ order.customer_url }}" class="m-button m-button--secondary m-button--small">{{ order.name }}</a>
+          </td>
+          <td class="m:w-1/5" data-label="{{ 'customer.orders.date' | t }}">{{ order.created_at | date: format: 'month_day_year' }}</td>
+          <td class="m:w-1/5" data-label="{{ 'customer.orders.payment_status' | t }}">{{ order.financial_status_label }}</td>
+          <td class="m:w-1/5" data-label="{{ 'customer.orders.fulfillment_status' | t }}">{{ order.fulfillment_status_label }}</td>
+          <td class="m:w-1/5" data-label="{{ 'customer.orders.total' | t }}">{{ order.total_price | money }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+{% else %}
+    <div class="notification show success">
+      <svg class="m-svg-icon--medium" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+      <a href="{{ routes.collections_url }}">{{ 'customer.orders.make_your_first_order' | t }}</a>
+      <span>{{ 'customer.orders.none' | t }}</span>
+    </div>
+{% endif %}
+
+{% if paginate.pages > 1 %}
+  {% render 'pagination', paginate: paginate %}
+{% endif %}
+
+{% endpaginate %}

@@ -1,0 +1,209 @@
+{% liquid
+  assign prefix_class = PREFIX_CLASS | default: 'f:'
+  assign productReviews = shop.metafields.foxify['product-reviews'].value
+  assign feraReviews = shop.metafields.foxify.fera.value
+  assign judgemeReviews = shop.metafields.foxify.judgeme.value
+  assign looxReviews = shop.metafields.foxify.loox.value
+  assign laiReviews = shop.metafields.foxify['lai-reviews'].value
+  assign aliReviews = shop.metafields.foxify.alireviews.value
+  assign stampedReviews = shop.metafields.foxify.stamped.value
+  assign rivyoReviews = shop.metafields.foxify.rivyo.value
+  assign growaveReviews = shop.metafields.foxify.growave.value
+  assign yotpoReviews = shop.metafields.foxify.yotpo.value
+  assign ryviuReviews = shop.metafields.foxify.ryviu.value
+  assign automizelyReviews = shop.metafields.foxify['automizely-reviews'].value
+  assign trustooReviews = shop.metafields.foxify.trustoo.value
+  assign airReviews = shop.metafields.foxify['air-reviews'].value
+  assign trustifyReviews = shop.metafields.foxify['trustify-reviews'].value
+  assign aitrillion = shop.metafields.foxify.aitrillion.value
+%}
+{% if productReviews != blank and productReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <span class='shopify-product-reviews-badge' data-id='{{ product.id }}'></span>
+  </div>
+{% endif %}
+{% if feraReviews != blank and feraReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div data-fera-container='product_reviews_summary' data-product-id='{{ product.id }}'></div>
+  </div>
+{% endif %}
+{% if laiReviews != blank and laiReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div
+      class='scm-reviews-rate'
+      data-rate-version2='{{product.metafields.scm_review_importer.reviewsData.reviewCountInfo | json}}'
+      data-product-id='{{product.id}}'
+    ></div>
+  </div>
+{% endif %}
+{% if aliReviews != blank and aliReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div product-id='{{ product.id }}' class='alr-display-review-badge'></div>
+  </div>
+{% endif %}
+{% if looxReviews != blank and looxReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div
+      class='loox-rating'
+      data-id='{{ product.id }}'
+      data-rating='{{ product.metafields.loox.avg_rating }}'
+      data-raters='{{ product.metafields.loox.num_reviews }}'
+    ></div>
+  </div>
+{% endif %}
+{% if judgemeReviews != blank and judgemeReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}'>
+      {{ product.metafields.judgeme.badge }}
+    </div>
+  </div>
+{% endif %}
+{% if stampedReviews != blank and stampedReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <span
+      class='stamped-product-reviews-badge stamped-main-badge'
+      data-id='{{ product.id }}'
+      data-product-sku='{{ product.handle }}'
+      data-product-title='{{ product.title }}'
+      data-product-type='{{ product.type }}'
+    >
+      {{ product.metafields.stamped.badge }}
+    </span>
+  </div>
+{% endif %}
+{% if rivyoReviews != blank and rivyoReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div
+      class='wc_product_review_badge'
+      data-handle='{{ product.handle }}'
+      data-product_id='{{ product.id }}'
+    ></div>
+  </div>
+{% endif %}
+{% if growaveReviews != blank and growaveReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    {% capture the_snippet_review_avg %}{% render 'ssw-widget-avg-rate-listing', product: product %}{% endcapture %}
+    {% unless the_snippet_review_avg contains 'Liquid error' %}
+      {{ the_snippet_review_avg }}
+    {% endunless %}
+  </div>
+{% endif %}
+{% if yotpoReviews != blank and yotpoReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div
+      class='yotpo bottomLine'
+      data-domain='{{shop.permanent_domain | escape }}'
+      data-product-id='{{ product.id }}'
+      data-product-models='{{ product.id }}'
+      data-name='{{ product.title | escape }}'
+      data-url='{{ shop.url }}{{ product.url }}'
+      data-image-url='{{ product.featured_image | product_img_url: 'large' |replace: '?', '%3F' | replace: '&','%26'}}'
+      data-description='{{ product.description | escape }}'
+    ></div>
+  </div>
+{% endif %}
+{% if ryviuReviews != blank and ryviuReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div class='review-collection'>
+      <ryviu-widget-total
+        collection='1'
+        reviews_data='{{product.metafields.ryviu.product_reviews_info  | escape }}'
+        product_id='{{product.id}}'
+        handle='{{product.handle}}'
+      ></ryviu-widget-total>
+    </div>
+  </div>
+{% endif %}
+{% if automizelyReviews != blank and automizelyReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div
+      class='automizely_reviews_product_collection_star_widget'
+      data-product-id='{{ product.id }}'
+      data-ratings='{{ product.metafields.automizely_reviews.ratings }}'
+      data-raters='{{ product.metafields.automizely_reviews.raters }}'
+    ></div>
+  </div>
+{% endif %}
+{% if trustooReviews != blank and trustooReviews.show_product_rating %}
+  <div class='custom-vstar-rating-widget' product-id='{{ product.id }}'></div>
+{% endif %}
+{% if trustifyReviews != blank and trustifyReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div
+      class='trustify-review-stars-collection'
+      data-review-type='collection'
+      data-review-avg='{{ product.metafields.tr_reviews_product.review_avg }}'
+      data-review-count='{{ product.metafields.tr_reviews_product.review_count }}'
+    ></div>
+  </div>
+{% endif %}
+{% if airReviews != blank and airReviews.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div
+      class='AirReviews-Widget AirReviews-Widget--Stars'
+      data-review-avg='{{ product.metafields.air_reviews_product.review_avg }}'
+      data-review-count='{{ product.metafields.air_reviews_product.review_count }}'
+    ></div>
+  </div>
+{% endif %}
+{% if aitrillion != blank and aitrillion.show_product_rating %}
+  <div class='{{ prefix_class }}extension:rating-badge {{ prefix_class }}extension:rating-badge--product-card'>
+    <div class='product-review-star-container'>
+      {% assign star_svg = '<svg width="26" height="25" viewBox="0 0 26 25" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.4983 0.896992L16.7123 8.50399L24.9403 9.21099C25.0672 9.22202 25.1881 9.27015 25.2878 9.34939C25.3876 9.42862 25.4618 9.53545 25.5012 9.65656C25.5407 9.77768 25.5436 9.90773 25.5097 10.0305C25.4757 10.1533 25.4064 10.2633 25.3103 10.347L19.0673 15.754L20.9373 23.798C20.9658 23.922 20.9571 24.0516 20.9124 24.1707C20.8677 24.2897 20.789 24.393 20.686 24.4677C20.583 24.5423 20.4603 24.585 20.3332 24.5904C20.2061 24.5958 20.0803 24.5636 19.9713 24.498L12.9003 20.233L5.83033 24.5C5.72138 24.5656 5.59552 24.5978 5.46844 24.5924C5.34136 24.587 5.21867 24.5443 5.11567 24.4697C5.01268 24.395 4.93392 24.2917 4.88923 24.1727C4.84453 24.0536 4.83587 23.924 4.86433 23.8L6.73433 15.756L0.491328 10.348C0.394805 10.2646 0.325061 10.1545 0.290837 10.0316C0.256614 9.90867 0.259435 9.77839 0.298947 9.65708C0.338459 9.53577 0.412904 9.42882 0.512948 9.34964C0.612991 9.27046 0.734182 9.22258 0.861327 9.21199L9.08933 8.50499L12.3033 0.896992C12.3527 0.779297 12.4358 0.678813 12.5421 0.608148C12.6484 0.537484 12.7732 0.499786 12.9008 0.499786C13.0285 0.499786 13.1533 0.537484 13.2596 0.608148C13.3659 0.678813 13.4489 0.779297 13.4983 0.896992Z" fill="currentColor"></path></svg>' %}
+      {% assign half_star_svg = '<svg width="26" height="25" viewBox="0 0 26 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_99_1082)"><path class="nofill" d="M25.6079 9.98995C25.5779 10.11 25.5079 10.22 25.4079 10.3L19.1679 15.71L21.0379 23.75C21.0679 23.88 21.0579 24.01 21.0079 24.13C20.9679 24.24 20.8879 24.35 20.7879 24.42C20.6779 24.5 20.5579 24.54 20.4279 24.55C20.3079 24.55 20.1779 24.52 20.0679 24.45L12.9979 20.19H12.9779V0.449951H12.9979C13.1279 0.449951 13.2479 0.489951 13.3579 0.559951C13.4679 0.629951 13.5479 0.729951 13.5979 0.849951L16.8079 8.45995L25.0379 9.16995C25.1679 9.17995 25.2879 9.21995 25.3879 9.29995C25.4879 9.37995 25.5579 9.48995 25.5979 9.60995C25.6379 9.72995 25.6479 9.85995 25.6079 9.98995Z" fill="#E1DFE5"/><path class="fill" d="M12.978 0.449951V20.2L5.92796 24.45C5.81796 24.52 5.69796 24.55 5.56796 24.55C5.43796 24.54 5.31796 24.5 5.21796 24.42C5.10796 24.35 5.03796 24.25 4.98796 24.13C4.94796 24.01 4.93796 23.88 4.96796 23.75L6.83796 15.71L0.587962 10.3C0.497962 10.22 0.427962 10.11 0.387962 9.98995C0.357962 9.85995 0.357962 9.72995 0.397962 9.60995C0.437962 9.48995 0.507962 9.37995 0.607962 9.29995C0.707962 9.22995 0.837962 9.17995 0.957961 9.16995L9.18796 8.45995L12.398 0.849951C12.448 0.729951 12.538 0.629951 12.638 0.559951C12.738 0.489951 12.858 0.449951 12.978 0.449951Z" fill="currentColor"/></g><defs><clipPath id="clip0_99_1082"><rect width="26" height="25" fill="currentColor"/></clipPath></defs></svg>' %}
+      {% assign reviews = product.metafields.eggviews.reviews_average %}
+      {% assign ratingcount = product.metafields.eggviews.reviews_count %}
+      {% if reviews %}
+        {% assign rating = product.metafields.eggviews.reviews_average %}
+        {% assign integerPart = rating | floor %}
+        {% assign counter = 0 %}
+        {% assign decimalPart = rating | minus: integerPart %}
+        <div class='aio-review-ratings'>
+          <div class='star-container'>
+            <span class='ai-review-stars' title='{{ product.metafields.eggviews.reviews_average }}' style='color: #feb403'>
+              {% for i in (1..integerPart) %}
+                {% assign counter = counter | plus: 1 %}
+                <span class='aa fa_star'>
+                  {{ star_svg }}
+                </span>
+              {% endfor %}
+              {% if decimalPart > 0.1 %}
+                {% if decimalPart < 0.6 %}
+                  <span class='fa_star_half_full'>
+                    {{ half_star_svg }}
+                  </span>
+                {% elsif decimalPart > 0.5 %}
+                  <span class='aa fa_star'>
+                    {{ star_svg }}
+                  </span>
+                {% else %}
+                  <span class='fa_star no'>
+                    {{ star_svg }}
+                  </span>
+                {% endif %}
+                {% assign counter = counter | plus: 1 %}
+              {% endif %}
+              {% assign remainingStars = 5 | minus: counter %}
+              {% for i in (1..remainingStars) %}
+                <span class='ss fa_star_o' style='color: #e0e0e0'>
+                  {{ star_svg }}
+                </span>
+              {% endfor %}
+            </span>
+          </div>
+          <span class='ai-review-stars-text'>({{ ratingcount }})</span>
+        </div>
+      {% else %}
+        <div class='aio-review-ratings'>
+          <span class='ai-review-stars'>
+            {% for i in (1..5) %}
+              <span class='fa_star_o' style='color: #e0e0e0'>
+                {{ star_svg }}
+              </span>
+            {% endfor %}
+          </span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

@@ -1,0 +1,317 @@
+{% liquid
+  assign selected_variant = product.selected_or_first_available_variant
+  assign sold_out = false
+  unless product.available
+    assign sold_out = true
+  endunless
+%}
+{%- capture select_options -%}
+  {%- render 'new-locale', key: 'products.product.select_options' -%}
+{%- endcapture -%}
+{%- capture variant_price -%}
+  {%- if product.quantity_price_breaks_configured? -%}
+    {%- liquid
+      assign volume_pricing_array = selected_variant.quantity_price_breaks | sort: 'quantity' | reverse
+      assign current_qty_for_volume_pricing = cart_qty | plus: selected_variant.quantity_rule.min
+      if cart_qty > 0
+        assign current_qty_for_volume_pricing = cart_qty | plus: selected_variant.quantity_rule.increment
+      endif
+      assign variant_price_compare = selected_variant.compare_at_price
+    -%}
+    <price-per-item
+      id="PricePerItem-{{ block_id }}"
+      class="variant-item__price-per-item m:display-flex m:flex-wrap m:items-center m:gap-2"
+      data-section-id="{{ block_id }}"
+      data-product-id="{{ product_id }}"
+      data-variant-id="{{ selected_variant.id }}"
+    >
+      {%- if variant_price_compare -%}
+        <span class="m:visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+        <span class="m:inline-flex m:items-center h-auto m:relative">
+          {%- liquid
+            if settings.currency_code_enabled
+              echo variant_price_compare | money_with_currency
+            else
+              echo variant_price_compare | money
+            endif
+          -%}
+        </span>
+        <span class="m:visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+      {%- endif -%}
+      {%- if selected_variant.quantity_price_breaks.size > 0 -%}
+        {%- if current_qty_for_volume_pricing < volume_pricing_array.last.minimum_quantity -%}
+          {%- liquid
+            if settings.currency_code_enabled
+              assign variant_price = selected_variant.price | money_with_currency
+            else
+              assign variant_price = selected_variant.price | money
+            endif
+          -%}
+          <span class="price-per-item--current price__regular m:whitespace-nowrap">{{ variant_price }}</span>
+        {%- else -%}
+          {%- for price_break in volume_pricing_array -%}
+            {%- if current_qty_for_volume_pricing >= price_break.minimum_quantity -%}
+              {%- liquid
+                if settings.currency_code_enabled
+                  assign price_break_price = price_break.price | money_with_currency
+                else
+                  assign price_break_price = price_break.price | money
+                endif
+              -%}
+              <span class="price-per-item--current price__regular m:whitespace-nowrap">{{ price_break_price }}</span>
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- else -%}
+        <span class="price-per-item--current price__regular m:whitespace-nowrap">
+          {%- liquid
+            if settings.currency_code_enabled
+              assign variant_price = selected_variant.price | money_with_currency
+            else
+              assign variant_price = selected_variant.price | money
+            endif
+          -%}
+          {{ variant_price }}
+        </span>
+      {%- endif -%}
+    </price-per-item>
+  {% else %}
+    {% render 'product-prices', use_variant: true, product: product, show_sale_badge: true, sale_badge_type: 'fixed_amount' %}
+  {%- endif -%}
+{%- endcapture -%}
+<div
+  class="product-bundles__item m:display-flex m:items-center{% if show_reviews %} product-bundles__item--has-reviews{% endif %}"
+  data-index="{{ index }}"
+  data-product-handle="{{ product.handle }}"
+  data-block-id="{{ block_id }}"
+  data-product-id="{{ product.id }}"
+  data-available="{{ product.available }}"
+>
+  <span class="product-bundles__item-index m:inline-flex m:justify-center m:items-center">
+    {{- index -}}
+  </span>
+  <a href="{{ product.url }}" class="m:block product-bundles__item-image m:blocks-radius-md">
+    {% render 'responsive-image', image: product.featured_image, aspect_ratio: image_ratio %}
+  </a>
+  <div class="product-bundles__item-info m:display-flex m:flex-wrap md:m:flex-nowrap">
+    <div class="product-bundles__item-details m:w-full">
+      {% if show_reviews %}
+        <div class="product-bundles__item-review m:text-sm">
+          {% render 'product-reviews-app__badge', product: product %}
+        </div>
+      {% endif %}
+      <h3 class="product-bundles__item-title h6">
+        <a href="{{ product.url }}">{{ product.title }}</a>
+      </h3>
+      <div class="product-bundles__item-variant">
+        {% if product.available %}
+          <select
+            name="id"
+            class="m-product-option--dropdown-select{% if product.has_only_default_variant %} m:hidden{% endif %}"
+            aria-label="{{ select_options }}"
+          >
+            {% for variant in product.variants %}
+              {%- capture option_ids -%}
+                {%- for option in variant.options -%}
+                  {{- option.id -}}{%- unless forloop.last -%},{%- endunless -%}
+                {%- endfor -%}
+              {%- endcapture -%}
+              <option
+                {% if variant == selected_variant %}
+                  selected="selected"
+                {% endif %}
+                {% if variant.available == false %}
+                  disabled="disabled"
+                {% endif %}
+                value="{{ variant.id }}"
+                data-options-id="{{ option_ids }}"
+                data-price="{{ variant.price }}"
+              >
+                {{ variant.title }}
+                {%- if variant.available == false %} - {{ 'products.product.sold_out' | t }}{% endif -%}
+              </option>
+            {% endfor %}
+          </select>
+        {% else %}
+          <input
+            type="hidden"
+            name="id"
+            value="{{- selected_variant.id -}}"
+            class="product-variant-id"
+            {% if selected_variant.available == false %}
+              disabled
+            {% endif %}
+          >
+        {% endif %}
+        <div id="QuantityForm-{{ block_id }}" class="product-bundle-card__quantity m:hidden">
+          {% render 'product-qty-input', product_form_id: '', product: product, section_id: block_id %}
+        </div>
+        {%- if product.quantity_price_breaks_configured? -%}
+          {%- liquid
+            assign has_qty_rules = false
+            if selected_variant.quantity_rule.increment > 1 or selected_variant.quantity_rule.min > 1 or selected_variant.quantity_rule.max != null
+              assign has_qty_rules = true
+            endif
+
+            assign has_vol_pricing = false
+            if selected_variant.quantity_price_breaks.size > 0
+              assign has_vol_pricing = true
+            endif
+          -%}
+
+          {%- if has_qty_rules or has_vol_pricing -%}
+            {%- capture qty_rules_vol_pricing -%}
+              <button
+                class="quantity-popover__button volume-pricing-toggle m-button m-button--blank m:text-color-subtext"
+                aria-label="Open Volume Pricing"
+              >
+                <svg
+                  class="m-svg-icon"
+                  viewBox="0 0 25 24"
+                  stroke="currentColor"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12.5 16V11M13 8C13 8.27614 12.7761 8.5 12.5 8.5C12.2239 8.5 12 8.27614 12 8M13 8C13 7.72386 12.7761 7.5 12.5 7.5C12.2239 7.5 12 7.72386 12 8M13 8H12M22.5 12C22.5 17.5228 18.0228 22 12.5 22C6.97715 22 2.5 17.5228 2.5 12C2.5 6.47715 6.97715 2 12.5 2C18.0228 2 22.5 6.47715 22.5 12Z"></path>
+                </svg>
+
+                <span class="m:text-sm">{%- render 'new-locale', key: 'products.product.volume_pricing.note' -%}</span>
+              </button>
+              <div class="quantity-popover__wrapper m:blocks-radius-md" hidden>
+                <button class="quantity-popover__close" aria-label="Close">
+                  <svg
+                    class="m-svg-icon"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 320 512"
+                  >
+                    <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"></path>
+                  </svg>
+                </button>
+              
+              {%- if has_qty_rules -%}
+                <div class="quantity__rules m:text-sm m:flex-wrap">
+                  {%- if selected_variant.quantity_rule.increment > 1 -%}
+                    <span class="divider">
+                      {%- render 'new-locale',
+                        key: 'products.product.quantity_multiples_of',
+                        param: '{{ quantity }}',
+                        value: selected_variant.quantity_rule.increment
+                      -%}
+                    </span>
+                  {%- endif -%}
+                  {%- if selected_variant.quantity_rule.min > 1 -%}
+                    <span class="divider">
+                      {%- render 'new-locale',
+                        key: 'products.product.quantity_minimum_of',
+                        param: '{{ quantity }}',
+                        value: selected_variant.quantity_rule.min
+                      -%}
+                    </span>
+                  {%- endif -%}
+                  {%- if selected_variant.quantity_rule.max != null -%}
+                    <span class="divider">
+                      {%- render 'new-locale',
+                        key: 'products.product.quantity_maximum_of',
+                        param: '{{ quantity }}',
+                        value: selected_variant.quantity_rule.max
+                      -%}
+                    </span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+              {%- if has_vol_pricing -%}
+                {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+                <volume-pricing
+                  class="volume-pricing m:block parent-display{% unless has_qty_rules %} volume-pricing--empty-header{% endunless %}"
+                  id="Volume-{{ block_id }}"
+                >
+                  <ul class="list-unstyled volume-pricing__list">
+                    <li class="volume-pricing__item">
+                      <span>{{ selected_variant.quantity_rule.min }}+</span>
+                      {%- liquid
+                        if settings.currency_code_enabled
+                          assign price = selected_variant.price | money_with_currency
+                        else
+                          assign price = selected_variant.price | money
+                        endif
+                      -%}
+                      {%- capture price_at_each -%}
+                        {%- render 'new-locale',
+                          key: 'products.product.volume_pricing.price_at_each',
+                          param: '{{ price }}',
+                          value: price
+                        -%}
+                      {%- endcapture -%}
+                      <span data-text="{{ price_at_each | strip_html }}">
+                        {%- render 'new-locale',
+                          key: 'products.product.volume_pricing.each_html',
+                          param: '{{ money }}',
+                          value: price
+                        -%}
+                      </span>
+                    </li>
+                    {%- for price_break in selected_variant.quantity_price_breaks -%}
+                      {%- liquid
+                        if settings.currency_code_enabled
+                          assign price_break_price = price_break.price | money_with_currency
+                        else
+                          assign price_break_price = price_break.price | money
+                        endif
+                      -%}
+                      <li class="volume-pricing__item">
+                        <span>
+                          {{- price_break.minimum_quantity -}}
+                          <span aria-hidden="true">+</span></span
+                        >
+                        {%- capture price_at_each -%}
+                          {%- render 'new-locale',
+                            key: 'products.product.volume_pricing.price_at_each',
+                            param: '{{ price }}',
+                            value: price_break_price
+                          -%}
+                        {%- endcapture -%}
+                        <span data-text="{{ price_at_each | strip_html }}">
+                          {%- render 'new-locale',
+                            key: 'products.product.volume_pricing.each_html',
+                            param: '{{ money }}',
+                            value: price_break_price
+                          -%}
+                        </span>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </volume-pricing>
+              {%- endif -%}
+            </div>
+            {%- endcapture -%}
+          {%- endif -%}
+          <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+          <div class="product-card-bundle__quantity-popover" id="QuantityRule-{{ block_id }}">
+            <quantity-popover class="quantity-popover m:block m:relative">
+              {{ qty_rules_vol_pricing }}
+            </quantity-popover>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+    <div class="product-bundles__item-prices md:m:text-right" id="Price-{{ block_id }}">
+      {% unless sold_out %}
+        {{ variant_price }}
+      {% else %}
+        {{ 'products.product.sold_out' | t }}
+      {% endunless %}
+    </div>
+  </div>
+  {% if selected_variant.featured_media %}
+    <div class="selected-variant-media m:hidden">
+      {{
+        selected_variant.featured_media
+        | image_url: width: selected_variant.featured_media.width
+        | image_tag: loading: 'lazy', fetchpriority: 'low', widths: '70, 100, 140, 150, 200', sizes: '200px'
+      }}
+    </div>
+  {% endif %}
+</div>

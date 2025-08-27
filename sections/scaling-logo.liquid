@@ -1,0 +1,228 @@
+{% if template == 'index' %}
+  {%- style -%}
+    .m-scaling-logo {
+      min-height: calc(100vh - var(--m-topbar-height, 0px) - var(--m-announcement-height, 0px));
+      position: relative;
+    }
+    .m-scaling-logo--sticky-none.m-scaling-logo {
+      min-height: calc(
+        100vh - var(--m-header-height, 0px) - var(--m-topbar-height, 0px) - var(--m-announcement-height, 0px)
+      );
+    }
+    .m-scaling-logo__bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-event: none;
+    }
+    .m-scaling-logo__bg .m-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .m-scaling-logo__content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 32px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      transition: var(--m-duration-long) ease opacity;
+    }
+    .m-scaling-logo__heading + .m-scaling-logo__button {
+      margin-top: 32px;
+    }
+    .m-scaling-logo__button + .m-scaling-logo__icon {
+      margin-top: 60px;
+    }
+    .m-scaling-logo__logo-wrapper {
+      z-index: 1;
+      position: sticky;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--logo-width-sticky, 140px);
+      height: var(--logo-height-sticky, 30px);
+    }
+    [dir="rtl"] .m-scaling-logo__logo-wrapper {
+      left: auto;
+      right: 50%;
+      transform: translateX(50%);
+    }
+    .m-scaling-logo__logo {
+      width: 100%;
+      height: 100%;
+      background-image: url('{{ section.settings.logo | image_url }}');
+      transform-origin: top;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center center;
+    }
+    @media (max-width: 767px) {
+      .m-scaling-logo {
+        min-height: calc(100vh - var(--mobile-sticky-bar-height, 0px) - var(--m-announcement-height, 0px));
+      }
+    }
+  {%- endstyle -%}
+  <script src="{{ 'scaling-logo.js' | asset_url }}" defer="defer"></script>
+  {%- liquid
+    assign image_background = section.settings.background
+    assign image_background_mobile = section.settings.background_mobile
+    assign heading = section.settings.heading
+    assign button_label = section.settings.button_label
+    assign button_style = section.settings.button_style
+    assign button_link = section.settings.button_link
+    assign logo = section.settings.logo
+    assign image_background_class = ''
+
+    if image_background_mobile == blank
+      assign image_background_mobile = image_background
+    else
+      assign image_background_class = 'm:hidden md:m:block'
+    endif
+
+    assign section_class = 'm:block m-scaling-logo m-color-' | append: section.settings.color_scheme
+  -%}
+  <m-scaling-logo class="{{ section_class }}">
+    {% if logo != blank %}
+      <div class="m-scaling-logo__logo-wrapper">
+        <div class="m-scaling-logo__logo"></div>
+      </div>
+    {% endif %}
+    <div class="m-scaling-logo__bg">
+      {% if image_background != blank %}
+        {% render 'responsive-image', image: image_background, wrapper_class: image_background_class %}
+        {% if image_background_mobile != blank %}
+          {% render 'responsive-image', image: image_background_mobile, wrapper_class: 'md:m:hidden' %}
+        {% endif %}
+      {% else %}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full' }}
+      {% endif %}
+    </div>
+    <div class="m-scaling-logo__content">
+      {% if heading != blank %}
+        <h2 class="m-scaling-logo__heading">{{ heading }}</h2>
+      {% endif %}
+      {% if button_label != blank %}
+        <a href="{{ button_link | default: "#" }}" class="m-scaling-logo__button m-button {{ button_style }}">
+          {{- button_label -}}
+        </a>
+      {% endif %}
+      <svg
+        class="m-scaling-logo__icon"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M27.0613 13.0612L17.0613 23.0612C16.9219 23.2011 16.7563 23.312 16.574 23.3877C16.3917 23.4634 16.1962 23.5024 15.9988 23.5024C15.8013 23.5024 15.6059 23.4634 15.4235 23.3877C15.2412 23.312 15.0756 23.2011 14.9363 23.0612L4.93626 13.0612C4.65446 12.7794 4.49615 12.3972 4.49615 11.9987C4.49615 11.6002 4.65446 11.218 4.93626 10.9362C5.21805 10.6544 5.60024 10.4961 5.99876 10.4961C6.39727 10.4961 6.77946 10.6544 7.06126 10.9362L16 19.875L24.9388 10.935C25.2205 10.6532 25.6027 10.4949 26.0013 10.4949C26.3998 10.4949 26.782 10.6532 27.0638 10.935C27.3455 11.2168 27.5039 11.599 27.5039 11.9975C27.5039 12.396 27.3455 12.7782 27.0638 13.06L27.0613 13.0612Z" fill="currentColor"/>
+      </svg>
+    </div>
+  </m-scaling-logo>
+{% endif %}
+{% schema %}
+{
+  "name": "Scaling logo",
+  "class": "m-section-scaling-logo",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/c9JkHe)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "color_scheme",
+      "label": "Color scheme",
+      "id": "color_scheme"
+    },
+    {
+      "type": "header",
+      "content": "Background settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "background",
+      "label": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_mobile",
+      "label": "Background image mobile"
+    },
+    {
+      "type": "header",
+      "content": "Logos"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "label": "Heading",
+      "id": "heading",
+      "default": "Scaling logo"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop more",
+      "info": "Leave it blank to hide"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "m-button--primary",
+          "label": "Primary button"
+        },
+        {
+          "value": "m-button--secondary",
+          "label": "Secondary button"
+        },
+        {
+          "value": "m-button--white",
+          "label": "White button"
+        },
+        {
+          "value": "m-button--link",
+          "label": "Underline button"
+        }
+      ],
+      "default": "m-button--primary"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scaling logo"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,167 @@
+{% liquid
+  if thumbnail == null
+    assign thumbnail = false
+  endif
+
+  if autoplay == null
+    assign autoplay = false
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign is_grid = false
+  if media_layout == 'layout-1' or media_layout == 'layout-2' or media_layout == 'layout-3'
+    assign is_grid = true
+  endif
+
+  if thumbnail
+    assign thumb_aspect_ratio = product.media[0].preview_image.aspect_ratio
+  else
+    assign thumb_aspect_ratio = aspect_ratio | default: media.preview_image.aspect_ratio
+  endif
+
+  assign loading = 'lazy'
+  assign fetchpriority = 'low'
+  if index < 1
+    assign loading = 'eager'
+    assign fetchpriority = 'high'
+  endif
+
+  assign media_alt = media.preview_image.alt | escape
+%}
+{%- capture sizes -%}
+  (min-width: {{ settings.container_width }}px) {{ settings.container_width | minus: 100 | times: 0.55 | round }}px, (min-width: 990px) calc({{ 0.55 | times: 100 }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw - 4rem)
+{%- endcapture -%}
+{%- if media.media_type != 'image' and thumbnail == false -%}
+  <div
+    class="m-product-media m-product-media--{{ media.media_type }}{% if animated and is_grid %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}{% if media_layout != 'layout-7' %} m:blocks-radius{% endif %}"
+    {% if animated and is_grid %}
+      data-cascade
+      style="--animation-order: {{ index }};"
+    {% endif %}
+  >
+    {%- if media.media_type == 'model' -%}
+      <div style="--aspect-ratio: {{ media.preview_image.aspect_ratio }}">
+        <product-model
+          class="deferred-media no-js-hidden media-model"
+          style="padding-top: 100%"
+          data-media-id="{{ media.id }}"
+          data-auto-play="{{ autoplay }}"
+        >
+    {%- else -%}
+      <deferred-media
+        class="deferred-media no-js-hidden"
+        style="padding-top: {{ 1 | divided_by: media.preview_image.aspect_ratio | times: 100 }}%"
+        data-media-id="{{ media.id }}"
+        data-auto-play="{{ autoplay }}"
+      >
+    {%- endif -%}
+    <button
+      id="Product-Thumb-Deferred-Poster-Modal-{{ media.id }}"
+      class="deferred-media__poster"
+      type="button"
+      aria-label="{{ media_alt }}"
+    >
+      <span class="deferred-media__poster-button motion-reduce">
+        {%- if media.media_type == 'model' -%}
+          {%- render 'icon-3d-model' -%}
+        {%- else -%}
+          {%- render 'icon-play' -%}
+        {%- endif -%}
+      </span>
+      {{
+        media.preview_image
+        | image_url: width: 1946
+        | image_tag:
+          loading: loading,
+          fetchpriority: fetchpriority,
+          sizes: sizes,
+          widths: '400, 620, 690, 810, 980, 1240, 1380, 1620, 1960',
+          alt: media_alt
+      }}
+    </button>
+    <template>
+      {%- liquid
+        assign mute = false
+        if autoplay
+          assign mute = true
+        endif
+        case media.media_type
+          when 'external_video'
+            assign video_class = 'js-' | append: media.host
+            if media.host == 'youtube'
+              if autoplay
+                echo media | external_video_url: autoplay: autoplay, loop: loop, mute: mute, playlist: media.external_id | external_video_tag: class: video_class, loading: 'lazy'
+              else
+                echo media | external_video_url: playlist: media.external_id, loop: loop | external_video_tag: class: video_class, loading: 'lazy'
+              endif
+            else
+              if autoplay
+                echo media | external_video_url: autoplay: autoplay, loop: loop, mute: mute | external_video_tag: class: video_class, loading: 'lazy'
+              else
+                echo media | external_video_url: loop: loop | external_video_tag: class: video_class, loading: 'lazy'
+              endif
+            endif
+          when 'video'
+            echo media | media_tag: image_size: '2048x', autoplay: autoplay, loop: loop, controls: true, preload: 'none'
+          when 'model'
+            echo media | media_tag: image_size: '2048x', toggleable: true
+        endcase
+      -%}
+    </template>
+    {%- if media.media_type == 'model' -%}
+      </product-model>
+      </div>
+    {%- else -%}
+      </deferred-media>
+    {%- endif -%}
+  </div>
+{%- else -%}
+  {% comment %} class_remove: media-image {% endcomment %}
+  <div
+    class="m-product-media{% if animated and is_grid %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}{% if media_layout != 'layout-7' %} m:blocks-radius{% endif %}"
+    data-media-id="{{ media.id }}"
+    data-media-width="{{ media.preview_image.width }}"
+    data-media-height="{{ media.preview_image.width | divided_by: media.preview_image.aspect_ratio | ceil }}"
+    data-media-alt="{{ media_alt }}"
+    data-media-src="{{ media | image_url: width: 1946 }}"
+    {% if animated and is_grid %}
+      data-cascade
+      style="--animation-order: {{ index }};"
+    {% endif %}
+  >
+    <responsive-image
+      class="m-image"
+      style="--aspect-ratio: {{ thumb_aspect_ratio }}"
+    >
+      {% if thumbnail %}
+        {{
+          media.preview_image
+          | image_url: width: media.preview_image.width
+          | image_tag:
+            loading: loading,
+            fetchpriority: fetchpriority,
+            widths: '70, 100, 140, 150, 200, 300, 400',
+            sizes: '(max-width: 767px) calc((100vw - 30px) / 5), (max-width: 1023px) 80px, 150px',
+            alt: media.alt
+          | escape
+        }}
+      {% else %}
+        {{
+          media.preview_image
+          | image_url: width: 1946
+          | image_tag:
+            loading: loading,
+            fetchpriority: fetchpriority,
+            sizes: sizes,
+            widths: '400, 620, 690, 810, 980, 1240, 1380, 1620, 1960',
+            alt: media_alt
+        }}
+      {% endif %}
+    </responsive-image>
+  </div>
+{%- endif -%}

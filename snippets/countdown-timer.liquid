@@ -1,0 +1,59 @@
+{% comment %}
+  Accepts:
+  - time: {String} Time setting (required)
+  - separator: {Boolean} Show separator. Default: true (optional)
+  - short_label: {Boolean} Show unit label on short format. Default: false (optional)
+  - extra_classes: {String} Extra classes (optional)
+
+  Usage:
+  {% render 'countdown-timer', time: time %}
+{% endcomment %}
+
+{{ 'component-countdown-timer.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'countdown-timer.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign main_classes = 'm-countdown-timer m:block'
+
+  if short_label == true
+    assign main_classes = main_classes | append: ' m-countdown-timer--short-label'
+  endif
+
+  if extra_classes != null
+    assign main_classes = main_classes | append: ' ' | append: extra_classes
+  endif
+%}
+
+<m-countdown-timer class="{{ main_classes }}" data-time="{{ time }}" style="opacity: 0;">
+  <div class="m-countdown-timer__wrapper">
+    <div class="m-countdown-timer__box m-countdown-timer__day">
+      <div class="m-countdown-timer__digit countdown-timer-day">00</div>
+      <p class="m-countdown-timer__text">{{ 'general.time.days' | t }}</p>
+      <p class="m-countdown-timer__text m-countdown-timer__text--short">{{ 'general.time.days' | t }}</p>
+    </div>
+    {% if separator != false %}
+      <div class="m-countdown-timer__separator">:</div>
+    {% endif %}
+    <div class="m-countdown-timer__box m-countdown-timer__hour">
+      <div class="m-countdown-timer__digit countdown-timer-hour">00</div>
+      <p class="m-countdown-timer__text">{{ 'general.time.hours' | t }}</p>
+      <p class="m-countdown-timer__text m-countdown-timer__text--short">{{ 'general.time.hrs' | t }}</p>
+    </div>
+    {% if separator != false %}
+      <div class="m-countdown-timer__separator">:</div>
+    {% endif %}
+    <div class="m-countdown-timer__box m-countdown-timer__min">
+      <div class="m-countdown-timer__digit countdown-timer-minute">00</div>
+      <p class="m-countdown-timer__text">{{ 'general.time.minutes' | t }}</p>
+      <p class="m-countdown-timer__text m-countdown-timer__text--short">{{ 'general.time.mins' | t }}</p>
+    </div>
+    {% if separator != false %}
+      <div class="m-countdown-timer__separator">:</div>
+    {% endif %}
+    <div class="m-countdown-timer__box m-countdown-timer__sec">
+      <div class="m-countdown-timer__digit countdown-timer-sec">00</div>
+      <p class="m-countdown-timer__text">{{ 'general.time.seconds' | t }}</p>
+      <p class="m-countdown-timer__text m-countdown-timer__text--short">{{ 'general.time.secs' | t }}</p>
+    </div>
+  </div>
+</m-countdown-timer>

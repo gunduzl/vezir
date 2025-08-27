@@ -1,0 +1,162 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "mobile-sticky-bar": {
+      "type": "mobile-sticky-bar",
+      "settings": {
+        "show_mobile_sticky": true,
+        "show_home_icon": true,
+        "show_collection_icon": true,
+        "show_cart_icon": true,
+        "show_search_icon": true,
+        "show_account_icon": false,
+        "show_wishlist_icon": false
+      }
+    },
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "49e72833-c68f-4a7b-ab64-3ef0cae99bcb": {
+          "type": "menu",
+          "settings": {
+            "menu": "footer",
+            "title": "ABOUT VEZIR",
+            "width": "25%",
+            "order_first": true,
+            "open_default": false
+          }
+        },
+        "7ebc2f78-975b-4a81-b874-103c3355a866": {
+          "type": "menu",
+          "settings": {
+            "menu": "customer-servi-ce",
+            "title": "CUSTOMER SERVİCES",
+            "width": "25%",
+            "order_first": false,
+            "open_default": false
+          }
+        },
+        "93571032-b171-4c66-8b3e-96cd91946363": {
+          "type": "our_store",
+          "settings": {
+            "title": "ABOUT",
+            "description": "<ul><li>High-quality sports gear</li><li>Exclusive discounts</li><li>Worldwide shipping</li></ul>",
+            "show_email": false,
+            "show_phone": false,
+            "show_socials_link": false,
+            "width": "33%",
+            "order_first": false,
+            "open_default": false
+          }
+        },
+        "7b0bf4c6-3873-4222-b8d6-ce009e710078": {
+          "type": "newsletter",
+          "settings": {
+            "title": "Stay Active with Us",
+            "description": "Subscribe for updates on the latest sports gear and exclusive offers.",
+            "email_placeholder": "Enter your email for sports updates",
+            "show_icon_input": false,
+            "button_label": "Join Now",
+            "button_position": "inline",
+            "button_style": "m-button--primary",
+            "form_style": "bordered",
+            "show_social": false,
+            "show_agree_checkbox": true,
+            "width": "50%",
+            "order_first": true,
+            "open_default": true
+          }
+        },
+        "spacing_4d6agY": {
+          "type": "spacing",
+          "settings": {
+            "width": "25%"
+          }
+        }
+      },
+      "block_order": [
+        "49e72833-c68f-4a7b-ab64-3ef0cae99bcb",
+        "7ebc2f78-975b-4a81-b874-103c3355a866",
+        "93571032-b171-4c66-8b3e-96cd91946363",
+        "7b0bf4c6-3873-4222-b8d6-ce009e710078",
+        "spacing_4d6agY"
+      ],
+      "custom_css": [
+        ".m-footer--block-spacing {width: 10%;}",
+        ".m-newsletter-form {margin-top: 24px;}",
+        ".m-footer--block-newsletter .m-footer--block-title {font-weight: 400; font-size: 25px;}",
+        "@media (min-width: 1280px) {.m-footer--block-newsletter .m-footer--block-title {font-size: 36px; margin-bottom: 12px; } .m-footer__copyright, .m-footer--bottom-menu {font-size: 14px; }}"
+      ],
+      "settings": {
+        "color_scheme": "footer",
+        "design": "footer-2",
+        "container": "container-full",
+        "bordered": true,
+        "copyright": "© 2025 Vezir, All Rights Reserved",
+        "show_country_selector": false,
+        "show_currency_selector": true,
+        "show_language_selector": false,
+        "show_social_links": true,
+        "enable_follow_on_shop": false,
+        "show_payment_icons": true,
+        "image_custom_payment": "shopify://shop_images/vezir_6.png",
+        "payment_icons_width": 150,
+        "footer_bottom_color_scheme": "default",
+        "footer_bottom_menu": "customer-account-main-menu",
+        "show_menu_item_divider": true
+      }
+    },
+    "age-verifier-popup": {
+      "type": "age-verifier-popup",
+      "blocks": {
+        "block-1": {
+          "type": "heading",
+          "settings": {
+            "heading": "Confirm your age"
+          }
+        },
+        "block-2": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Are you 18 years old or older?</p>"
+          }
+        },
+        "block-3": {
+          "type": "buttons",
+          "settings": {
+            "decline_button": "No, I'm not",
+            "approve_button": "Yes, I am"
+          }
+        }
+      },
+      "block_order": [
+        "block-1",
+        "block-2",
+        "block-3"
+      ],
+      "settings": {
+        "design_mode": false,
+        "enable": false,
+        "bg_blur": true,
+        "decline_heading": "Come back when you're older",
+        "decline_content": "<p>Sorry, the content of this store can't be seen by a younger audience. Come back when you're older.</p>",
+        "return_button": "Oops, I entered incorrectly"
+      }
+    }
+  },
+  "order": [
+    "mobile-sticky-bar",
+    "footer",
+    "age-verifier-popup"
+  ]
+}

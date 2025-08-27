@@ -1,0 +1,102 @@
+{%- liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+-%}
+
+{% render 'page-title', title: page.title %}
+
+{% if section.blocks.size > 0 %}
+<section data-section-type="contact-information" data-section-id="{{ section.id }}" class="m-section m-contact-information">
+  <div class="{{ container }}">
+    <div class="m-row m:flex">
+      {% for block in section.blocks %}
+        <div class="m-contact-information__{{ block.type }} m:text-left md:m:text-center m:column md:m:w-3/12{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+          <h3 ckass="h5">{{ block.settings.title }}</h3>
+          {% case block.type %}
+            {% when 'textblock' %}
+              <div class="m-contact-information__text rte">{{ block.settings.content }}</div>
+            {% else %}
+              <div class="m-contact-information__social">{% render 'social-media-links', centermd: true %}</div>
+          {% endcase %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Contact Information",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/7U9LNH)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "textblock",
+      "name": "Text block",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Block Title"
+        },
+        {
+          "type": "textarea",
+          "id": "content",
+          "label": "Content",
+          "default": "7895 Piermont Dr NE Albuquerque, NM 198866, <a href='#'>See Our Stores</a>"
+        }
+      ]
+    },
+    {
+      "type": "socialmedia",
+      "name": "Social media",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Social Media"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

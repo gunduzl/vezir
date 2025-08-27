@@ -1,0 +1,22 @@
+<div class="m-account__navigation">
+  <a
+    href="{{ routes.account_url }}"
+    class="{% if request.path == routes.account_url %}active{% endif %}"
+  >
+    {{ 'customer.account.dashboard' | t }}
+  </a>
+  <a
+    href="{{ routes.account_addresses_url }}"
+    class="{% if request.path == routes.account_addresses_url %}active{% endif %}"
+  >
+    {{ 'customer.account.addresses' | t }}
+  </a>
+  {% if settings.wishlist_page != blank %}
+    <a href="{{ pages[settings.wishlist_page].url }}">
+      {{ 'customer.account.wishlist' | t }}
+    </a>
+  {% endif %}
+  <a href="{{ routes.account_logout_url }}">
+    {{ 'customer.account.log_out' | t }}
+  </a>
+</div>

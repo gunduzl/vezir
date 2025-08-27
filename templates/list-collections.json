@@ -1,0 +1,36 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "collection-list-template",
+      "settings": {
+        "container": "container-fluid",
+        "display_type": "all",
+        "title": "All collection",
+        "description": "<p>Here is your chance to upgrade your wardrobe <br\/>with a variation of styles and fits that are both feminine and relaxed.<\/p>",
+        "header_alignment": "left",
+        "items_per_row": 4,
+        "item_gap": 30,
+        "mobile_columns": "2",
+        "mobile_gap": 16,
+        "card_style": "inside-2",
+        "text_alignment": "center",
+        "hover_effect": "scaling-up",
+        "show_product_count": true,
+        "count_inline_title": true,
+        "image_rounded": false
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

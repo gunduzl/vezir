@@ -1,0 +1,113 @@
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign review_app = settings.review_app
+%}
+<div class="m-product-reviews__wrapper{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+  {% if custom_liquid != blank %}
+    {{ custom_liquid }}
+  {% else %}
+    {% case review_app %}
+      {% when 'judge' %}
+        {% capture judgeme_widgets %}{% render 'judgeme_widgets', widget_type: 'judgeme_review_widget', concierge_install: false, product: product %}{% endcapture %}
+        {% unless judgeme_widgets contains 'Liquid error' %}
+          {{ judgeme_widgets }}
+        {% else %}
+          {% render 'mm-judgeme-widgets',
+            widget_type: 'judgeme_review_widget',
+            concierge_install: false,
+            product: product
+          %}
+        {% endunless %}
+      {% when 'loox' %}
+        <div
+          id="looxReviews"
+          data-product-id="{{ product.id }}"
+          class="loox-reviews-default"
+        ></div>
+      {% when 'growave' %}
+        {% capture the_snippet_reviews %}{% render 'socialshopwave-widget-recommends' with 1 %}{% endcapture %}
+        {% unless the_snippet_reviews contains 'Liquid error' %}
+          {{ the_snippet_reviews }}
+        {% else %}
+          {% render 'mm-socialshopwave-widget-recommends' with 1 %}
+        {% endunless %}
+      {% when 'lai_reviews' %}
+        {% assign random_number = 'now' | date: '%N' | modulo: 1000 | plus: 0 %}
+        <script>
+            var sectionConfig=  (typeof sectionConfig == "undefined" || sectionConfig == null) ? {} : sectionConfig;
+            var scmCustomData=  (typeof scmCustomData == "undefined" || scmCustomData == null) ? {} : scmCustomData;
+            var scmCustomDataWigetAll= (typeof scmCustomDataWigetAll == "undefined" || scmCustomDataWigetAll == null) ? [] : scmCustomDataWigetAll; 
+            scmCustomDataWigetAll['{{ random_number }}'] ={"id_iframe" : "{{ random_number }}","productId" : "{{ product.id }}","typePage" : 'productPage',"sectionConfig" : JSON.stringify(sectionConfig),"scmCustomData" : JSON.stringify(scmCustomData),'dataProduct' : []};
+            sectionConfig= null;
+            scmCustomData= null;
+            scmCustomDataWigetAll['{{ random_number }}'].dataProduct['product']= {{ product | json }};
+            {% for metafieldValue in  product.metafields.scm_review_importer %}
+              scmCustomDataWigetAll['{{ random_number }}'].dataProduct['{{ metafieldValue[0] }}']= `{{ metafieldValue[1] | json }}`;
+            {% endfor %}
+        </script>
+        <div class="scm-container" style="display: none;">
+          <div class="scm-reviews-importer" data-product-id="{{ product.id }}">
+            <iframe
+              class="scm-reviews-importer-iframe"
+              width="100%"
+              title="Sma reviews section Product page"
+              data-idIframe="{{ random_number }}"
+            ></iframe>
+          </div>
+        </div>
+      {% when 'yotpo' %}
+        <div
+          class="yotpo yotpo-main-widget"
+          data-product-id="{{ product.id }}"
+          data-name="{{ product.title | escape }}"
+          data-url="{{ shop.url }}{{ product.url }}"
+          data-image-url="{{ product.featured_image | product_image_url: 'large' | replace: '?', '%3F' | replace: '&', '%26' }}"
+          data-price="{{ variant.price | money_without_currency }}"
+          data-currency="{{ shop.currency }}"
+          data-description="{{ product.description | escape }}"
+        ></div>
+      {% when 'automizely' %}
+        <div id="automizely_reviews_carousel_v2_production"></div>
+        <div id="automizely_reviews_carousel_production" style="display: none"></div>
+        <script
+          type="text/javascript"
+          async
+          src="https://widgets.automizely.com/reviews/v1/sdk.js?{{- shop.metafields.automizely_reviews.script_tags_query.value -}}&shop=chind-dev-new.myshopify.com"
+        ></script>
+      {% when 'stamped' %}
+        <div
+          id="stamped-main-widget"
+          data-product-id="{{ product.id }}"
+          data-name="{{ product.title | escape }}"
+          data-url="{{ shop.url }}{{ product.url }}"
+          data-image-url="{{ product.featured_image | product_image_url: "large" | replace: '?', '%3F' | replace: '&', '%26' }}"
+          data-description="{{ product.description | escape }}"
+          data-product-sku="{{ product.handle }}"
+          data-product-title="{{ product.title }}"
+          data-product-type="{{ product.type }}"
+        >
+          {{ product.metafields.stamped.reviews }}
+        </div>
+      {% when 'ali_reviews' %}
+
+      {% when 'ryviu' %}
+        <div class="lt-block-reviews">
+          <ryviu-widget
+            product_id="{{product.id}}"
+            handle="{{product.handle}}"
+            title_product="{{product.title}}"
+            image_product="{{ product.featured_image.src | img_url: '100x' }}"
+          >
+          </ryviu-widget>
+        </div>
+
+      {% when 'trustify' %}
+        <div class="trustify-review-box"></div>
+    {% endcase %}
+  {% endif %}
+</div>

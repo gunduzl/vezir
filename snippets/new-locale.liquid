@@ -1,0 +1,160 @@
+{%- liquid
+  assign text = key | t
+  assign text_downcase = text | downcase
+-%}
+{%- capture text -%}
+  {%- if text_downcase contains 'translation missing' -%}
+    {%- case key -%}
+      {%- when 'layout.back' -%}
+        Back
+      {%- when 'collections.paginate.load_more' -%}
+        Load more
+      {%- when 'products.product.preorder' -%}
+        Pre-order
+      {%- when 'products.product.out_of_stock' -%}
+        Out of stock
+      {%- when 'products.product.low_stock' -%}
+        Low stock
+      {%- when 'products.product.backordered' -%}
+        Backordered
+      {%- when 'products.product.sold' -%}
+        Sold
+      {%- when 'products.product.available' -%}
+        Available
+      {%- when 'products.product.select_options' -%}
+        Select options
+      {%- when 'products.product.choose_an_option' -%}
+        Choose an option
+      {%- when 'products.product.inventory_quantity_html' -%}
+        <span class="m-product-inventory__quantity">{% raw %}{{ quantity }}{% endraw %}</span> In stock
+      {%- when 'products.product.inventory_low_quantity_html' -%}
+        Only <span class="m-product-inventory__quantity">{% raw %}{{ quantity }}{% endraw %}</span> left
+      {%- when 'products.product.save_html' -%}
+        Save <span class="m-currency--saved m:font-medium" data-saved-price>{%- raw -%}{{ amount }}{%- endraw -%}</span>
+      {%- when 'products.product.sale_text' -%}
+        Sale
+      {%- when 'products.product.xr_button' -%}
+        View in your space
+      {%- when 'products.product.xr_button_label' -%}
+        View in your space, loads item in augmented reality window
+      {%- when 'products.product.preorder_note' -%}
+        Preorder item
+      {%- when 'general.tooltip.not_found' -%}
+        Tooltip type not found
+      {%- when 'customer.account.greeting' -%}
+        Hello
+      {%- when 'customer.account.not' -%}
+        not
+      {%- when 'products.product.pickup_availability.unavailable' -%}
+        Couldn't load pickup availability
+      {%- when 'products.product.pickup_availability.refresh' -%}
+        Refresh
+      {%- when 'products.product.pickup_availability.view_store_info' -%}
+        View store information
+      {%- when 'products.product.pickup_availability.check_other_stores' -%}
+        Check availability at other stores
+      {%- when 'products.product.pickup_availability.pick_up_available' -%}
+        Pickup available
+      {%- when 'products.product.pickup_availability.pick_up_available_at_html' -%}
+        Pickup available at <span>{%- raw -%}{{ location_name }}{%- endraw -%}</span>
+      {%- when 'products.product.pickup_availability.pick_up_unavailable_at_html' -%}
+        Pickup currently unavailable at <span>{%- raw -%}{{ location_name }}{%- endraw -%}</span>
+      {%- when 'products.product.see_more_options' -%}
+        See {%- raw -%}{{ count }}{%- endraw -%} more option(s)
+      {%- when 'recipient.form.checkbox' -%}
+        I want to send this as a gift
+      {%- when 'recipient.form.email_label' -%}
+        Recipient email
+      {%- when 'recipient.form.email_label_optional' -%}
+        Recipient email (optional)
+      {%- when 'recipient.form.email' -%}
+        Email
+      {%- when 'recipient.form.name_label' -%}
+        Recipient name (optional)
+      {%- when 'recipient.form.name' -%}
+        Name
+      {%- when 'recipient.form.message_label' -%}
+        Message (optional)
+      {%- when 'recipient.form.message' -%}
+        Message
+      {%- when 'recipient.form.max_characters' -%}
+        {% raw %}{{ max_chars }}{% endraw %} characters max
+      {%- when 'recipient.form.send_on' -%}
+        YYYY-MM-DD
+      {%- when 'templates.contact.form.error_heading' -%}
+        Please adjust the following:
+      {%- when 'cart.general.cart_error' -%}
+        There was an error while updating your cart. Please try again.
+      {%- when 'general.search.suggestions' -%}
+        Suggestions
+      {%- when 'general.search.page_article' -%}
+        Pages & articles
+      {%- when 'general.search.products' -%}
+        Products
+      {%- when 'products.product.select_variant' -%}
+        Please select a variant before adding the product to your cart.
+      {%- when 'cart.general.delivery_title' -%}
+        Delivery
+      {%- when 'cart.general.delivery_time' -%}
+        Delivery time
+      {%- when 'cart.general.delivery_label' -%}
+        Pick a delivery date:
+      {%- when 'cart.general.delivery_error' -%}
+        Please choose the current or future time.
+      {%- when 'products.product.quantity_in_cart_html' -%}
+        <span class="quantity-cart">{%- raw -%}{{ quantity }}{%- endraw -%}</span> in cart
+      {%- when 'products.product.quantity_minimum_of' -%}
+        Minimum of {% raw %}{{ quantity }}{% endraw %}
+      {%- when 'products.product.quantity_maximum_of' -%}
+        Maximum of {% raw %}{{ quantity }}{% endraw %}
+      {%- when 'products.product.quantity_multiples_of' -%}
+        Increments of {% raw %}{{ quantity }}{% endraw %}
+      {%- when 'products.product.volume_pricing.title' -%}
+        Volume Pricing
+      {%- when 'products.product.volume_pricing.note' -%}
+        Volume pricing available
+      {%- when 'products.product.volume_pricing.minimum' -%}
+        {% raw %}{{ quantity }}{% endraw %}+
+      {%- when 'products.product.volume_pricing.price_at_each' -%}
+        at {% raw %}{{ price }}{% endraw %}/ea
+      {%- when 'products.product.volume_pricing.price_range' -%}
+        {% raw %}{{ minimum }}{% endraw %} - {% raw %}{{ maximum }}{% endraw %}
+      {%- when 'products.product.volume_pricing.each' -%}
+        {% raw %}{{ money }}{% endraw %}/ea
+      {%- when 'products.product.volume_pricing.price_at_each_html' -%}
+        at {%- raw -%}{{ price }}{%- endraw -%}/ea
+      {%- when 'products.product.volume_pricing.price_range_html' -%}
+        {%- raw -%}{{ minimum }}{%- endraw -%} - {%- raw -%}{{ maximum }}{%- endraw -%}
+      {%- when 'products.product.volume_pricing.each_html' -%}
+        {%- raw -%}{{ money }}{%- endraw -%}/ea
+      {%- when 'products.product.variant_sold_out_or_unavailable' -%}
+        Variant sold out or unavailable
+      {%- when 'products.facets.show_more' -%}
+        Show more
+      {%- when 'cart.label.variant' -%}
+        Variant
+      {%- when 'sections.quick_order_list.view_cart' -%}
+        View cart
+      {%- when 'sections.quick_order_list.total_items' -%}
+        Total items
+      {%- when 'sections.quick_order_list.remove_all_items_confirmation' -%}
+        Remove all {% raw %}{{ quantity }}{% endraw %} items from your cart?
+      {%- when 'sections.quick_order_list.remove_all' -%}
+        Remove all
+      {%- when 'sections.quick_order_list.cancel' -%}
+        Cancel
+      {%- else -%}
+        <span style="display: none;">Translation key not found!</span>
+    {%- endcase -%}
+  {%- else -%}
+    {{ text }}
+  {%- endif -%}
+{%- endcapture -%}
+{%- if text contains param -%}
+  {%- assign text = text | replace: param, value -%}
+{%- endif -%}
+{%- if text contains param_2 -%}
+  {%- assign text = text | replace: param_2, value_2 -%}
+{%- endif -%}
+
+{{- text | strip_newlines | strip -}}

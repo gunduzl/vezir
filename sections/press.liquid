@@ -1,0 +1,310 @@
+{{ 'press.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'press.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  assign items = section.blocks.size
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign classes = 'm-section m-press'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+  assign image_width = 0
+  for block in section.blocks
+    assign block_image_width = block.settings.image_width | split: 'px' | first
+    assign image_width = image_width | plus: block_image_width | plus: 60
+  endfor
+%}
+
+<style>
+  #m-press-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+<section
+  id="m-press-{{ section.id }}"
+  class="{{ classes }}"
+  data-section-type="press"
+  data-section-id="{{ section.id }}"
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    {% render 'index-section-header', section_settings: section.settings %}
+    <m-press
+      data-autoplay="{{ section.settings.autoplay | default: false }}"
+      data-items="{{ items }}"
+    >
+      <div class="m-press__inner{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        <div class="m-press__content swiper-container">
+          <div class="swiper-wrapper">
+            {% for block in section.blocks %}
+              {% if block.settings.title == blank %}
+                {% continue %}
+              {% endif %}
+              <div class="swiper-slide" data-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+                <div class="m-press__title rte m:text-color-body">
+                  {{ block.settings.title }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div
+          class="m-press__list{% if section.settings.show_divider %} m-press__list--show-divider{% endif %}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+          style="--press-list-width: {{ image_width }}px;"
+        >
+          <div class="swiper-container swiper--equal-height">
+            <div class="swiper-wrapper">
+              {% for block in section.blocks %}
+                {% liquid
+                  if block.settings.title == blank
+                    continue
+                  endif
+                  assign max_width = '100%'
+                  if block.settings.image_width != blank
+                    assign max_width = block.settings.image_width
+                  endif
+                %}
+                <div
+                  class="swiper-slide m-press__logo"
+                  data-index="{{ forloop.index0 }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="m-press__logo-wrapper m:w-full">
+                    {% if block.settings.image != blank %}
+                      {% render 'responsive-image',
+                        image: block.settings.image,
+                        max_width: max_width,
+                        wrapper_class: 'm:w-full'
+                      %}
+                    {% else %}
+                      {{ 'image' | placeholder_svg_tag: 'm-image m-placeholder-svg' }}
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% render 'slider-controls', show_nav: false, extra_classes: 'sm:m:hidden' %}
+      </div>
+    </m-press>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Press",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured in"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate content"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        { "value": "inherit", "label": "Inherit global setting" },
+        { "value": "fade-in", "label": "Fade in" },
+        { "value": "fade-in-up", "label": "Fade in up" },
+        { "value": "fade-in-left", "label": "Fade in left" },
+        { "value": "fade-in-right", "label": "Fade in right" }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "news",
+      "name": "Newspaper",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "Content",
+          "default": "<p>Super class, cute, comfortable. You can wear them with just about anything.</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "image_width",
+          "label": "Image width (px)",
+          "placeholder": "eg: 100px",
+          "default": "150px",
+          "info": "Leave blank to use original width."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Press",
+      "category": "Promotional",
+      "blocks": [
+        {
+          "type": "news"
+        },
+        {
+          "type": "news"
+        },
+        {
+          "type": "news"
+        },
+        {
+          "type": "news"
+        },
+        {
+          "type": "news"
+        },
+        {
+          "type": "news"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

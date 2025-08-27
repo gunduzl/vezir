@@ -1,0 +1,45 @@
+{%- capture page_title -%}
+  {{ 'customer.register.title' | t }}
+{%- endcapture -%}
+{% render 'page-title', title: page_title %}
+
+<div class="m-register-form">
+  <div class="m-register-form__wrapper">
+    <h1>{{ 'customer.register.title' | t }}</h1>
+    <div data-register-form>
+      {% form 'create_customer' %}
+      {% render 'form__error', form: form %}
+      
+      <input type="text" name="customer[first_name]" placeholder="{{ 'customer.register.first_name' | t }}" class="form-field form-field--input" />
+      <input type="text" name="customer[last_name]" placeholder="{{ 'customer.register.last_name' | t }}" class="form-field form-field--input" />
+      <input type="email" name="customer[email]" placeholder="{{ 'customer.login.email' | t }}" class="form-field form-field--input" />
+      <input type="password" name="customer[password]" placeholder="{{ 'customer.login.password' | t }}" class="form-field form-field--input" />
+      <div class="m-register-form__description">
+        {{ 'customer.register.description' | t }}
+      </div>
+      {% assign show_terms = false %}
+      {% if settings.agree_text != blank and settings.show_agree_on_register %}
+        <div class="m-terms-conditons">
+          <label class="form-field--checkbox">
+            <input type="checkbox" name="agree_terms" value="yes" required>
+            <span class="form-field--checkbox__label">{{ settings.agree_text }}</span>
+            <span class="form-field--checkbox__icon">
+              <svg class="m-svg-icon--medium" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 20 20">
+                <path d="M18.5 1.5H1.5L1.5 18.5H18.5V1.5ZM1.5 0.5C0.947715 0.5 0.5 0.947715 0.5 1.5V18.5C0.5 19.0523 0.947715 19.5 1.5 19.5H18.5C19.0523 19.5 19.5 19.0523 19.5 18.5V1.5C19.5 0.947715 19.0523 0.5 18.5 0.5H1.5Z" fill-rule="evenodd" fill="currentColor"/>
+                <path d="M14.9975 6.09084C15.201 6.27746 15.2147 6.59375 15.0281 6.79728L8.91631 13.4627C8.82231 13.5652 8.68987 13.6239 8.55079 13.6247C8.41172 13.6256 8.27857 13.5684 8.18335 13.4671L4.99513 10.0731C4.80606 9.87179 4.81596 9.55536 5.01723 9.3663C5.21849 9.17723 5.53492 9.18713 5.72399 9.3884L8.54335 12.3897L14.291 6.12145C14.4776 5.91791 14.7939 5.90421 14.9975 6.09084Z" fill="currentColor"/>
+              </svg>
+            </span>
+          </label>
+        </div>
+        {% assign show_terms = true %}
+      {% endif %}
+      <button class="m-button m-button--primary m:w-full"{% if show_terms %} data-terms-action disabled{% endif %}>
+        {{ 'customer.register.title' | t }}
+      </button>
+      <a class="m-button m-button--secondary m:w-full" href="{{ routes.account_login_url }}">
+        {{ 'customer.login.title' | t }}
+      </a>
+      {% endform %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,434 @@
+{{ 'component-product-inventory.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'recently-viewed-products.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign classes = 'm-section m:block m-recently-viewed m-swiper-overflow m:block m:hidden m-gradient m-color-' | append: section.settings.color_scheme
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+
+  assign enable_slider = section.settings.enable_slider
+  assign mobile_disable_slider = section.settings.mobile_disable_slider
+  assign use_scroll_mobile = section.settings.use_scroll_mobile
+
+  assign card_style = section.settings.pcard_layout
+  assign image_ratio = section.settings.pcard_image_ratio
+  assign show_vendor = section.settings.show_vendor
+  assign hide_title = section.settings.hide_title
+
+  if card_style == null or card_style == blank
+    assign card_style = settings.pcard_layout
+  endif
+%}
+
+{%- style -%}
+  #m-section--{{ section.id }} {
+    --column-gap: {{ section.settings.column_gap }}px;
+    --column-gap-mobile: {{ section.settings.item_gap_mobile }}px;
+    --row-gap: {{ section.settings.column_gap | plus: 10 }}px;
+    --row-gap-mobile: 30px;
+    --items: {{ section.settings.columns }};
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<m-recently-viewed
+  id="m-section--{{ section.id }}"
+  class="{{ classes }}"
+  data-section-type="recently-viewed"
+  data-section-id="{{ section.id }}"
+  data-products-to-show="{{ section.settings.limit }}"
+  data-products-per-row="{{ section.settings.columns }}"
+  data-enable-slider="{{ enable_slider }}"
+  data-mobile-disable-slider="{{ section.settings.mobile_disable_slider }}"
+  {% if enable_slider %}
+    data-show-pagination="{{ section.settings.show_pagination }}"
+    data-show-navigation="{{ section.settings.show_navigation }}"
+  {% endif %}
+  {% if template == 'product' %}
+    data-product-handle="{{ product.handle }}"
+  {% endif %}
+  data-url="{{ routes.search_url }}?section_id={{ section.id }}&type=product&q="
+  {% if request.page_type == 'product' %}
+    data-product-id="{{ product.id }}"
+  {% endif %}
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    {% assign default_heading = 'products.product.recently_viewed_products' | t %}
+    <div class="m-section__header m:text-{{ section.settings.text_align | default: 'left' }}">
+      <h2 class="m-section__heading {{ section.settings.heading_size }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        {{ section.settings.heading | default: default_heading }}
+      </h2>
+    </div>
+    <div class="m-product-list m-slider-control-hover-inside m:relative m-mixed-layout {% if mobile_disable_slider or enable_slider != true %} m-mixed-layout--mobile-grid{% if use_scroll_mobile %} m-mixed-layout--mobile-scroll{% endif %}{% endif %}">
+      <div class="m-mixed-layout__wrapper{% if enable_slider %} swiper-container{% endif %}">
+        <div
+          class="m-mixed-layout__inner m:grid m-cols-{{ section.settings.columns }} m:grid-2-cols md:m:grid-{{ section.settings.columns | divided_by: 2.0 | ceil }}-cols lg:m:grid-3-cols xl:m:grid-{{ section.settings.columns }}-cols{% if enable_slider %} swiper-wrapper{% endif %}"
+          data-products-container
+        >
+          {%- liquid
+            assign parsed_terms = search.terms | split: ' OR '
+          -%}
+          {%- for parsed_term in parsed_terms -%}
+            {%- assign id = parsed_term | split: 'id:' | last | times: 1 -%}
+            {%- for product in search.results -%}
+              {%- if product.id == id -%}
+                <div class="m:column{% if enable_slider %} swiper-slide{% endif %}">
+                  {% liquid
+                    case card_style
+                      when '1'
+                        render 'product-card-1', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                      when '2'
+                        render 'product-card-2', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                      when '3'
+                        render 'product-card-3', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                      when '4'
+                        render 'product-card-4', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                      when '5'
+                        render 'product-card-5', product: product, image_ratio: image_ratio, show_vendor: show_vendor, hide_title: hide_title, index: forloop.index, animated: animated, animation_effect: animation_effect
+                    endcase
+                  %}
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+        </div>
+      </div>
+      {% if enable_slider %}
+        {% render 'slider-controls',
+          extra_classes: 'm:hidden',
+          absolute: true,
+          container: section.settings.container,
+          show_pagination: section.settings.show_pagination,
+          show_nav: section.settings.show_navigation,
+          nav_class: 'm:hidden'
+        %}
+      {% endif %}
+    </div>
+  </div>
+</m-recently-viewed>
+{% schema %}
+{
+  "name": "Recently viewed products",
+  "disabled_on": {
+    "groups": ["header"]
+  },
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Header settings"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Recently Viewed Products"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {
+          "value": "h3",
+          "label": "Medium"
+        },
+        {
+          "value": "h2",
+          "label": "Large"
+        }
+      ],
+      "default": "h3"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Grid settings"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Products to show",
+      "default": 8,
+      "min": 3,
+      "max": 20
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Products per row",
+      "default": 4,
+      "min": 3,
+      "max": 8
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap",
+      "default": 30,
+      "min": 0,
+      "max": 50,
+      "step": 2
+    },
+    {
+      "type": "header",
+      "content": "Product card settings"
+    },
+    {
+      "type": "select",
+      "id": "pcard_layout",
+      "label": "Design layout",
+      "default": "",
+      "options": [
+        {
+          "value": "",
+          "label": "Use global settings"
+        },
+        {
+          "value": "1",
+          "label": "Style 1"
+        },
+        {
+          "value": "2",
+          "label": "Style 2"
+        },
+        {
+          "value": "3",
+          "label": "Style 3"
+        },
+        {
+          "value": "4",
+          "label": "Style 4"
+        },
+        {
+          "value": "5",
+          "label": "Style 5"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "pcard_image_ratio",
+      "label": "Image aspect ratio",
+      "default": "",
+      "options": [
+        {
+          "value": "",
+          "label": "Use global settings"
+        },
+        {
+          "value": "original",
+          "label": "Original aspect ratio"
+        },
+        {
+          "value": "1/1",
+          "label": "1:1"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show product vendors",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_title",
+      "label": "Hide product title",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_slider",
+      "label": "Enable slider",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show navigation",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "checkbox",
+      "label": "Disable slider",
+      "id": "mobile_disable_slider",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Use horizontal scrollbar",
+      "id": "use_scroll_mobile",
+      "default": true,
+      "info": "Uncheck to display as grid"
+    },
+    {
+      "type": "range",
+      "id": "item_gap_mobile",
+      "label": "Column gap",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Recently viewed products",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

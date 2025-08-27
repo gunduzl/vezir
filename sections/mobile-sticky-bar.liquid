@@ -1,0 +1,144 @@
+{{ 'mobile-sticky-bar.css' | asset_url | stylesheet_tag }}
+
+{% liquid
+  assign should_show = section.settings.show_mobile_sticky
+  assign section_settings = section.settings
+  if section_settings.show_home_icon == false and section_settings.show_cart_icon == false and section_settings.show_wishlist_icon == false and section_settings.show_search_icon == false and section_settings.show_account_icon == false
+    assign should_show = false
+  endif
+%}
+
+{% if template.name != 'product' and should_show %}
+  <div class="m-mobile-sticky-bar md:m:hidden m:flex m:justify-between">
+    {% if section_settings.show_home_icon %}
+      <div class="m-mobile-sticky-bar--item">
+        <a href="{{ routes.root_url }}" aria-label="product">
+          <svg class="m-svg-icon--large" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 22 17">
+            <path fill="currentColor" d="M20.9141 7.93359c.1406.11719.2109.26953.2109.45703 0 .14063-.0469.25782-.1406.35157l-.3516.42187c-.1172.14063-.2578.21094-.4219.21094-.1406 0-.2578-.04688-.3515-.14062l-.9844-.77344V15c0 .3047-.1172.5625-.3516.7734-.2109.2344-.4687.3516-.7734.3516h-4.5c-.3047 0-.5742-.1172-.8086-.3516-.2109-.2109-.3164-.4687-.3164-.7734v-3.6562h-2.25V15c0 .3047-.11719.5625-.35156.7734-.21094.2344-.46875.3516-.77344.3516h-4.5c-.30469 0-.57422-.1172-.80859-.3516-.21094-.2109-.31641-.4687-.31641-.7734V8.46094l-.94922.77344c-.11719.09374-.24609.14062-.38672.14062-.16406 0-.30468-.07031-.42187-.21094l-.35157-.42187C.921875 8.625.875 8.50781.875 8.39062c0-.1875.070312-.33984.21094-.45703L9.73438.832031C10.1094.527344 10.5312.375 11 .375s.8906.152344 1.2656.457031l8.6485 7.101559zm-3.7266 6.50391V7.05469L11 1.99219l-6.1875 5.0625v7.38281h3.375v-3.6563c0-.3046.10547-.5624.31641-.7734.23437-.23436.5039-.35155.80859-.35155h3.375c.3047 0 .5625.11719.7734.35155.2344.211.3516.4688.3516.7734v3.6563h3.375z"/>
+          </svg>
+        </a>
+      </div>
+    {% endif %}
+    {% if section_settings.show_collection_icon %}
+      <div class="m-mobile-sticky-bar--item">
+        <a href="{{ routes.all_products_collection_url }}" aria-label="collection">
+          <svg class="m-svg-icon--medium" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+            <path d="M416 32H32A32 32 0 0 0 0 64v384a32 32 0 0 0 32 32h384a32 32 0 0 0 32-32V64a32 32 0 0 0-32-32zm-16 48v152H248V80zm-200 0v152H48V80zM48 432V280h152v152zm200 0V280h152v152z"/>
+          </svg>
+        </a>
+      </div>
+    {% endif %}
+    {% if section_settings.show_cart_icon %}
+      <div class="m-mobile-sticky-bar--item">
+        {% render 'cart' %}
+      </div>
+    {% endif %}
+    {% if section_settings.show_wishlist_icon %}
+      {% if settings.wishlist_page != blank %}
+        {% assign url = pages[settings.wishlist_page].url %}
+      {% else %}
+        {% assign url = '/pages/wishlist' %}
+      {% endif %}
+      <div class="m-mobile-sticky-bar--item">
+        <a class="m-mobile-sticky-bar--wishlist" href="{{ url }}" aria-label="wishlist">
+          <svg class="m-svg-icon--medium" viewBox="0 0 15 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.1929 1.1123C13.8492 1.67741 14.2867 2.35189 14.5054 3.13574C14.7242 3.90137 14.7333 4.63965 14.5328 5.35059C14.3323 6.06152 13.9859 6.6722 13.4937 7.18262L8.70857 12.0498C8.4169 12.3415 8.07055 12.4873 7.66951 12.4873C7.26846 12.4873 6.92211 12.3415 6.63044 12.0498L1.84529 7.18262C1.3531 6.6722 1.00675 6.06152 0.806225 5.35059C0.605704 4.62142 0.614819 3.87402 0.833569 3.1084C1.05232 2.34277 1.48982 1.67741 2.14607 1.1123C2.92992 0.456055 3.8505 0.173503 4.90779 0.264648C5.98331 0.337565 6.90388 0.756836 7.66951 1.52246C8.43513 0.756836 9.34659 0.337565 10.4039 0.264648C11.4794 0.173503 12.4091 0.456055 13.1929 1.1123ZM12.564 6.25293C13.0927 5.70605 13.357 5.04069 13.357 4.25684C13.357 3.45475 13.0289 2.74382 12.3726 2.12402C11.8258 1.68652 11.1877 1.49512 10.4586 1.5498C9.74763 1.60449 9.13695 1.89616 8.62654 2.4248L7.66951 3.38184L6.71248 2.4248C6.20206 1.89616 5.58227 1.60449 4.8531 1.5498C4.14216 1.49512 3.51326 1.68652 2.96638 2.12402C2.31013 2.74382 1.98201 3.45475 1.98201 4.25684C1.98201 5.04069 2.24633 5.70605 2.77498 6.25293L7.58748 11.1201C7.64216 11.193 7.69685 11.193 7.75154 11.1201L12.564 6.25293Z" fill="currentColor"/>
+          </svg>
+          <sup class="m-wishlist-count m:hidden"></sup>
+        </a>
+      </div>
+    {% endif %}
+    {% if section_settings.show_search_icon %}
+      <m-search-popup class="m-mobile-sticky-bar--item" data-open-search-popup>
+        <span class="m-mobile-sticky-bar--search">
+          <svg
+            class="m-svg-icon--medium"
+            fill="currentColor"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+          >
+            <path d="M508.5 468.9L387.1 347.5c-2.3-2.3-5.3-3.5-8.5-3.5h-13.2c31.5-36.5 50.6-84 50.6-136C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c52 0 99.5-19.1 136-50.6v13.2c0 3.2 1.3 6.2 3.5 8.5l121.4 121.4c4.7 4.7 12.3 4.7 17 0l22.6-22.6c4.7-4.7 4.7-12.3 0-17zM208 368c-88.4 0-160-71.6-160-160S119.6 48 208 48s160 71.6 160 160-71.6 160-160 160z"/>
+          </svg>
+        </span>
+      </m-search-popup>
+    {% endif %}
+    {% if shop.customer_accounts_enabled or shop.customer_accounts_optional %}
+      {% if section_settings.show_account_icon %}
+        <div class="m-mobile-sticky-bar--item">
+          <a href="{{ routes.account_url }}" aria-label="account">
+            <svg
+              class="m-svg-icon--medium"
+              fill="currentColor"
+              stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 448 512"
+            >
+              <path d="M313.6 304c-28.7 0-42.5 16-89.6 16-47.1 0-60.8-16-89.6-16C60.2 304 0 364.2 0 438.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-25.6c0-74.2-60.2-134.4-134.4-134.4zM400 464H48v-25.6c0-47.6 38.8-86.4 86.4-86.4 14.6 0 38.3 16 89.6 16 51.7 0 74.9-16 89.6-16 47.6 0 86.4 38.8 86.4 86.4V464zM224 288c79.5 0 144-64.5 144-144S303.5 0 224 0 80 64.5 80 144s64.5 144 144 144zm0-240c52.9 0 96 43.1 96 96s-43.1 96-96 96-96-43.1-96-96 43.1-96 96-96z"/>
+            </svg>
+          </a>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endif %}
+{% schema %}
+{
+  "name": "Mobile sticky bar",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/NtGGOO)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mobile_sticky",
+      "label": "Show sticky bar",
+      "default": true,
+      "info": "Show a sticky bar on mobile to let customers shopping easier. Switch to mobile view to see it."
+    },
+    {
+      "type": "header",
+      "content": "Addons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_home_icon",
+      "label": "Show home icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_icon",
+      "label": "Show products listing",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart_icon",
+      "label": "Show cart icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search_icon",
+      "label": "Show search icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account_icon",
+      "label": "Show account icon",
+      "default": false,
+      "info": "Customers account must be enabled. See [Enabling customer accounts](https://help.shopify.com/en/manual/checkout-settings/customer-accounts)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist_icon",
+      "label": "Show wishlist icon",
+      "default": false,
+      "info": "Wishlist page must be specified"
+    }
+  ]
+}
+{% endschema %}

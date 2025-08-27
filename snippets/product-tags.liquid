@@ -1,0 +1,30 @@
+{%- comment -%}
+    TODO: add to theme settings [color, tag...]
+    Valid tags:
+     - tag__hot_[DISPLAY_TEXT]
+     - tag__new_[DISPLAY_TEXT]
+     - tag__sale_[DISPLAY_TEXT]
+    Example: tag__hot_-50% OFF, tag__new_NEW ARRIVAL
+{%- endcomment -%}
+
+{% for tag in product.tags %}
+    {% if tag contains 'tag__' %}
+        {%- liquid
+            assign tag_content = tag | split: '__' | last
+            assign type = tag_content | split: '_' | first
+            assign tag_name = tag_content | split: '_' | last
+            assign color_scheme_class = 'm-color-'
+            case type
+                when 'sale':
+                    assign color_scheme_class = color_scheme_class | append: settings.sale_badge_color_scheme
+                when 'new':
+                    assign color_scheme_class = color_scheme_class | append: settings.new_badge_color_scheme
+                when 'hot':
+                    assign color_scheme_class = color_scheme_class | append: settings.hot_badge_color_scheme
+            endcase
+        -%}
+        <span class="m-product-tag m-product-tag--{{ type }} m-gradient {{ color_scheme_class }}">
+            {{ tag_name }}
+        </span>
+    {% endif %}
+{% endfor %}

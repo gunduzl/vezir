@@ -1,0 +1,89 @@
+{% comment %}
+  Accepts:
+  - show_pagination: {Boolean} Show Pagination (optional)
+  - show_nav: {Boolean} Show Navigation (optional)
+  - pagination_type: {String} Accepted value: bullets/fraction (optional)
+  - position: {String} Accepted value: top-left/top-center/top-right/middle-left/middle-right/bottom-left/bottom-center/bottom-right (optional)
+  - absolute: {Boolean} (optional)
+  - container: {String} (optional)
+  - pagination_class: {String} Pagination extra classes (optional)
+  - extra_classes: {String} Extra classes (optional)
+
+  Usage:
+  {% render 'slider-controls',
+    show_pagination: false,
+    show_nav: false,
+    pagination_type: 'bullets',
+    position: 'bottom-center',
+    container: '',
+    absolute: false,
+    pagination_class: '',
+    extra_classes: ''
+  %}
+{% endcomment %}
+
+{% liquid
+  assign pagination_type = pagination_type | default: 'bullets'
+  assign position = position | default: 'bottom-center'
+
+  if show_pagination == null
+    assign show_pagination = true
+  endif
+
+  assign classes = 'm-slider-controls'
+  assign classes = classes | append: ' m-slider-controls--' | append: position
+
+  if show_nav
+    assign classes = classes | append: ' m-slider-controls--show-nav'
+  endif
+
+  if show_pagination
+    assign classes = classes | append: ' m-slider-controls--show-pagination'
+    assign classes = classes | append: ' m-slider-controls--pagination-' | append: pagination_type
+  endif
+
+  if absolute == true and pagination_type == 'bullets'
+    assign classes = classes | append: ' m-slider-controls--absolute'
+  else
+    assign classes = classes | append: ' m-slider-controls--group'
+  endif
+
+  if container == 'w-full' or container == 'container-full'
+    assign classes = classes | append: ' m-slider-controls--full'
+  endif
+
+  if animated
+    assign classes = classes | append: ' m-scroll-trigger animate--' | append: animation_effect
+  endif
+
+  if extra_classes
+    assign classes = classes | append: ' ' | append: extra_classes
+  endif
+%}
+<div class="{{ classes }}">
+  <div class="m-slider-controls__wrapper">
+    {% if show_nav %}
+      <button
+        class="m-slider-controls__button m-slider-controls__button-prev swiper-button-prev {{ nav_class }}"
+        aria-label="Previous"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    {% endif %}
+    {% if show_pagination %}
+      <div class="swiper-pagination m:w-full {{ pagination_class }}"></div>
+    {% endif %}
+    {% if show_nav %}
+      <button
+        class="m-slider-controls__button m-slider-controls__button-next swiper-button-next {{ nav_class }}"
+        aria-label="Next"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.5 15L12.5 10L7.5 5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    {% endif %}
+  </div>
+</div>

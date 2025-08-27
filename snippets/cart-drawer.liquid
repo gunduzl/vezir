@@ -1,0 +1,221 @@
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+{{ 'component-quantity-popover.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  if linklists['gift-wrapping'].links != blank and linklists['gift-wrapping'].links.first.type == 'product_link'
+    assign gift_wrapping = linklists['gift-wrapping'].links.first
+
+    assign gift_wrap_id = gift_wrapping.object.variants.first.id
+    assign gift_wraps_in_cart = 0
+    for item in cart.items
+      if item.id == gift_wrap_id
+        assign gift_wraps_in_cart = item.quantity
+        break
+      endif
+    endfor
+    assign items_in_cart = cart.item_count | minus: gift_wraps_in_cart
+  endif
+%}
+
+<m-cart-drawer
+  id="MinimogCartDrawer"
+  class="m-cart-drawer"
+>
+  <div class="m-cart-drawer__inner m:h-full m-gradient m-color-{{ settings.drawer_popup_color_scheme }}">
+    <button class="m-cart-drawer__close" aria-label="Close">
+      <svg
+        class="m-svg-icon--large"
+        fill="currentColor"
+        stroke="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 320 512"
+      >
+        <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"/>
+      </svg>
+    </button>
+    <div class="m:flex m:flex-col m:h-full" id="MinimogCartDrawerHeader">
+      <div class="m-cart-drawer__header">
+        <h3 class="m-cart-drawer__title m:text-xl md:m:text-2xl m:font-medium">{{ 'cart.general.title' | t }}</h3>
+        {% if template.name != 'cart' %}
+          <foxkit-cart-countdown></foxkit-cart-countdown>
+        {% endif %}
+        <foxkit-cart-goal></foxkit-cart-goal>
+      </div>
+      <m-cart-items
+        class="m-cart-drawer__body m-scrollbar--vertical m:flex m:flex-col m:flex-1"
+        id="MinimogCartDrawerBody"
+        data-section-name="cart-drawer"
+      >
+        <form action="{{ routes.cart_url }}" method="post" id="cart-drawer-form" class="m:w-full" novalidate>
+          {%- if cart.items.size > 0 -%}
+            <div class="m-cart-drawer__items">
+              {% for item in cart.items %}
+                {% render 'cart-drawer-item',
+                  item: item,
+                  gift_wrap_id: gift_wrap_id,
+                  gift_wraps_in_cart: gift_wraps_in_cart,
+                  items_in_cart: items_in_cart
+                %}
+              {% endfor %}
+            </div>
+          {%- else -%}
+            <div class="m-cart-drawer__empty">
+              {{ 'cart.general.empty' | t }}
+            </div>
+          {%- endif -%}
+        </form>
+      </m-cart-items>
+      <div class="m-cart-drawer__footer" id="MinimogCartDrawerFooter">
+        <div class="m-cart-drawer__footer--wrapper{% if cart == empty %} m:hidden{% else %} m:block{% endif %}">
+          {% render 'cart-addons', form_id: 'cart-drawer-form' %}
+          <div class="m-cart-drawer__gift-wrapping">
+            <div class="m:hidden">{{ gift_wrapping.object.variants.first | json }}</div>
+            {%- if gift_wrapping != null -%}
+              <m-gift-wrapping-component
+                class="m-gift-wrapping"
+                data-gift-wrap-id="{{ gift_wrap_id }}"
+                data-gift-wrapping="{{ cart.attributes.gift-wrapping | escape }}"
+                cart-items-size="{{ cart.items.size }}"
+                gift-wraps-in-cart="{{ gift_wraps_in_cart }}"
+                items-in-cart="{{ items_in_cart }}"
+              >
+                <input
+                  id="m-gift-wrapping"
+                  type="checkbox"
+                  name="attributes[gift-wrapping]"
+                  value="yes"
+                  {% if gift_wraps_in_cart > 0 %}
+                    checked="checked"
+                  {% endif %}
+                  class="m:visually-hidden"
+                >
+                <label for="m-gift-wrapping" class="m-gift-wrapping--label">
+                  {%- capture gift_price -%}<strong class="m-gift-wrapping--price">{{ gift_wrapping.object.price | money }}</strong>{%- endcapture -%}
+                  <span class="m-gift-wrapping--text">
+                    {{- 'cart.general.gift_wrapping_html' | t: price: gift_price -}}
+                  </span>
+                  <div class="m-gift-wrapping--loading">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                  <svg
+                    class="m-gift-wrapping--icon"
+                    viewBox="0 0 14 14"
+                    with="16"
+                    height="16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect x="0.5" y="0.5" width="13" height="13" stroke="currentColor"/>
+                    <path d="M3.5625 7.625L5.75 9.8125L10.75 4.8125" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </label>
+                {%- if gift_wraps_in_cart > 0 -%}
+                  <m-gift-note-component class="m-gift-wrapping--note">
+                    <textarea
+                      class="form-field"
+                      name="attributes[gift-note]"
+                      placeholder="{{ 'cart.general.gift_note_placeholder' | t }}"
+                    >{{ cart.attributes.gift-note }}</textarea>
+                  </m-gift-note-component>
+                {%- endif -%}
+              </m-gift-wrapping-component>
+            {%- endif -%}
+          </div>
+          <div class="m-cart__summary m-cart-drawer__summary">
+            <div data-foxkit-cart-summary></div>
+            <div data-minimog-cart-discounts>
+              {%- if cart.cart_level_discount_applications.size > 0 -%}
+                <ul class="m-cart__discount" role="list">
+                  {%- for discount in cart.cart_level_discount_applications -%}
+                    <li class="m-cart__discount--item m:justify-end m:items-center">
+                      <svg
+                        aria-hidden="true"
+                        width="20"
+                        height="20"
+                        focusable="false"
+                        role="presentation"
+                        viewBox="0 0 12 13"
+                      >
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M7 .5h3a2 2 0 0 1 2 2v3a.995.995 0 0 1-.293.707l-6 6a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414l6-6A.995.995 0 0 1 7 .5zm2 2a1 1 0 1 0 2 0 1 1 0 0 0-2 0z" fill="currentColor"></path>
+                      </svg>
+                      <span>{{ discount.title | upcase }}&nbsp;(-{{ discount.total_allocated_amount | money }})</span>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </div>
+            <div class="m-cart__subtotal m:flex m:justify-between" data-cart-subtotal>
+              <span class="m-cart__subtotal--label m:font-medium">{{ 'cart.general.subtotal' | t }}</span>
+              <span class="m-cart__subtotal--price m:font-medium" data-cart-subtotal-price>
+                {% if settings.currency_code_enabled %}
+                  {{ cart.total_price | money_with_currency }}
+                {% else %}
+                  {{ cart.total_price | money }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="m:flex m:flex-col m:items-center">
+            {% assign show_terms = false %}
+            {% if settings.agree_text != blank and settings.show_agree_on_cart %}
+              <div class="m-terms-conditons">
+                <label class="form-field--checkbox">
+                  <input type="checkbox" name="agree_terms" value="yes" required>
+                  <span class="form-field--checkbox__label">{{ settings.agree_text }}</span>
+                  <span class="form-field--checkbox__icon">
+                    <svg
+                      class="m-svg-icon--medium"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                      focusable="false"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M18.5 1.5H1.5L1.5 18.5H18.5V1.5ZM1.5 0.5C0.947715 0.5 0.5 0.947715 0.5 1.5V18.5C0.5 19.0523 0.947715 19.5 1.5 19.5H18.5C19.0523 19.5 19.5 19.0523 19.5 18.5V1.5C19.5 0.947715 19.0523 0.5 18.5 0.5H1.5Z" fill-rule="evenodd" fill="currentColor"/>
+                      <path d="M14.9975 6.09084C15.201 6.27746 15.2147 6.59375 15.0281 6.79728L8.91631 13.4627C8.82231 13.5652 8.68987 13.6239 8.55079 13.6247C8.41172 13.6256 8.27857 13.5684 8.18335 13.4671L4.99513 10.0731C4.80606 9.87179 4.81596 9.55536 5.01723 9.3663C5.21849 9.17723 5.53492 9.18713 5.72399 9.3884L8.54335 12.3897L14.291 6.12145C14.4776 5.91791 14.7939 5.90421 14.9975 6.09084Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                </label>
+              </div>
+              {% assign show_terms = true %}
+            {% endif %}
+            <button
+              type="submit"
+              form="cart-drawer-form"
+              class="m-button m-button--primary m:w-full"
+              name="checkout"
+              {% if show_terms %}
+                data-terms-action disabled
+              {% endif %}
+            >
+              <span>{{ 'cart.general.checkout' | t }}</span>
+            </button>
+            {%- if settings.cart_drawer_show_accelerated_button and additional_checkout_buttons -%}
+              <div class="additional-checkout-buttons m:w-full">
+                {{ content_for_additional_checkout_buttons }}
+              </div>
+            {%- endif -%}
+            <a class="m-cart-drawer__link-to-cart m-button m-button--link" href="{{ routes.cart_url }}">
+              {{ 'cart.general.viewcart' | t }}
+            </a>
+          </div>
+          {% if settings.cart_drawer_trust_badge %}
+            <div class="m-cart__trust-badge">
+              <img
+                src="{{ settings.cart_drawer_trust_badge | image_url: width: 840 }}"
+                loading="lazy"
+                width="400"
+                height="100"
+                alt="Trust secure badge"
+              >
+            </div>
+          {% endif %}
+        </div>
+        <div class="m-cart__overlay"></div>
+      </div>
+    </div>
+  </div>
+</m-cart-drawer>

@@ -1,0 +1,67 @@
+{% liquid
+  if results.url
+      assign results_url = results.url
+  else
+      assign terms = results.terms | escape
+      assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+  endif
+%}
+<script src="{{ 'facet-remove.js' | asset_url }}" defer="defer"></script>
+<div id="ActiveFacets" class="m-active-facets m:flex m:flex-wrap m:items-center{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+  {%- assign has_filters = false -%}
+  {%- for filter in results.filters -%}
+    {%- liquid 
+      if filter.active_values.size > 0
+        assign has_filters = true
+      endif
+    -%}
+    {%- for value in filter.active_values -%}
+      <facet-remove class="m-active-facets--item">
+        <a href="{{ value.url_to_remove }}">
+          <span class="m:flex m:items-center">
+            <span class="m-active-facets--remove-icon">
+              <svg class="m-svg-icon" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"/>
+              </svg>
+            </span>
+            {{ value.label | escape }}
+          </span>
+        </a>
+      </facet-remove>
+    {%- endfor -%}
+    {% if filter.type == "price_range" %}
+      {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+        {%- assign has_filters = true -%}
+        <facet-remove class="m-active-facets--item">
+          <a href="{{ filter.url_to_remove }}" class="m:flex">
+            <span class="m-active-facets--remove-icon">
+              <svg class="m-svg-icon" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"/>
+              </svg>
+            </span>
+            <span>
+              {%- if filter.min_value.value -%}
+                {{- filter.min_value.value | money -}}
+              {%- else -%}
+                {{- 0 | money -}}
+              {%- endif -%} 
+              <span>-</span>
+              {%- if filter.max_value.value -%}
+                {{- filter.max_value.value | money -}}
+              {%- else -%}
+                {{- filter.range_max | money -}}
+              {%- endif -%}
+            </span>
+          </a>
+        </facet-remove>
+      {%- endif -%}
+    {% endif %}
+  {%- endfor -%}
+  {%- unless has_filters == false -%}
+    <facet-remove class="m-active-facets--item m-active-facets--item-remove-all">
+      <a href="{{ results_url }}" class="m-active-facets--remove-all">
+        <span>{{ 'collections.sidebar.clear_all' | t }}</span>
+      </a>
+    </facet-remove>
+  {%- endunless -%}
+</div>

@@ -1,0 +1,355 @@
+{%- assign st = section.settings -%}
+{%- assign total_active_values = 0 -%}
+
+{% liquid
+  assign color_swatches_design = section.settings.color_swatches_design
+%}
+
+<script src="{{ 'storefont-filters.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'price-range.js' | asset_url }}" defer="defer"></script>
+<collection-filters-form class="m-collection-filters-form m-filter--widget">
+  <form id="CollectionFiltersForm">
+    {%- if results.terms -%}
+      <input type="hidden" name="q" value="{{ results.terms | escape }}">
+      <input name="options[prefix]" type="hidden" value="last">
+    {%- endif -%}
+    {%- if st.show_sorting -%}
+      <div class="m:hidden" data-form-sorting>
+        {%- assign sort_by = results.sort_by | default: results.default_sort_by -%}
+        <select name="sort_by" aria-describedby="a11y-refresh-page-message">
+          {%- for option in results.sort_options -%}
+            <option
+              value="{{ option.value | escape }}"
+              {% if option.value == sort_by %}
+                selected="selected"
+              {% endif %}
+              data-index="{{ forloop.index0 }}"
+            >
+              {{ option.name | escape }}
+            </option>
+          {%- endfor -%}
+        </select>
+      </div>
+    {%- endif -%}
+    {%- for filter in results.filters -%}
+      {% liquid
+        assign total_active_values = total_active_values | plus: filter.active_values.size
+        assign acc_open_class = 'open'
+        assign acc_content_style = 'style="opacity: 1;"'
+
+        if st.collapsed_groups contains filter.label
+          assign acc_open_class = ''
+          assign acc_content_style = ''
+        endif
+
+        assign filter_label = filter.label | downcase
+        assign color_swatches = section.settings.color_swatches | downcase | split: ','
+        assign has_color = color_swatches | where: filter_label | first
+        assign is_color = false
+
+        if color_swatches != blank and has_color != blank
+          assign is_color = true
+        endif
+
+        assign sorted_values = filter.values
+        # Keep the selected values grouped together when operator is AND
+        if filter.operator == 'AND'
+          assign active_filter_values = filter.values | where: 'active', true
+          assign inactive_filter_values = filter.values | where: 'active', false
+          assign sorted_values = active_filter_values | concat: inactive_filter_values
+        endif
+      %}
+
+      {% case filter.type %}
+        {% when 'list', 'boolean' %}
+          <div class="m-filter--widget m-accordion--item {{ acc_open_class }}" data-index="{{ forloop.index }}">
+            <div class="m-filter--widget-title h5 m-accordion--item-button ">
+              <span>{{ filter.label | escape }}</span>
+              <span class="m-accordion--item-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.5306 6.53073L8.5306 11.5307C8.46092 11.6007 8.37813 11.6561 8.28696 11.694C8.1958 11.7318 8.09806 11.7513 7.99935 11.7513C7.90064 11.7513 7.8029 11.7318 7.71173 11.694C7.62057 11.6561 7.53778 11.6007 7.4681 11.5307L2.4681 6.53073C2.3272 6.38984 2.24805 6.19874 2.24805 5.99948C2.24805 5.80023 2.3272 5.60913 2.4681 5.46823C2.60899 5.32734 2.80009 5.24818 2.99935 5.24818C3.19861 5.24818 3.3897 5.32734 3.5306 5.46823L7.99997 9.93761L12.4693 5.46761C12.6102 5.32671 12.8013 5.24756 13.0006 5.24756C13.1999 5.24756 13.391 5.32671 13.5318 5.46761C13.6727 5.60851 13.7519 5.7996 13.7519 5.99886C13.7519 6.19812 13.6727 6.38921 13.5318 6.53011L13.5306 6.53073Z" fill="currentColor"/>
+                </svg>
+              </span>
+            </div>
+            <div class="m-filter--widget-content m-accordion--item-content" {{ acc_content_style }}>
+              <ul
+                class="m-facets {% if st.limit_height_widget %}m-filter--scroll-content m-scrollbar--vertical{% endif %}{% if is_color or filter.presentation == 'swatch' or filter.presentation == 'image' %} m-filter--swatches m-filter--swatches-{{ color_swatches_design }}{% endif %}"
+                role="list"
+                style="--max-height: {{ section.settings.limit_height }}px;"
+              >
+                {%- for value in sorted_values -%}
+                  {%- if is_color or filter.presentation == 'swatch' -%}
+                    {% liquid
+                      unless filter.presentation == 'swatch'
+                        assign tag = value.value
+                        assign tag_downcase = tag | handleize | downcase
+
+                        capture texture
+                          render 'get_swatch_texture', texture_name: tag
+                        endcapture
+
+                        capture texture_style
+                          if texture != ''
+                            echo texture | asset_url
+                          endif
+                        endcapture
+
+                        assign colors = ',' | append: settings.product_colors | strip_newlines | downcase | append: ','
+                        assign tag_list = tag | downcase | strip
+                        assign tag_list = ',' | append: tag_list | append: ':'
+                        capture curcol
+                          if colors contains tag_list
+                            echo colors | split: tag_list | last | split: ',' | first | strip
+                          endif
+                        endcapture
+                        assign default_color = tag_downcase | split: '-' | first
+                      else
+                        assign swatch_image = blank
+                        assign swatch_fallback = value.value | split: ' ' | last | handle
+                        if value.swatch.image
+                          assign swatch_image = value.swatch.image | image_url: width: 72
+                          assign swatch_fallback_override = false
+                        elsif value.swatch.color
+                          assign swatch_fallback = value.swatch.color
+                        endif
+                      endunless
+                    %}
+                    <li class="m-facet--item m-facet--color{% unless color_swatches_design == 'list' %} m-tooltip--style-2 m-tooltip m-tooltip--top{% endunless %}{% if value.active %} active remove-tag{% endif %}">
+                      {%- unless filter.presentation == 'swatch' -%}
+                        <label
+                          for="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                          class="{% if value.count == 0 and value.active == false %}m-facet--checkbox__disabled{% endif %}"
+                        >
+                          <input
+                            type="checkbox"
+                            name="{{ value.param_name }}"
+                            value="{{ value.value }}"
+                            class="m:visually-hidden"
+                            id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                            {% if value.active %}
+                              checked
+                            {% endif %}
+                            {% if value.count == 0 and value.active == false %}
+                              disabled
+                            {% endif %}
+                          >
+                          <span
+                            class="m-facet--color-label m-bg-lazy"
+                            style="background-color: {{ curcol | default: default_color }}; background-image: url({{- texture_style -}}); background-size: cover;"
+                          >
+                            <span class="m:visually-hidden">{{ value.label }}</span>
+                          </span>
+                          {% if color_swatches_design == 'list' %}
+                            <span class="m-facet--color-name">
+                              {{- value.label -}}
+                              <span class="m-facet--product-count">({{ value.count }})</span></span
+                            >
+                          {% else %}
+                            <span class="m-tooltip__content">{{ value.label }}</span>
+                          {% endif %}
+                        </label>
+                      {%- else -%}
+                        <label
+                          class="{% if value.count == 0 and value.active == false %}m-facet--checkbox__disabled{% endif %}"
+                          for="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                        >
+                          <input
+                            type="checkbox"
+                            name="{{ value.param_name }}"
+                            value="{{ value.value }}"
+                            class="m:visually-hidden"
+                            id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                            {% if value.active %}
+                              checked
+                            {% endif %}
+                            {% if value.count == 0 and value.active == false %}
+                              disabled
+                            {% endif %}
+                          >
+                          <span
+                            class="m-facet--color-label m-bg-lazy"
+                            style="background-color: {{ swatch_fallback }}; {% if swatch_fallback_override == false and swatch_image != blank %} background-image: url({{ swatch_image }});{% endif %}; background-size: cover;"
+                          >
+                            <span class="m:visually-hidden">{{ value.label }}</span>
+                          </span>
+                          {% if color_swatches_design == 'list' %}
+                            <span class="m-facet--color-name">
+                              {{- value.label -}}
+                              <span class="m-facet--product-count">({{ value.count }})</span></span
+                            >
+                          {% else %}
+                            <span class="m-tooltip__content">{{ value.label }}</span>
+                          {% endif %}
+                        </label>
+                      {%- endunless -%}
+                    </li>
+                  {%- elsif filter.presentation == 'image' -%}
+                    {%- liquid
+                      assign is_disabled = false
+                      if filter_value.count == 0 and filter_value.active == false
+                        assign is_disabled = true
+                      endif
+
+                      assign swatch_image = blank
+                      assign swatch_fallback = value.value | split: ' ' | last | handle
+                      if value.image
+                        assign swatch_image = value.image | image_url: width: 90
+                      endif
+                    -%}
+                    <li class="m-facet--item m-facet--color{% unless color_swatches_design == 'list' %} m-tooltip--style-2 m-tooltip m-tooltip--top{% endunless %}{% if value.active %} active remove-tag{% endif %}">
+                      <label
+                        class="{% if is_disabled %}m-facet--checkbox__disabled{% endif %}"
+                        for="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                      >
+                        <input
+                          type="checkbox"
+                          name="{{ value.param_name }}"
+                          value="{{ value.value }}"
+                          class="m:visually-hidden"
+                          id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                          {% if value.active %}
+                            checked
+                          {% endif %}
+                          {% if is_disabled %}
+                            disabled
+                          {% endif %}
+                        >
+                        <span
+                          class="m-facet--color-label m-bg-lazy"
+                          style="background-color: {{ swatch_fallback }}; {% if swatch_image != blank %} background-image: url({{ swatch_image }});{% endif %}; background-size: cover;"
+                        >
+                          <span class="m:visually-hidden">{{ value.label }}</span>
+                        </span>
+                        {% if color_swatches_design == 'list' %}
+                          <span class="m-facet--color-name">
+                            {{- value.label -}}
+                            <span class="m-facet--product-count">({{ value.count }})</span></span
+                          >
+                        {% else %}
+                          <span class="m-tooltip__content">{{ value.label }}</span>
+                        {% endif %}
+                      </label>
+                    </li>
+                  {%- else -%}
+                    <li class="m-facet--item">
+                      <label
+                        for="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                        class="m-facet--checkbox{% if value.count == 0 and value.active == false %} m-facet--checkbox__disabled{% endif %}"
+                      >
+                        <input
+                          type="checkbox"
+                          name="{{ value.param_name }}"
+                          value="{{ value.value }}"
+                          id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                          {% if value.active %}
+                            checked
+                          {% endif %}
+                          {% if value.count == 0 and value.active == false %}
+                            disabled
+                          {% endif %}
+                        >
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="0.5" y="0.5" width="17" height="17" stroke="currentColor"/>
+                          <path d="M4.875 9.75L7.5 12.375L13.5 6.375" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="m-facet--label">{{ value.label | escape }}</span>
+                        {%- if st.show_product_count -%}
+                          <span class="m-facet--product-count">({{ value.count }})</span>
+                        {%- endif -%}
+                      </label>
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          </div>
+        {% when 'price_range' %}
+          {%- liquid
+            assign min_value = filter.min_value.value | default: 0.0 | divided_by: 100.0
+            assign max_value = filter.max_value.value | default: filter.range_max | divided_by: 100.0
+            assign range_max = filter.range_max | divided_by: 100.0 | ceil
+            assign step_value = max_value | minus: min_value | divided_by: 100.0 | ceil | at_most: 1
+            assign lower_bound_progress = min_value | divided_by: range_max | times: 100.0
+            assign higher_bound_progress = max_value | divided_by: range_max | times: 100.0
+          -%}
+          <div class="m-filter--widget m-accordion--item {{ acc_open_class }}" data-index="{{ forloop.index }}">
+            <div class="m-filter--widget-title h5 m-accordion--item-button">
+              {{ filter.label | escape }}
+              <span class="m-accordion--item-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.5306 6.53073L8.5306 11.5307C8.46092 11.6007 8.37813 11.6561 8.28696 11.694C8.1958 11.7318 8.09806 11.7513 7.99935 11.7513C7.90064 11.7513 7.8029 11.7318 7.71173 11.694C7.62057 11.6561 7.53778 11.6007 7.4681 11.5307L2.4681 6.53073C2.3272 6.38984 2.24805 6.19874 2.24805 5.99948C2.24805 5.80023 2.3272 5.60913 2.4681 5.46823C2.60899 5.32734 2.80009 5.24818 2.99935 5.24818C3.19861 5.24818 3.3897 5.32734 3.5306 5.46823L7.99997 9.93761L12.4693 5.46761C12.6102 5.32671 12.8013 5.24756 13.0006 5.24756C13.1999 5.24756 13.391 5.32671 13.5318 5.46761C13.6727 5.60851 13.7519 5.7996 13.7519 5.99886C13.7519 6.19812 13.6727 6.38921 13.5318 6.53011L13.5306 6.53073Z" fill="currentColor"/>
+                </svg>
+              </span>
+            </div>
+            <div class="m-filter--widget-content m-accordion--item-content" {{ acc_content_style }}>
+              <price-range
+                class="m-facets-price"
+                style="--from: {{ lower_bound_progress | default: 0 }}%; --to: {{ higher_bound_progress | default: 100 }}%;"
+              >
+                <div class="m-facets-price--ranges">
+                  <input
+                    class="m-facets-price--range m-facets-price--range-min"
+                    type="range"
+                    min="0"
+                    max="{{ range_max | ceil }}"
+                    step="{{ step_value }}"
+                    value="{{ min_value | ceil }}"
+                  >
+                  <input
+                    class="m-facets-price--range m-facets-price--range-max"
+                    type="range"
+                    min="0"
+                    max="{{ range_max | ceil }}"
+                    step="{{ step_value }}"
+                    value="{{ max_value | ceil }}"
+                  >
+                </div>
+                <div class="m-facets-price--input">
+                  <div class="m-facets-price--field">
+                    <span class="m:visually-hidden">{{ 'sections.collection_template.from' | t }}</span>
+                    <span class="m-facets-price--field-currency">{{ cart.currency.symbol }}</span>
+                    <input
+                      class="form-field form-field--input m:text-right"
+                      type="number"
+                      inputmode="numeric"
+                      name="{{ filter.min_value.param_name }}"
+                      autocomplete="off"
+                      placeholder="0"
+                      min="0"
+                      max="{{ max_value | ceil }}"
+                      step="{{ step_value }}"
+                      {% if filter.min_value.value %}
+                        value="{{ min_value | ceil }}"
+                      {% endif %}
+                    >
+                  </div>
+                  <span class="m-facets-price--to">{{ 'sections.collection_template.to' | t }}</span>
+                  <div class="m-facets-price--field">
+                    <span class="m:visually-hidden">{{ 'sections.collection_template.to' | t }}</span>
+                    <span class="m-facets-price--field-currency">{{ cart.currency.symbol }}</span>
+                    <input
+                      class="form-field form-field--input m:text-right"
+                      type="number"
+                      inputmode="numeric"
+                      name="{{ filter.max_value.param_name }}"
+                      autocomplete="off"
+                      placeholder="{{ range_max | ceil }}"
+                      min="{{ min_value | ceil }}"
+                      max="{{ range_max | ceil }}"
+                      step="{{ step_value }}"
+                      {% if filter.max_value.value %}
+                        value="{{ max_value | ceil }}"
+                      {% endif %}
+                    >
+                  </div>
+                </div>
+              </price-range>
+            </div>
+          </div>
+      {% endcase %}
+    {%- endfor -%}
+    {%- if results.current_vendor or results.current_type -%}
+      <input type="hidden" name="q" value="{{ results.current_vendor }}{{ results.current_type }}">
+    {%- endif -%}
+  </form>
+</collection-filters-form>

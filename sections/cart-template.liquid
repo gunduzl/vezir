@@ -1,0 +1,243 @@
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+{{ 'component-quantity-popover.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+{%- liquid
+  if linklists['gift-wrapping'].links != blank and linklists['gift-wrapping'].links.first.type == 'product_link'
+    assign gift_wrapping = linklists['gift-wrapping'].links.first
+
+    assign gift_wrap_id = gift_wrapping.object.variants.first.id
+    assign gift_wraps_in_cart = 0
+    for item in cart.items
+      if item.id == gift_wrap_id
+        assign gift_wraps_in_cart = item.quantity
+        break
+      endif
+    endfor
+    assign items_in_cart = cart.item_count | minus: gift_wraps_in_cart
+  endif
+-%}
+{%- capture page_title -%}
+    {{ 'cart.general.title' | t }}
+{%- endcapture -%}
+{% render 'page-title', title: page_title, container: 'container' %}
+<div class="container">
+  <m-cart
+    class="m-cart"
+    id="MinimogCart"
+  >
+    <form action="{{ routes.cart_url }}" method="post" novalidate>
+      <div class="m-cart__wrapper m:w-full">
+        <div class="m-cart__header" id="MinimogCartHeader">
+          <div class="m-cart__header--wrapper{% if cart == empty %} m:hidden{% else %} m:flex{% endif %}">
+            <div class="m-cart__column m-cart__column--product">{{ 'cart.label.product' | t }}</div>
+            <div class="m-cart__column m-cart__column--price">{{ 'cart.label.price' | t }}</div>
+            <div class="m-cart__column m-cart__column--quantity m:hidden md:m:block">
+              {{ 'cart.label.quantity' | t }}
+            </div>
+            <div class="m-cart__column m-cart__column--subtotal m:text-right m:hidden md:m:block">
+              {{ 'cart.label.total' | t }}
+            </div>
+          </div>
+        </div>
+
+        <m-cart-items
+          class="m-cart__body"
+          data-section-name="cart-template"
+          id="MinimogCartBody"
+        >
+          {%- if cart.item_count > 0 -%}
+            <div class="m-cart__items">
+              {% for item in cart.items %}
+                {% render 'cart-line-item', item: item %}
+              {% endfor %}
+            </div>
+          {%- else -%}
+            <div class="m-cart__empty">
+              <h3 class="m:text-center m:text-xl">
+                {{ 'cart.general.empty' | t }}
+                <a href="{{ routes.all_products_collection_url }}" class="m-text-link">
+                  {{ 'layout.back_to_shopping' | t }}
+                </a>
+              </h3>
+            </div>
+          {%- endif -%}
+        </m-cart-items>
+      </div>
+
+      <div class="m-cart__footer m:flex m:justify-end" id="MinimogCartFooter">
+        <div class="m-cart__footer--wrapper{% if cart == empty %} m:hidden{% else %} m:block{% endif %}">
+          {% render 'cart-addons' %}
+          {%- assign cart_discounts = 'template ' | split: ' ' -%}
+          {%- if cart.cart_level_discount_applications.size > 0 -%}
+            {%- assign cart_discounts = cart.cart_level_discount_applications -%}
+          {%- endif -%}
+          <div class="m-cart__gift-wrapping">
+            {%- if gift_wrapping != null -%}
+              <m-gift-wrapping-component
+                class="m-gift-wrapping"
+                data-gift-wrap-id="{{ gift_wrap_id }}"
+                data-gift-wrapping="{{ cart.attributes.gift-wrapping | escape }}"
+                cart-items-size="{{ cart.items.size }}"
+                gift-wraps-in-cart="{{ gift_wraps_in_cart }}"
+                items-in-cart="{{ items_in_cart }}"
+              >
+                <input
+                  id="m-gift-wrapping"
+                  type="checkbox"
+                  name="attributes[gift-wrapping]"
+                  value="yes"
+                  {% if gift_wraps_in_cart > 0 %}
+                    checked="checked"
+                  {% endif %}
+                  class="m:visually-hidden"
+                >
+                <label for="m-gift-wrapping" class="m-gift-wrapping--label">
+                  {%- capture gift_price -%}<strong class="m-gift-wrapping--price">{{ gift_wrapping.object.price | money }}</strong>{%- endcapture -%}
+                  <span class="m-gift-wrapping--text">
+                    {{- 'cart.general.gift_wrapping_html' | t: price: gift_price -}}
+                  </span>
+                  <div class="m-gift-wrapping--loading">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                  <svg
+                    class="m-gift-wrapping--icon"
+                    viewBox="0 0 14 14"
+                    with="16"
+                    height="16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect x="0.5" y="0.5" width="13" height="13" stroke="currentColor"/>
+                    <path d="M3.5625 7.625L5.75 9.8125L10.75 4.8125" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </label>
+                {%- if cart.attributes['gift-wrapping'] -%}
+                  <m-gift-note-component class="m-gift-wrapping--note">
+                    <textarea
+                      class="form-field"
+                      name="attributes[gift-note]"
+                      placeholder="{{ 'cart.general.gift_note_placeholder' | t }}"
+                    >{{ cart.attributes.gift-note }}</textarea>
+                  </m-gift-note-component>
+                {%- endif -%}
+              </m-gift-wrapping-component>
+            {%- endif -%}
+          </div>
+          <div class="m-cart__summary">
+            <div
+              data-minimog-cart-discounts
+            >
+              {% if cart.cart_level_discount_applications.size > 0 %}
+                <span class="m:visually-hidden">{{ 'customer.order.discounts' | t }}</span>
+                <div data-discounts>
+                  <ul class="m-cart__discount" data-discounts-list>
+                    {%- for discount_application in cart_discounts -%}
+                      {% if discount_application.total_allocated_amount != blank %}
+                        <li class="m-cart__discount--item m:justify-end m:items-center">
+                          <svg
+                            aria-hidden="true"
+                            width="20"
+                            height="20"
+                            focusable="false"
+                            role="presentation"
+                            viewBox="0 0 12 13"
+                          >
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7 .5h3a2 2 0 0 1 2 2v3a.995.995 0 0 1-.293.707l-6 6a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414l6-6A.995.995 0 0 1 7 .5zm2 2a1 1 0 1 0 2 0 1 1 0 0 0-2 0z" fill="currentColor"></path>
+                          </svg>
+                          <span data-cart-discount-title>
+                            {{- discount_application.title -}}
+                            &nbsp;(-<span data-cart-discount-amount>
+                              {{- discount_application.total_allocated_amount | money -}}</span
+                            >)</span
+                          >
+                        </li>
+                      {% endif %}
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="m:flex m:justify-between m-cart__subtotal" data-cart-subtotal>
+              <span class="m-cart__subtotal--label m:font-medium">{{ 'cart.general.subtotal' | t }}</span>
+              <span class="m-cart__subtotal--price m:font-medium" data-cart-subtotal-price>
+                {% if settings.currency_code_enabled %}
+                  {{ cart.total_price | money_with_currency }}
+                {% else %}
+                  {{ cart.total_price | money }}
+                {% endif %}
+              </span>
+            </div>
+            {%- capture taxes_shipping_checkout -%}
+              {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+                {{ 'cart.general.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+              {%- elsif cart.taxes_included -%}
+                {{ 'cart.general.taxes_included_but_shipping_at_checkout' | t }}
+              {%- elsif shop.shipping_policy.body != blank -%}
+                {{ 'cart.general.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+              {%- else -%}
+                {{ 'cart.general.taxes_and_shipping_at_checkout' | t }}
+              {%- endif -%}
+            {%- endcapture -%}
+            <div class="m-cart__shipping-note m:text-sm m:text-color-subtext">{{ taxes_shipping_checkout }}</div>
+          </div>
+          <div class="m-cart__checkout">
+            {% assign show_terms = false %}
+            {% if settings.agree_text != blank and settings.show_agree_on_cart %}
+              <div class="m-terms-conditons">
+                <label class="form-field--checkbox">
+                  <input type="checkbox" name="agree_terms" value="yes" required>
+                  <span class="form-field--checkbox__label">{{ settings.agree_text }}</span>
+                  <span class="form-field--checkbox__icon">
+                    <svg
+                      class="m-svg-icon--medium"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                      focusable="false"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M18.5 1.5H1.5L1.5 18.5H18.5V1.5ZM1.5 0.5C0.947715 0.5 0.5 0.947715 0.5 1.5V18.5C0.5 19.0523 0.947715 19.5 1.5 19.5H18.5C19.0523 19.5 19.5 19.0523 19.5 18.5V1.5C19.5 0.947715 19.0523 0.5 18.5 0.5H1.5Z" fill-rule="evenodd" fill="currentColor"/>
+                      <path d="M14.9975 6.09084C15.201 6.27746 15.2147 6.59375 15.0281 6.79728L8.91631 13.4627C8.82231 13.5652 8.68987 13.6239 8.55079 13.6247C8.41172 13.6256 8.27857 13.5684 8.18335 13.4671L4.99513 10.0731C4.80606 9.87179 4.81596 9.55536 5.01723 9.3663C5.21849 9.17723 5.53492 9.18713 5.72399 9.3884L8.54335 12.3897L14.291 6.12145C14.4776 5.91791 14.7939 5.90421 14.9975 6.09084Z" fill="currentColor"/>
+                    </svg>
+                  </span>
+                </label>
+              </div>
+              {% assign show_terms = true %}
+            {% endif %}
+            <div
+              class="m-cart__checkout-button{% if show_terms %} show-terms-conditions{% endif %}"
+              {% if show_terms %}
+                data-terms-action disabled
+              {% endif %}
+            >
+              <button type="submit" name="checkout" class="m:w-full m-button m-button--primary">
+                <span>{{ 'cart.general.checkout' | t | upcase }}</span>
+              </button>
+            </div>
+            {%- if additional_checkout_buttons -%}
+              <div class="additional-checkout-buttons m:w-full">
+                {{ content_for_additional_checkout_buttons }}
+              </div>
+            {%- endif -%}
+          </div>
+          {% if settings.cart_drawer_trust_badge %}
+            <div class="m-cart__trust-badge">
+              <img
+                src="{{ settings.cart_drawer_trust_badge | image_url: width: 1000 }}"
+                alt="Trust secure badge"
+                loading="lazy"
+                width="1000"
+                height="200"
+                alt="Trust secure badge"
+              >
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </m-cart>
+</div>

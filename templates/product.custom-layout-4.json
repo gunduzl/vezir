@@ -1,0 +1,357 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "bd55b00c-c0c3-4d81-a2fe-af7a03a9892e": {
+      "type": "custom-code",
+      "settings": {
+        "custom_css": ".sf__index-custom-html .rte .section__heading {\n    margin-bottom: 13px;\n}\n.sf__index-custom-html .block__content-header {\n    margin-bottom: 40px;\n}\n.sf__index-custom-html .block__content-body {\n    margin-bottom: 60px;\n}\n.sf__index-custom-html .block__content-body h3 {\n    font-size: 24px;\n    line-height: 1.33;\n    margin-bottom: 10px;\n}\n.sf__index-custom-html .block__content-header p,\n.sf__index-custom-html .block__content-body p {\n    font-size: 15px;\n}\n.sf__index-custom-html .block__content-footer {\n    padding-top: 24px;\n    margin-top: 90px;\n    border-top: 1px solid #ededed;\n}\n.sf__index-custom-html .block__content-footer .block__item h4 {\n    font-size: 48px;\n    line-height: 1.33;\n}\n.sf__index-custom-html .block__content-footer .block__item p {\n    font-size: 18px;\n}\n\n@media (max-width: 767px) {\n    .sf__index-custom-html .block__content-body {\n        margin-bottom: 30px;\n    }\n    .sf__index-custom-html .block__content-footer {\n        margin-top: 30px;\n    }\n    .sf__index-custom-html .block__content-footer .block__item h4 {\n        font-size: 32px;\n    }\n}"
+      }
+    },
+    "1634180587c910711e": {
+      "type": "breadcrumb",
+      "settings": {
+        "container": "container",
+        "text_alignment": "center",
+        "hide_current": false,
+        "hide_on_mb": false,
+        "animations": "inherit"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_saving": false,
+            "sale_badge_type": "percentage"
+          }
+        },
+        "a7c33681-2e92-4afe-af6c-09be8f611b30": {
+          "type": "short_description",
+          "settings": {}
+        },
+        "1bfc8830-45fe-4840-b192-262d4a0ed107": {
+          "type": "visitors",
+          "settings": {
+            "live_views_text": "{count_number} people are viewing this right now",
+            "live_views_range": "20-30",
+            "live_view_duration": "10",
+            "live_view_icon_blinks": true
+          }
+        },
+        "cf0dabab-3786-4c50-b7a2-96ef9f4fc958": {
+          "type": "foxkit_stock_countdown",
+          "settings": {}
+        },
+        "ecf54c3f-3da0-4922-8917-196d012654a8": {
+          "type": "foxkit_countdown_timer",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "size_title": "Size"
+          }
+        },
+        "a3e408b8-ab19-42b5-8f7f-8ec634b687b8": {
+          "type": "custom_field",
+          "settings": {
+            "title": "Enter your name",
+            "field_type": "text",
+            "field_options": "",
+            "field_placeholder": "",
+            "field_required": false,
+            "show_at_checkout": true
+          }
+        },
+        "1dbe35df-79f6-4509-8c63-e6f38e5ee846": {
+          "type": "image_field",
+          "settings": {
+            "title": "Select image",
+            "field_required": false,
+            "show_at_checkout": true
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_atc_button": true,
+            "show_dynamic_checkout": false,
+            "show_gift_card_recipient": true
+          }
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {
+            "show_atcp": true,
+            "show_ask_a_question": true,
+            "show_social": true
+          }
+        },
+        "98eecea7-1e9e-46dd-8fc4-b00c7702dbda": {
+          "type": "shipping",
+          "settings": {
+            "show_delivery_times": true,
+            "deliver_text": "Estimated Delivery:",
+            "deliver_days": "7",
+            "date_format": "%b %d",
+            "show_shipping_text": true,
+            "shipping_text": "<p><strong>Free Shipping & Returns: </strong>On all orders over $75</p>"
+          }
+        },
+        "95858a21-0a8c-42d1-be95-cd4f1797f5fc": {
+          "type": "trust_badge",
+          "disabled": true,
+          "settings": {
+            "trust_badges_text": "<p>Guarantee safe & secure checkout</p>",
+            "trust_badges_image_width": "320px",
+            "position": "below"
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "a7c33681-2e92-4afe-af6c-09be8f611b30",
+        "1bfc8830-45fe-4840-b192-262d4a0ed107",
+        "cf0dabab-3786-4c50-b7a2-96ef9f4fc958",
+        "ecf54c3f-3da0-4922-8917-196d012654a8",
+        "variant_picker",
+        "a3e408b8-ab19-42b5-8f7f-8ec634b687b8",
+        "1dbe35df-79f6-4509-8c63-e6f38e5ee846",
+        "buy_buttons",
+        "addons",
+        "98eecea7-1e9e-46dd-8fc4-b00c7702dbda",
+        "95858a21-0a8c-42d1-be95-cd4f1797f5fc"
+      ],
+      "settings": {
+        "container": "container",
+        "layout": "layout-6",
+        "show_atwl": true,
+        "enable_history_state": true,
+        "enable_variant_group_images": false,
+        "show_featured_media": true,
+        "show_zoom_button": true,
+        "enable_video_autoplay": false,
+        "show_nav_media_mobile": false,
+        "show_pagination_mobile": true,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
+        "enable_dynamic_checkout": false,
+        "sticky_atc_compare": false
+      }
+    },
+    "product-details-tabs": {
+      "type": "product-details-tabs",
+      "blocks": {
+        "description": {
+          "type": "description",
+          "settings": {
+            "header": "Product description"
+          }
+        },
+        "tab": {
+          "type": "tab",
+          "settings": {
+            "header": "Shipping & Return",
+            "content": "<p>Shipping cost is based on weight. Just add products to your cart and use the Shipping Calculator to see the shipping price.</p><p>We want you to be 100% satisfied with your purchase. Items can be returned or exchanged within 30 days of delivery.</p>",
+            "content_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "description",
+        "tab"
+      ],
+      "disabled": true,
+      "settings": {
+        "container": "container",
+        "default_open": true,
+        "animations": "inherit"
+      }
+    },
+    "custom-content": {
+      "type": "custom-content",
+      "blocks": {
+        "d58d90b1-a098-4835-b1fe-9f7ecb7f48e6": {
+          "type": "html",
+          "settings": {
+            "code": "<div class=\"rte\">\n<div class=\"block__content-header\">\n<h2 class=\"section__heading\">100% Sustainable</h2>\n<p class=\"text-color-subtext\">Get skincare made to fit—with some of the top acne-busting<br> ingredients prescribed by dermatologists nationwide.</p>\n</div>\n<div class=\"block__content-body\">\n<h3>Plastic free</h3>\n<p class=\"text-color-subtext\">From sourcing recycled paper, to printing with eco-friendly inks and<br> shipping orders in post-consumer-waste mailers. </p>\n</div>\n<div class=\"block__content-body\">\n<h3>100% recycable</h3>\n<p class=\"text-color-subtext\">Orders are secured in our sturdy, 100% PCW packaging, which is<br> fully recyclable biodegradable, and compostable</p>\n</div>\n<div class=\"block__content-body\">\n<h3>High-quality materials.</h3>\n<p class=\"text-color-subtext\">Orders are secured in our sturdy, 100% PCW packaging, which is<br> fully recyclable biodegradable, and compostable</p>\n</div>\n</div>",
+            "width": "50%",
+            "block_custom_class": "sf__index-custom-html",
+            "animations": "inherit"
+          }
+        },
+        "1632060681ed6277b4-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "d58d90b1-a098-4835-b1fe-9f7ecb7f48e6",
+        "1632060681ed6277b4-1"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container",
+        "gap": 100,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "custom_class": "sf__index-custom-content sf__prd-custom-content"
+      }
+    },
+    "163212164016351730": {
+      "type": "custom-content",
+      "blocks": {
+        "163212164016351730-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        },
+        "ac572247-b885-4b3c-b2e4-1f5f8ada6386": {
+          "type": "html",
+          "settings": {
+            "code": "<div class=\"rte\">\n<div class=\"block__content-header\">\n<h2 class=\"section__heading\">Details &amp; Specs</h2>\n<p class=\"text-color-subtext\">Get skincare made to fit—with some of the top acne-busting<br> ingredients prescribed by dermatologists nationwide.</p>\n</div>\n<div>\n<ul>\n<li style=\"font-size: 15px; line-height: 32px;\" class=\"flex text-color-subtext\">\n<img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">Each set includes envelopes</li>\n<li style=\"font-size: 15px; line-height: 32px;\" class=\"flex text-color-subtext\">\n<img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">Dimensions: 4.25” x 5.5”</li>\n<li style=\"font-size: 15px; line-height: 32px;\" class=\"flex text-color-subtext\">\n<img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">Smooth finish</li>\n<li style=\"font-size: 15px; line-height: 32px;\" class=\"flex text-color-subtext\">\n<img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">Blank interior</li>\n<li style=\"font-size: 15px; line-height: 32px;\" class=\"flex text-color-subtext\">\n<img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">Assorted sets of cards are packaged flat</li>\n<li style=\"font-size: 15px; line-height: 32px;\" class=\"flex text-color-subtext\">\n<img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">Made in USA</li>\n</ul>\n</div>\n</div>",
+            "width": "50%",
+            "block_custom_class": "sf__index-custom-html",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "163212164016351730-1",
+        "ac572247-b885-4b3c-b2e4-1f5f8ada6386"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container",
+        "gap": 100,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "custom_class": "sf__index-custom-content sf__prd-custom-content"
+      }
+    },
+    "163212177275e99b4c": {
+      "type": "custom-content",
+      "blocks": {
+        "163212177275e99b4c-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        },
+        "94ffa09a-e7df-4169-858c-d6c903032e39": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "163212177275e99b4c-1",
+        "94ffa09a-e7df-4169-858c-d6c903032e39"
+      ],
+      "settings": {
+        "heading": "Made from 100% post-consumer waste.Packaged and shipped plastic-free",
+        "subheading": "",
+        "description": "Orders are typically shipped within 1-2 business days. Tracking information is <br>provided for all orders EXCEPT orders of single cards",
+        "header_alignment": "center",
+        "container": "container",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 100,
+        "padding_bottom": 100,
+        "custom_class": ""
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "container": "container",
+        "heading": "You Might Also Like",
+        "text_align": "left",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true,
+        "use_scroll_mobile": true,
+        "animations": "inherit"
+      }
+    },
+    "16321491731d2c8073": {
+      "type": "product-reviews",
+      "settings": {
+        "container": "container-narrow",
+        "heading": "Reviews",
+        "custom_liquid": ""
+      }
+    },
+    "recent-viewed-products": {
+      "type": "recent-viewed-products",
+      "settings": {
+        "container": "container",
+        "heading": "Recently Viewed Products",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true
+      }
+    }
+  },
+  "order": [
+    "bd55b00c-c0c3-4d81-a2fe-af7a03a9892e",
+    "1634180587c910711e",
+    "main",
+    "product-details-tabs",
+    "custom-content",
+    "163212164016351730",
+    "163212177275e99b4c",
+    "product-recommendations",
+    "16321491731d2c8073",
+    "recent-viewed-products"
+  ]
+}

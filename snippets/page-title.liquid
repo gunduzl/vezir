@@ -1,0 +1,74 @@
+{% comment %}
+  Accepts:
+  - title: {String} Container class (required)
+  - container: {String} Container class. Default: 'container-fluid' (optional)
+  - extra_classes: {String} Extra classes (optional)
+  - text_alignment: {String} Text alignment. Default: 'center' (optional)
+  - size: {String} Accepted value: medium, large. Default: 'medium' (optional)
+  - justify: {String} Breadcrumb justify content. Default: 'center' (optional)
+  - show_breadcrumb: {Boolean} Show breadcrumb. Default: true (optional)
+
+  Usage:
+  {% render 'page-title', title: page.title %}
+{% endcomment %}
+
+{%- liquid
+  if container != nil and container == 'w-full'
+    assign container = 'container-full'
+  endif
+  if container == nil
+    assign container = 'container-fluid'
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign text_alignment = text_alignment | default: 'center'
+
+  if breadcrumb_justify == nil
+    if text_alignment == 'center'
+      assign breadcrumb_justify = 'center'
+    elsif text_alignment == 'right'
+      assign breadcrumb_justify = 'end'
+    else
+      assign breadcrumb_justify = 'start'
+    endif
+  endif
+
+  if show_breadcrumb == nil
+    assign show_breadcrumb = true
+  endif
+
+  assign template_name = template.name | handle
+
+  assign classes = 'm-page-header m-page-header--template-' | append: template_name
+  if size != nil
+    assign classes = classes | append: ' m-page-header--' | append: size
+  endif
+
+  assign classes = classes | append: ' m:text-' | append: text_alignment
+
+  if extra_classes != nil
+    assign classes = classes | append: ' ' | append: extra_classes
+  endif
+-%}
+{% if title != nil %}
+  <div class="{{ classes }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+    <div class="{{ container }}">
+      <h1 class="m-page-header__title">{{ title }}</h1>
+      {% if description %}<div class="m-page-header__description rte">{{ description }}</div>{% endif %}
+    </div>
+    {% if show_breadcrumb %}
+      {% render 'breadcrumb', 
+        container: container, 
+        justify: breadcrumb_justify,
+        animated: false,
+        animation_effect: 'none'
+      %}
+    {% endif %}
+  </div>
+{% endif %}
+

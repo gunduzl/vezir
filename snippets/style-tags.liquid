@@ -1,0 +1,215 @@
+{% liquid
+  assign custom_css = settings.custom_css
+
+  assign font_body_base = settings.type_base_size
+  assign h1_font_size = settings.h1_font_size
+  assign h2_font_size = settings.h2_font_size
+  assign h3_font_size = settings.type_header_base_size
+  assign h4_font_size = settings.h4_font_size
+
+  assign enable_rtl = settings.enable_rtl
+  assign language_support_rtl = settings.language_support_rtl
+  if enable_rtl and language_support_rtl != blank
+    assign shop_locale = localization.language.iso_code
+    assign language_support_rtl_list = language_support_rtl | split: ','
+    assign is_rtl = language_support_rtl_list | where: shop_locale
+    if is_rtl.size > 0
+      assign enable_rtl = true
+    else
+      assign enable_rtl = false
+    endif
+  endif
+
+  assign blocks_radius = 0
+  assign medium_blocks_radius = 0
+  case settings.blocks_corner_radius
+    when 'round'
+      assign blocks_radius = 10
+      assign medium_blocks_radius = 5
+  endcase
+
+  assign pcard_radius = 0
+
+  case settings.pcard_corner_radius
+    when 'round'
+      assign pcard_radius = 10
+  endcase
+%}
+
+{%- style -%}
+   {% for scheme in settings.color_schemes -%}
+  	{% assign scheme_classes = scheme_classes | append: '.m-color-' | append: scheme.id | append: ', ' %}
+  	{%- if forloop.index == 1 -%}
+  		:root,
+  	{%- endif -%}
+  	.m-color-{{ scheme.id }} {
+      --color-background: {{ scheme.settings.background.red }},{{ scheme.settings.background.green }},{{ scheme.settings.background.blue }};
+      --color-background-secondary: {{ scheme.settings.background_secondary.red }},{{ scheme.settings.background_secondary.green }},{{ scheme.settings.background_secondary.blue }};
+  		{% if scheme.settings.background_gradient != empty %}
+  	  --gradient-background: {{ scheme.settings.background_gradient }};
+  		{% else %}
+  	  --gradient-background: {{ scheme.settings.background }};
+  		{% endif %}
+  		--color-foreground: {{ scheme.settings.text.red }},{{ scheme.settings.text.green }},{{ scheme.settings.text.blue }};
+  		--color-foreground-secondary: {{ scheme.settings.subtext.red }},{{ scheme.settings.subtext.green }},{{ scheme.settings.subtext.blue }};
+      --color-heading: {{ scheme.settings.heading_text.red }},{{ scheme.settings.heading_text.green }},{{ scheme.settings.heading_text.blue }};
+  		--color-button: {{ scheme.settings.button.red }},{{ scheme.settings.button.green }},{{ scheme.settings.button.blue }};
+  		--color-button-text: {{ scheme.settings.button_label.red }},{{ scheme.settings.button_label.green }},{{ scheme.settings.button_label.blue }};
+  		--color-outline-button: {{ scheme.settings.outline_button_label.red }},{{ scheme.settings.outline_button_label.green }},{{ scheme.settings.outline_button_label.blue }};
+      --color-button-hover: {{ scheme.settings.button_hover.red }}, {{ scheme.settings.button_hover.green }}, {{ scheme.settings.button_hover.blue }};
+      --color-button-text-hover: {{ scheme.settings.button_text_hover.red }}, {{ scheme.settings.button_text_hover.green }}, {{ scheme.settings.button_text_hover.blue }};
+  		--color-border: {{ scheme.settings.border.red }},{{ scheme.settings.border.green }},{{ scheme.settings.border.blue }};
+  		--color-price-sale: {{ scheme.settings.price_sale.red }},{{ scheme.settings.price_sale.green }},{{ scheme.settings.price_sale.blue }};
+  		--color-price-regular: {{ scheme.settings.price_regular.red }},{{ scheme.settings.price_regular.green }},{{ scheme.settings.price_regular.blue }};
+  		--color-form-field: {{ scheme.settings.form_field.red }},{{ scheme.settings.form_field.green }},{{ scheme.settings.form_field.blue }};
+  		--color-form-field-text: {{ scheme.settings.form_field_label.red }},{{ scheme.settings.form_field_label.green }},{{ scheme.settings.form_field_label.blue }};
+  		--color-tooltip: {{ scheme.settings.tooltip.red }},{{ scheme.settings.tooltip.green }},{{ scheme.settings.tooltip.blue }};
+  		--color-tooltip-text: {{ scheme.settings.tooltip_label.red }},{{ scheme.settings.tooltip_label.green }},{{ scheme.settings.tooltip_label.blue }};
+  	}
+  {% endfor %}
+  {{ scheme_classes | remove_last: ', ' }} {
+  	color: rgb(var(--color-foreground));
+  	background-color: rgb(var(--color-background));
+  }
+   {%- capture style -%}
+  :root {
+     /* ANIMATIONS */
+  	--m-duration-short: .1s;
+     --m-duration-default: .25s;
+     --m-duration-long: .5s;
+     --m-duration-image: .65s;
+     --m-duration-animate: 1s;
+     --m-animation-duration: {{ settings.animation_duration | times: 1000 | floor }}ms;
+     --m-animation-fade-in-up: m-fade-in-up var(--m-animation-duration) cubic-bezier(0, 0, 0.3, 1) forwards;
+     --m-animation-fade-in-left: m-fade-in-left var(--m-animation-duration) cubic-bezier(0, 0, 0.3, 1) forwards;
+     --m-animation-fade-in-right: m-fade-in-right var(--m-animation-duration) cubic-bezier(0, 0, 0.3, 1) forwards;
+     --m-animation-fade-in-left-rtl: m-fade-in-left-rtl var(--m-animation-duration) cubic-bezier(0, 0, 0.3, 1) forwards;
+     --m-animation-fade-in-right-rtl: m-fade-in-right-rtl var(--m-animation-duration) cubic-bezier(0, 0, 0.3, 1) forwards;
+     --m-animation-fade-in: m-fade-in calc(var(--m-animation-duration) * 2) cubic-bezier(0, 0, 0.3, 1);
+     --m-animation-zoom-fade: m-zoom-fade var(--m-animation-duration) ease forwards;
+
+  	/* BODY */
+  	--base-line-height: {{ settings.type_base_line_height }};
+
+   /* INPUTS */
+   --inputs-border-width: {{ settings.inputs_border_thickness }}px;
+  	--inputs-radius: {{ settings.inputs_border_radius }}px;
+
+  	/* BUTTON */
+  	--btn-letter-spacing: {{ settings.btn_letter_spacing }}px;
+  	--btn-border-radius: {{ settings.btn_border_radius }}px;
+  	--btn-border-width: {{ settings.btn_border_width }}px;
+  	--btn-line-height: {{ settings.btn_line_height }}px;
+  	{% if settings.btn_uppercase_text %}
+  	--btn-text-transform: uppercase;
+  	{% endif %}
+
+  	/* COUNT BUBBLE */
+  	--color-cart-wishlist-count: {{ settings.color_cart_wishlist_count }};
+  	--bg-cart-wishlist-count: {{ settings.bg_cart_wishlist_count }};
+
+  	/* OVERLAY */
+  	--color-image-overlay: {{ settings.img_overlay_bg }};
+  	--opacity-image-overlay: {{ settings.img_overlay_opacity | divided_by: 100.00 }};
+
+  	/* Notification */
+  	--color-success: {{ settings.color_success.red }},{{ settings.color_success.green }},{{ settings.color_success.blue }};
+  	--color-warning: {{ settings.color_warning.red }},{{ settings.color_warning.green }},{{ settings.color_warning.blue }};
+    --color-error: {{ settings.color_error.red }}, {{ settings.color_error.green }}, {{ settings.color_error.blue }};
+    --color-error-bg: {{ settings.color_error | color_lighten: 40 }};
+    --color-warning-bg: {{ settings.color_warning | color_lighten: 45 }};
+    --color-success-bg: {{ settings.color_success | color_lighten: 50 }};
+
+  	/* CUSTOM COLOR */
+  	--text-black: 0,0,0;
+  	--text-white: 255,255,255;
+  	--bg-black: 0,0,0;
+  	--bg-white: 255,255,255;
+  	--rounded-full: 9999px;
+  	--bg-card-placeholder: rgba(243,243,243,1);
+  	--arrow-select-box: url({{ 'ar-down.svg' | asset_url }});
+
+  	/* FONT SIZES */
+  	--font-base-size: {{ font_body_base }};
+  	--font-btn-size: {{ settings.btn_base_size }}px;
+  	--font-btn-weight: {{ settings.btn_weight }};
+  	--font-h1-desktop: {{ h1_font_size }};
+  	--font-h1-tablet: {{ h1_font_size | times: 0.70 | floor }};
+  	--font-h1-mobile: {{ h1_font_size | times: 0.60 | floor }};
+  	--font-h2-desktop: {{ h2_font_size }};
+  	--font-h2-tablet: {{ h2_font_size | times: 0.80 | floor }};
+  	--font-h2-mobile: {{ h2_font_size | times: 0.70 | floor }};
+  	--font-h3-desktop: {{ h3_font_size }};
+  	--font-h3-tablet: {{ h3_font_size | times: 0.80 | floor }};
+  	--font-h3-mobile: {{ h3_font_size | times: 0.70 | floor }};
+  	--font-h4-desktop: {{ h4_font_size }};
+  	--font-h4-tablet: {{ h4_font_size | times: 0.80 | floor }};
+  	--font-h4-mobile: {{ h4_font_size | times: 0.80 | floor }};
+  	--font-h5-desktop: {{ font_body_base | times: 1.125 | floor }};
+  	--font-h5-mobile: {{ font_body_base }};
+  	--font-h6-desktop: {{ font_body_base }};
+  	--font-h6-mobile: {{ font_body_base }};
+  	--heading-letter-spacing: {{ settings.type_header_spacing }}px;
+
+   --arrow-down-url: url({{ 'arrow-down.svg' | asset_url }});
+   --arrow-down-white-url: url({{ 'arrow-down-white.svg' | asset_url }});
+   --product-title-line-clamp: {{ settings.pcard_title_line_clamp }};
+
+  	--spacing-sections-desktop: {{ settings.spacing_sections }}px;
+   --spacing-sections-laptop: {{ settings.spacing_sections | times: 0.8 | round: 0 }}px;
+   --spacing-sections-tablet: {{ settings.spacing_sections | times: 0.6 | round: 0 }}px;
+   --spacing-sections-mobile: {{ settings.spacing_sections_mobile }}px;
+
+  	/* LAYOUT */
+  	--container-width: {{ settings.container_width }}px;
+   --fluid-container-width: {{ settings.container_fluid_width }}px;
+   --fluid-container-offset: {{ settings.container_fluid_offset }}px;
+   /* CORNER RADIUS */
+   --blocks-radius: {{ blocks_radius }}px;
+   --medium-blocks-radius: {{ medium_blocks_radius }}px;
+   --pcard-radius: {{ pcard_radius }}px;
+  }
+   {%- endcapture -%}
+
+   {{ style | strip_newlines }}
+{%- endstyle -%}
+
+<link rel="stylesheet" href="{{ 'cart.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'cart.css' | asset_url | stylesheet_tag }}</noscript>
+
+{%- liquid
+  echo 'vendor.css' | asset_url | stylesheet_tag
+  if template contains 'customers/'
+    echo 'customer.css' | asset_url | stylesheet_tag
+  endif
+  if template.suffix == 'about-us'
+    echo 'about-us.css' | asset_url | stylesheet_tag
+  endif
+  if enable_rtl
+    echo 'rtl.css' | asset_url | stylesheet_tag
+  endif
+  if shop.metafields.tcustomizer.config
+    echo 'tpo-integration.css' | asset_url | stylesheet_tag
+  endif
+-%}
+{%- if linklists['gift-wrapping'].links != blank and linklists['gift-wrapping'].links.first.type == 'product_link' -%}
+  <link rel="stylesheet" href="{{ 'gift-wrapping.css' | asset_url }}" media="print" onload="this.media='all'">
+  <noscript>{{ 'gift-wrapping.css' | asset_url | stylesheet_tag }}</noscript>
+{%- endif -%}
+<link rel="stylesheet" href="{{ 'custom-style.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'custom.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'custom-style.css' | asset_url | stylesheet_tag }}</noscript>
+<noscript>{{ 'custom.css' | asset_url | stylesheet_tag }}</noscript>
+
+{%- style -%}
+  {%- if custom_css != blank -%}
+    {{ custom_css | strip_newlines }}
+  {%- endif -%}
+{%- endstyle -%}
+
+{% if request.path == '/challenge' %}
+  {% render 'customer-challenge-style' %}
+{% endif %}
+
+{% comment %} For init Product list of Recently product, Foxkit Related, Product recommendation {% endcomment %}
+<script src="{{ 'product-list.js' | asset_url }}" defer="defer"></script>

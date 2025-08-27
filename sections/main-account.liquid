@@ -1,0 +1,40 @@
+
+{%- capture page_title -%}
+  {{ 'customer.account.title' | t }}
+{%- endcapture -%}
+{% render 'page-title', title: page_title %}
+<div class="m-account">
+<div class="container-fluid">
+  {% render 'customer-navs' %}
+  <div class="m-account__content">
+    <div class="m-account__greeting">
+      {% render 'new-locale', key: 'customer.account.greeting' %}
+      <span>{{ customer.name }}</span>
+      ({% render 'new-locale', key: 'customer.account.not' %} <span>{{ customer.name }}</span>?
+      <a href="{{ routes.account_logout_url }}" class="m-text-link">{{ 'customer.account.log_out' | t }}</a>)
+    </div>
+
+    <div class="m-customer-order">
+      <h3 class="m-account__title">{{ 'customer.orders.title' | t }}</h3>
+      {% render 'customer-orders', paginate: paginate %}
+    </div>
+
+    <div class="m-account__detail m-customer-info">
+      <h3 class="m-account__title">{{ 'customer.account.details' | t }}</h3>
+
+      <div class="m-customer-info__field">
+        <div class="m:w-4/12">{{ 'customer.account.name' | t }}</div>
+        <div class="m:w-8/12">{{ customer.name }}</div>
+      </div>
+      <div class="m-customer-info__field">
+        <div class="m:w-4/12">{{ 'customer.account.email' | t }}</div>
+        <div class="m:w-8/12">{{ customer.email }}</div>
+      </div>
+
+      <a href="/account/addresses" class="m-button m-button--primary">
+        {{ 'customer.account.view_addresses' | t }} ({{ customer.addresses_count }})
+      </a>
+    </div>
+  </div>
+</div>
+</div>

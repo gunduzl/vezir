@@ -1,0 +1,391 @@
+{% liquid
+  assign cart_qty = cart | item_count_for_variant: variant.id
+
+  assign has_qty_rules = false
+  if variant.quantity_rule.increment > 1 or variant.quantity_rule.min > 1 or variant.quantity_rule.max != null
+    assign has_qty_rules = true
+  endif
+
+  assign has_vol_pricing = false
+  if variant.quantity_price_breaks.size > 0
+    assign has_vol_pricing = true
+  endif
+
+  assign section_id = section_id | append: '-' | append: index
+%}
+{%- if has_qty_rules or has_vol_pricing -%}
+  {%- capture qty_rules_vol_pricing -%}
+    {%- if has_qty_rules -%}
+      <div class="quantity__rules m:text-sm m:flex-wrap">
+        {%- if variant.quantity_rule.increment > 1 -%}
+          <span class="divider">
+            {%- render 'new-locale',
+              key: 'products.product.quantity_multiples_of',
+              param: '{{ quantity }}',
+              value: variant.quantity_rule.increment
+            -%}
+          </span>
+        {%- endif -%}
+        {%- if variant.quantity_rule.min > 1 -%}
+          <span class="divider">
+            {%- render 'new-locale',
+              key: 'products.product.quantity_minimum_of',
+              param: '{{ quantity }}',
+              value: variant.quantity_rule.min
+            -%}
+          </span>
+        {%- endif -%}
+        {%- if variant.quantity_rule.max != null -%}
+          <span class="divider">
+            {%- render 'new-locale',
+              key: 'products.product.quantity_maximum_of',
+              param: '{{ quantity }}',
+              value: variant.quantity_rule.max
+            -%}
+          </span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+    {%- if has_vol_pricing -%}
+      {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+      <volume-pricing
+        class="volume-pricing m:block parent-display{% unless has_qty_rules %} volume-pricing--empty-header{% endunless %}"
+        id="Volume-{{ section_id }}"
+      >
+        <ul class="list-unstyled volume-pricing__list">
+          <li class="volume-pricing__item">
+            <span>{{ variant.quantity_rule.min }}+</span>
+            {%- liquid
+              if settings.currency_code_enabled
+                assign price = variant.price | money_with_currency
+              else
+                assign price = variant.price | money
+              endif
+            -%}
+            {%- capture price_at_each -%}
+              {%- render 'new-locale',
+                key: 'products.product.volume_pricing.each',
+                param: '{{ money }}',
+                value: price
+              -%}
+            {%- endcapture -%}
+            <span data-text="{{ price_at_each | strip_html }}">
+              {%- render 'new-locale',
+                key: 'products.product.volume_pricing.each_html',
+                param: '{{ money }}',
+                value: price
+              -%}
+            </span>
+          </li>
+          {%- for price_break in variant.quantity_price_breaks -%}
+            {%- liquid
+              if settings.currency_code_enabled
+                assign price_break_price = price_break.price | money_with_currency
+              else
+                assign price_break_price = price_break.price | money
+              endif
+            -%}
+            <li class="volume-pricing__item">
+              <span>
+                {{- price_break.minimum_quantity -}}
+                <span aria-hidden="true">+</span></span
+              >
+              {%- capture price_at_each -%}
+                {%- render 'new-locale',
+                  key: 'products.product.volume_pricing.each',
+                  param: '{{ money }}',
+                  value: price_break_price
+                -%}
+              {%- endcapture -%}
+              <span data-text="{{ price_at_each | strip_html }}">
+                {%- render 'new-locale',
+                  key: 'products.product.volume_pricing.each_html',
+                  param: '{{ money }}',
+                  value: price_break_price
+                -%}
+              </span>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </volume-pricing>
+    {%- endif -%}
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- capture variant_price -%}
+  {%- if product.quantity_price_breaks_configured? -%}
+    {%- liquid
+      assign volume_pricing_array = variant.quantity_price_breaks | sort: 'quantity' | reverse
+      assign variant_price_compare = variant.compare_at_price
+    -%}
+    <price-per-item
+      id="PricePerItem-{{ section_id }}"
+      class="variant-item__price-per-item m:display-flex m:flex-wrap m:items-center m:gap-2"
+      data-section-id="{{ section_id }}"
+      data-product-id="{{ product_id }}"
+      data-variant-id="{{ variant.id }}"
+    >
+      {%- if variant_price_compare -%}
+        <span class="m:visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+        <span class="m:inline-flex m:items-center h-auto m:relative">
+          {%- liquid
+            if settings.currency_code_enabled
+              echo variant_price_compare | money_with_currency
+            else
+              echo variant_price_compare | money
+            endif
+          -%}
+        </span>
+        <span class="m:visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+      {%- endif -%}
+      {%- if variant.quantity_price_breaks.size > 0 -%}
+        {%- if cart_qty < volume_pricing_array.last.minimum_quantity -%}
+          {%- liquid
+            if settings.currency_code_enabled
+              assign variant_price = variant.price | money_with_currency
+            else
+              assign variant_price = variant.price | money
+            endif
+          -%}
+          <span class="price-per-item--current price__regular m:whitespace-nowrap">
+            {%- render 'new-locale',
+              key: 'products.product.volume_pricing.each_html',
+              param: '{{ money }}',
+              value: variant_price
+            -%}
+          </span>
+        {%- else -%}
+          {%- for price_break in volume_pricing_array -%}
+            {%- if cart_qty >= price_break.minimum_quantity -%}
+              {%- liquid
+                if settings.currency_code_enabled
+                  assign price_break_price = price_break.price | money_with_currency
+                else
+                  assign price_break_price = price_break.price | money
+                endif
+              -%}
+              <span class="price-per-item--current price__regular m:whitespace-nowrap">
+                {%- render 'new-locale',
+                  key: 'products.product.volume_pricing.each_html',
+                  param: '{{ money }}',
+                  value: price_break_price
+                -%}
+              </span>
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- else -%}
+        <span class="price-per-item--current price__regular m:whitespace-nowrap">
+          {%- liquid
+            if settings.currency_code_enabled
+              assign variant_price = variant.price | money_with_currency
+            else
+              assign variant_price = variant.price | money
+            endif
+          -%}
+          {%- render 'new-locale',
+            key: 'products.product.volume_pricing.each_html',
+            param: '{{ money }}',
+            value: variant_price
+          -%}
+        </span>
+      {%- endif -%}
+    </price-per-item>
+  {% else %}
+    {% render 'product-prices', use_variant: true, product: item, selected_variant: variant %}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- capture variant_quantity -%}
+  <div
+    class="variant-item__quantity-wrapper m:display-flex m:items-center"
+    id="QuantityForm-{{ section_id }}"
+  >
+    {% if variant.available == false or quantity_rule_soldout -%}
+      {{ 'products.product.sold_out' | t }}
+    {%- else -%}
+      <m-quantity-input
+        class="m-quantity"
+        data-product-id="{{ product_id }}"
+        data-section-id="{{ section_id }}"
+      >
+        <button
+          class="m-quantity__button"
+          name="minus"
+          type="button"
+          aria-label="{{ 'products.product.decrease_quantity' | t: title: item.title }}"
+        >
+          <svg
+            fill="currentColor"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 384 512"
+          >
+            <path d="M376 232H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h368c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+          </svg>
+        </button>
+        <input
+          class="m-quantity__input form-field form-field--no-border"
+          type="number"
+          name="updates[]"
+          value="{{ cart_qty }}"
+          data-cart-quantity="{{ cart_qty }}"
+          data-variant-id="{{ variant.id }}"
+          min="0"
+          data-min="{{ variant.quantity_rule.min }}"
+          {% if variant.quantity_rule.max != null %}
+            max="{{ variant.quantity_rule.max }}"
+          {% endif %}
+          step="{{ variant.quantity_rule.increment }}"
+        >
+        <button
+          class="m-quantity__button"
+          name="plus"
+          type="button"
+          aria-label="{{ 'products.product.increase_quantity' | t: title: item.title }}"
+        >
+          <svg
+            fill="currentColor"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 384 512"
+          >
+            <path d="M376 232H216V72c0-4.42-3.58-8-8-8h-32c-4.42 0-8 3.58-8 8v160H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h160v160c0 4.42 3.58 8 8 8h32c4.42 0 8-3.58 8-8V280h160c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+          </svg>
+        </button>
+      </m-quantity-input>
+      {%- if has_qty_rules or has_vol_pricing -%}
+        <quantity-popover class="quantity-popover m:block m:relative">
+          <button
+            class="quantity-popover__button volume-pricing-toggle m-button m-button--blank"
+            aria-label="Open Volume Pricing"
+          >
+            <svg
+              class="m-svg-icon"
+              viewBox="0 0 25 24"
+              stroke="currentColor"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12.5 16V11M13 8C13 8.27614 12.7761 8.5 12.5 8.5C12.2239 8.5 12 8.27614 12 8M13 8C13 7.72386 12.7761 7.5 12.5 7.5C12.2239 7.5 12 7.72386 12 8M13 8H12M22.5 12C22.5 17.5228 18.0228 22 12.5 22C6.97715 22 2.5 17.5228 2.5 12C2.5 6.47715 6.97715 2 12.5 2C18.0228 2 22.5 6.47715 22.5 12Z"></path>
+            </svg>
+          </button>
+          <div class="quantity-popover__wrapper m:blocks-radius-md" hidden>
+            <button class="quantity-popover__close" aria-label="Close">
+              <svg
+                class="m-svg-icon"
+                fill="currentColor"
+                stroke="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 320 512"
+              >
+                <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"></path>
+              </svg>
+            </button>
+            {{ qty_rules_vol_pricing }}
+          </div>
+        </quantity-popover>
+      {%- endif -%}
+      <div class="variant-item__action m:hidden md:m:display-flex m:items-center m:justify-center m-spinner-button">
+        <span class="m-spinner-icon">
+          <svg
+            class="animate-spin m-svg-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle  cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </span>
+        <a
+          class="variant-item__remove{% if cart_qty == 0 %} pointer-events-none invisible{% endif %}"
+          href="#"
+          is="quick-order-list-remove"
+          aria-label="{{ 'cart.general.remove' | t }}"
+          data-variant-id="{{ variant.id }}"
+        >
+          <svg
+            class="m-svg-icon--medium-small"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+{%- endcapture -%}
+<tr
+  class="variant-item"
+  data-index="{{ index }}"
+  data-variant-id="{{ variant.id }}"
+>
+  <td class="variant-item__info">
+    <div class="variant-item__info-inner m:display-flex m:items-stretch m:relative">
+      {% if show_image and image != blank %}
+        <div class="variant-item__image">
+          {% render 'responsive-image', image: image, wrapper_class: 'm:blocks-radius-md' %}
+        </div>
+      {% endif %}
+      <div class="variant-item__details m:display-flex m:flex-col m:flex-1 m:justify-start md:m:justify-center m:text-color-body">
+        <span class="variant-item__title m:text-heading m:font-medium">{{ item.title | escape }}</span>
+        {%- if show_sku and sku != blank -%}
+          <span class="variant-item__sku m:text-sm m:text-color-subtext">{{ sku | escape }}</span>
+        {%- endif -%}
+        <div class="variant-item__details-price md:m:hidden">
+          {{ variant_price }}
+        </div>
+        <div class="variant-item__details-quantity m:display-flex m:justify-between m:items-center md:m:hidden">
+          {{ variant_quantity }}
+          <div class="variant-item__details-total">
+            {{- cart | line_items_for: item | sum: 'original_line_price' | money -}}
+          </div>
+        </div>
+      </div>
+      <div class="variant-item__action m:display-flex m:items-center m:justify-center m-spinner-button md:m:hidden m:absolute">
+        <span class="m-spinner-icon">
+          <svg
+            class="animate-spin m-svg-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle  cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </span>
+        <a
+          class="variant-item__remove{% if cart_qty == 0 %} pointer-events-none invisible{% endif %}"
+          href="#"
+          is="quick-order-list-remove"
+          aria-label="{{ 'cart.general.remove' | t }}"
+          data-variant-id="{{ variant.id }}"
+        >
+          <svg
+            class="m-svg-icon--medium-small"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </td>
+  <td class="variant-item__quantity m:hidden md:m:table-cell">
+    {{ variant_quantity }}
+  </td>
+  <td class="variant-item__price m:hidden md:m:table-cell">
+    {{ variant_price }}
+  </td>
+  <td class="variant-item__total m:hidden md:m:table-cell">
+    {{- cart | line_items_for: item | sum: 'original_line_price' | money -}}
+  </td>
+</tr>

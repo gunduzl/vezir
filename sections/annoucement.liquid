@@ -1,0 +1,207 @@
+<script src="{{ 'announcement-bar.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign enable_slider = false
+  if section.blocks.size > 1
+    assign enable_slider = true
+  endif
+
+  assign autorotate = section.settings.autorotate
+  assign autorotate_speed = section.settings.autorotate_speed
+  assign show_divider = section.settings.show_divider
+  assign show_nav = section.settings.show_nav
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+%}
+
+{% if section.settings.show_announcement %}
+  {% if section.settings.homepage_only == false or request.page_type == 'index' %}
+    <section
+      id="m-announcement--{{ section.id }}"
+      data-section-id="{{ section.id }}"
+      data-section-type="announcement"
+      class="m-announcement-bar m-gradient m-color-{{ section.settings.color_scheme }}"
+      {% if show_divider %}
+        style="--border-width: 1px"
+      {% endif %}
+    >
+      <m-announcement-bar
+        data-enable-slider="{{ enable_slider }}"
+        {% if enable_slider %}
+          data-enable-autoplay="{{ autorotate }}"
+          data-autoplay-speed="{{ autorotate_speed }}"
+        {% endif %}
+      >
+        <div class="m-announcement-bar__container {{ container }}">
+          <div class="m-announcement-bar__wrapper{% if enable_slider %} swiper-container{% endif %}">
+            <div class="m-announcement-bar__inner{% if enable_slider %} swiper-wrapper{% endif %}">
+              {% for block in section.blocks %}
+                <div class="m-announcement-bar__item{% if enable_slider %} swiper-slide{% endif %}">
+                  {% if block.settings.message_link != blank %}
+                    <a href="{{ block.settings.message_link }}" class="m-announcement-bar__link"></a>
+                  {% endif %}
+                  {% if block.settings.message != blank %}
+                    <div class="m-announcement-bar__content">{{ block.settings.message }}</div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% if enable_slider %}
+            {% render 'slider-controls', show_nav: show_nav, absolute: true, container: container %}
+          {% endif %}
+        </div>
+      </m-announcement-bar>
+      {% if section.settings.show_close %}
+        <div class="m-announcement-bar__close m:flex m:items-center">
+          <svg
+            class="m-svg-icon--medium"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <script>
+          document.querySelector('.m-announcement-bar__close').addEventListener('click', function () {
+            document.querySelector('.m-announcement-bar').remove();
+            document.documentElement.style.setProperty('--m-announcement-height', '0px');
+          });
+        </script>
+      {% endif %}
+    </section>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/zDfFJy)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_announcement",
+      "label": "Show announcement",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "homepage_only",
+      "label": "Home page only",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close",
+      "label": "Show close button",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "Slider work when more than more 2 items"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_nav",
+      "label": "Show navigation",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "autorotate",
+      "label": "Auto-rotate slides",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autorotate_speed",
+      "label": "Change slides every",
+      "max": 10,
+      "min": 2,
+      "step": 1,
+      "unit": "s",
+      "default": 3
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Announcement item",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "message",
+          "label": "Message",
+          "default": "Free shipping for all orders from $60+"
+        },
+        {
+          "type": "url",
+          "id": "message_link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

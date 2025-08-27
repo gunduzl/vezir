@@ -1,0 +1,273 @@
+{{ 'component-article-card.css' | asset_url | stylesheet_tag }}
+{{ 'blog.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+
+  assign show_sidebar = false
+  if section.settings.show_sidebar and section.blocks != blank
+    assign show_sidebar = true
+  endif
+
+  assign view = section.settings.view
+  assign items = section.settings.show_item_per_row
+
+  assign blog_class = 'm-blog'
+  assign blog_class = blog_class | append: ' m-blog--view-' | append: view
+
+  if show_sidebar
+    if section.settings.layout == 'left_column'
+      assign sidebar_class = 'sidebar-left'
+    else
+      assign sidebar_class = 'sidebar-right'
+    endif
+    assign blog_class = blog_class | append: ' m-blog--' | append: sidebar_class
+  else
+    assign blog_class = blog_class | append: ' m-blog--no-sidebar'
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+-%}
+
+{% render 'page-title', title: blog.title, size: 'large', container: section.settings.container %}
+
+{%- paginate blog.articles by section.settings.blog_list -%}
+  <section
+    data-section-type="blog-template"
+    data-section-id="{{ section.id }}"
+    class="{{ blog_class }}"
+  >
+    <div class="{{ container }}">
+      <div class="m-row">
+        <div class="m-blog__wrapper">
+          <div class="m-blog__list m:grid m:grid-1-cols{% if view == 'grid' %} m:grid-2-cols md:m:grid-{{ items | minus: 1 }}-cols lg:m:grid-{{ items }}-cols{% endif %}">
+            {%- for article in blog.articles -%}
+              {% render 'article-card',
+                article: article,
+                view: view,
+                index: forloop.index,
+                animated: animated,
+                animation_effect: animation_effect
+              %}
+            {% endfor %}
+          </div>
+          {%- if paginate.pages > 1 -%}
+            {%- render 'pagination', paginate: paginate, animated: animated, animation_effect: animation_effect -%}
+          {%- endif -%}
+        </div>
+
+        {% if show_sidebar %}
+          <div class="m-blog-sidebar{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            {% render 'blog-sidebar' %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+{%- endpaginate -%}
+{% schema %}
+{
+  "name": "Blog pages",
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Sidebar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "Show sidebar",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Placement",
+      "default": "right_column",
+      "options": [
+        {
+          "value": "left_column",
+          "label": "Left column"
+        },
+        {
+          "value": "right_column",
+          "label": "Right column"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "layout"
+    },
+    {
+      "type": "select",
+      "id": "view",
+      "label": "Layout",
+      "default": "grid",
+      "options": [
+        {
+          "label": "Grid",
+          "value": "grid"
+        },
+        {
+          "label": "List",
+          "value": "list"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "blog_list",
+      "label": "Posts to show",
+      "default": 6,
+      "min": 2,
+      "max": 12,
+      "step": 1
+    },
+    {
+      "type": "range",
+      "id": "show_item_per_row",
+      "label": "Posts per row",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    }
+  ],
+  "blocks": [
+    {
+      "type": "categories",
+      "name": "Widget categories",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Categories"
+        },
+        {
+          "type": "link_list",
+          "id": "list_blog",
+          "label": "Select categories menu"
+        }
+      ]
+    },
+    {
+      "type": "tags",
+      "name": "Widget tags",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Tags"
+        }
+      ]
+    },
+    {
+      "type": "recent_post",
+      "name": "Widget recent posts",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Recent Post"
+        },
+        {
+          "type": "blog",
+          "id": "sidebar_recent_blog_name",
+          "label": "Blog Name"
+        },
+        {
+          "type": "text",
+          "id": "sidebar_recent_blog_count",
+          "label": "Post Count",
+          "info": "Integer",
+          "default": "3"
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_show_tags",
+          "label": "Show tags",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_show_author",
+          "label": "Show author",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_show_date",
+          "label": "Show date",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "show_excerpt",
+          "label": "Show excerpt",
+          "default": false
+        },
+        {
+          "type": "paragraph",
+          "content": "Show \"Content\" instead if \"Excerpt\" is empty."
+        },
+        {
+          "type": "checkbox",
+          "id": "truncate_excerpt",
+          "label": "Truncate Excerpt",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "truncate",
+          "label": "Show Words",
+          "default": "15",
+          "info": "Integer"
+        },
+        {
+          "type": "text",
+          "id": "truncate_last_symbols",
+          "label": "Last Symbols",
+          "default": "..."
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

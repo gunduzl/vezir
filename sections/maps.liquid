@@ -1,0 +1,368 @@
+{{ 'google-maps.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'maps.js' | asset_url }}" defer="defer"></script>
+{%- liquid
+  assign st = section.settings
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign classes = 'm-section m-google-maps'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+-%}
+<section
+  data-section-type="google-maps"
+  data-section-id="{{ section.id }}"
+  class="{{ classes }}"
+>
+  <div class="{{ container }}">
+    <div class="m-google-maps__wrapper">
+      <div class="m-google-maps__media{% if container != 'container-full' %} m:blocks-radius{% endif %}">
+        {% if settings.gm_api != blank %}
+          <m-gmaps class="m-gmaps">
+            <div
+              class="m-gmaps__inner m-gmaps__inner--{{ section.settings.map_height }}"
+              id="m-gmaps-inner"
+              data-key="{{ settings.gm_api }}"
+              data-map-title="{{ st.text2 }}"
+              data-map-x="{{ st.textx }}"
+              data-map-y="{{ st.texty }}"
+              data-map-zoom="{{ st.zoom }}"
+            ></div>
+          </m-gmaps>
+        {% else %}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'm-placeholder-svg' }}
+        {% endif %}
+      </div>
+      {% if section.blocks.size > 0 %}
+        <div class="m-google-maps__content m-google-maps__content--{{ section.settings.content_position }} m:text-{{ section.settings.text_alignment }}{% if section.settings.use_content_in_container %} container{% endif %}">
+          <div class="m-google-maps__content-box m:blocks-radius-md m-gradient m-color-{{ section.settings.color_scheme }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+            {% for block in section.blocks %}
+              {% case block.type %}
+                {% when 'heading' %}
+                  {% if block.settings.heading != blank %}
+                    <h2 class="m-section__heading h3">{{ block.settings.heading }}</h2>
+                  {% endif %}
+                {% when 'subheading' %}
+                  {% if block.settings.subheading != blank %}
+                    <p class="m-section__subheading m:uppercase">{{ block.settings.subheading }}</p>
+                  {% endif %}
+                {% when 'text' %}
+                  {% if block.settings.text != blank %}
+                    <div class="m-section__description rte">{{ block.settings.text }}</div>
+                  {% endif %}
+                {% when 'button' %}
+                  {% if block.settings.button_label != blank %}
+                    <a
+                      href="{{ block.settings.button_link }}"
+                      class="m:w-full m-button {{ block.settings.button_style | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-link', 'm-button--link' | replace: 'sf__btn-white', 'm-button--white' }}"
+                    >
+                      {{- block.settings.button_label -}}
+                    </a>
+                  {% endif %}
+                {% else %}
+
+              {% endcase %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Google Maps",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "w-full",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Maps settings"
+    },
+    {
+      "type": "select",
+      "id": "map_height",
+      "label": "Height",
+      "default": "medium",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": "Google maps must have API Key. Click Theme Settings bellow to setup API Key."
+    },
+    {
+      "type": "text",
+      "id": "textx",
+      "label": "Coordinate X",
+      "default": "40.6700",
+      "info": "Integer"
+    },
+    {
+      "type": "text",
+      "id": "texty",
+      "label": "Coordinate Y",
+      "default": "-73.9400",
+      "info": "Integer"
+    },
+    {
+      "type": "text",
+      "id": "zoom",
+      "label": "Zoom",
+      "default": "11"
+    },
+    {
+      "type": "textarea",
+      "id": "text2",
+      "label": "Map Text",
+      "default": "New York"
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "Content position",
+      "default": "middle-left",
+      "options": [
+        {
+          "label": "Top left",
+          "value": "top-left"
+        },
+        {
+          "label": "Top center",
+          "value": "top-center"
+        },
+        {
+          "label": "Top right",
+          "value": "top-right"
+        },
+        {
+          "label": "Middle left",
+          "value": "middle-left"
+        },
+        {
+          "label": "Middle center",
+          "value": "middle-center"
+        },
+        {
+          "label": "Middle right",
+          "value": "middle-right"
+        },
+        {
+          "label": "Bottom left",
+          "value": "bottom-left"
+        },
+        {
+          "label": "Bottom center",
+          "value": "bottom-center"
+        },
+        {
+          "label": "Bottom right",
+          "value": "bottom-right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Content alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "use_content_in_container",
+      "label": "Use content in container box",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        { "value": "inherit", "label": "Inherit global setting" },
+        { "value": "fade-in", "label": "Fade in" },
+        { "value": "fade-in-up", "label": "Fade in up" },
+        { "value": "fade-in-left", "label": "Fade in left" },
+        { "value": "fade-in-right", "label": "Fade in right" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Our store"
+        }
+      ]
+    },
+    {
+      "type": "subheading",
+      "name": "Sub heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Subheading"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>620 King Street West<br>Toronto, ON M5V 1M7, Canada</p><p>Mon - Fri, 8:30am - 10:30pm<br>Saturday, 8:30am - 10:30pm<br>Sunday, 8:30am - 10:30pm</p>"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Get directions"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Google map",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "button"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

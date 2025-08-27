@@ -1,0 +1,396 @@
+{{ 'image-comparison.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'image-comparison.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  assign container = section.settings.container
+  assign section_id = section.settings.custom_id | default: section.id
+  assign custom_class = section.settings.custom_class
+  assign layout = section.settings.layout
+  assign image_height = section.settings.image_height
+
+  if image_height == 'adapt'
+    assign first_block = section.blocks.first
+    assign aspect_ratio = first_block.settings.image.aspect_ratio | default: 2.333
+    assign aspect_ratio_mobile = first_block.settings.image_mobile.aspect_ratio | default: aspect_ratio
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+  endif
+  assign classes = 'm-section m-image-comparison-section'
+  if custom_class != blank
+    assign classes = classes | append: ' ' | append: custom_class
+  endif
+  assign classes = classes | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+%}
+<style>
+  #m-section--{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px ;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+<section
+  id="m-section--{{ section_id }}"
+  data-section-type="image-comparison"
+  data-section-id="{{ section.id }}"
+  class="{{ classes }}"
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    {% render 'index-section-header', section_settings: section.settings %}
+    <m-image-comparison
+      class="m-image-comparison m:blocks-radius m:block"
+      data-layout="{{ layout }}"
+      {% if animated %}
+        data-animation
+      {% endif %}
+    >
+      {% if animated %}<span class="m-image-comparison__slider-animation"></span>{% endif %}
+      {% for block in section.blocks %}
+        {% liquid
+          assign image = block.settings.image
+          assign image_mobile = block.settings.image_mobile
+          assign heading = block.settings.heading
+          assign image_class = ''
+          if image_mobile != blank
+            assign image_class = image_class | append: ' has-mobile-image'
+          endif
+          assign loading = 'lazy'
+          assign fetchpriority = 'low'
+          if section.index < 2 or section.settings.enable_preload_image
+            assign loading = 'eager'
+            assign fetchpriority = 'high'
+          endif
+        %}
+        {% if forloop.index == 1 %}
+          <div class="m-image-comparison__before m-image-comparison--media">
+            {% if heading != blank %}
+              <p class="m-image-comparison__heading h6 m:blocks-radius-md">{{ heading }}</p>
+            {% endif %}
+            <div
+              class="m-image-comparison__wrapper m-image-comparison--{{ image_height }}{{ image_class }}"
+              {% if image_height == 'adapt' %}
+                style="--aspect-ratio: {{ aspect_ratio }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }}"
+              {% endif %}
+            >
+              {% if image != blank %}
+                {% assign image_height = image.width | divided_by: image.aspect_ratio %}
+                {{
+                  image
+                  | image_url: width: 1500
+                  | image_tag:
+                    loading: loading,
+                    fetchpriority: fetchpriority,
+                    class: 'm-image-comparison__image-desktop',
+                    width: image.width,
+                    height: image_height,
+                    sizes: '100vw',
+                    widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+                    alt: image.alt
+                  | escape
+                }}
+              {% else %}
+                {{ 'lifestyle-1' | placeholder_svg_tag: 'm-placeholder-svg m-image-comparison__image-desktop' }}
+              {% endif %}
+              {% if image_mobile != blank %}
+                {% assign image_mobile_height = image_mobile.width | divided_by: image_mobile.aspect_ratio %}
+                {{
+                  image_mobile
+                  | image_url: width: 750
+                  | image_tag:
+                    loading: loading,
+                    fetchpriority: fetchpriority,
+                    class: 'm-image-comparison__image-mobile',
+                    width: image_mobile.width,
+                    height: image_mobile_height,
+                    sizes: '100vw',
+                    widths: '375, 550, 750',
+                    alt: image_mobile.alt
+                  | escape
+                }}
+              {% endif %}
+            </div>
+          </div>
+        {% else %}
+          <div class="m-image-comparison__after m-image-comparison--media">
+            {% if heading != blank %}
+              <p class="m-image-comparison__heading h6 m:blocks-radius-md">{{ heading }}</p>
+            {% endif %}
+            <div
+              class="m-image-comparison__wrapper m-image-comparison--{{ image_height }}{{ image_class }}"
+              {% if image_height == 'adapt' %}
+                style="--aspect-ratio: {{ aspect_ratio }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }}"
+              {% endif %}
+            >
+              {% if image != blank %}
+                {% assign image_height = image.width | divided_by: image.aspect_ratio %}
+                {{
+                  image
+                  | image_url: width: 1500
+                  | image_tag:
+                    loading: loading,
+                    fetchpriority: fetchpriority,
+                    class: 'm-image-comparison__image-desktop',
+                    width: image.width,
+                    height: image_height,
+                    sizes: '100vw',
+                    widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+                    alt: image.alt
+                  | escape
+                }}
+              {% else %}
+                {{ 'lifestyle-2' | placeholder_svg_tag: 'm-placeholder-svg m-image-comparison__image-desktop' }}
+              {% endif %}
+              {% if image_mobile != blank %}
+                {% assign image_mobile_height = image_mobile.width | divided_by: image_mobile.aspect_ratio %}
+                {{
+                  image_mobile
+                  | image_url: width: 750
+                  | image_tag:
+                    loading: loading,
+                    fetchpriority: fetchpriority,
+                    class: 'm-image-comparison__image-mobile',
+                    width: image_mobile.width,
+                    height: image_mobile_height,
+                    sizes: '100vw',
+                    widths: '375, 550, 750',
+                    alt: image_mobile.alt
+                  | escape
+                }}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+      <button class="m-image-comparison__button" aria-label="Drag">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" viewBox="0 0 11 16">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M0 0.5C0 0.223858 0.223858 0 0.5 0C0.776142 0 1 0.223858 1 0.5V15.5C1 15.7761 0.776142 16 0.5 16C0.223858 16 0 15.7761 0 15.5V0.5ZM5 0.5C5 0.223858 5.22386 0 5.5 0C5.77614 0 6 0.223858 6 0.5V15.5C6 15.7761 5.77614 16 5.5 16C5.22386 16 5 15.7761 5 15.5V0.5ZM11 0.5C11 0.223858 10.7761 0 10.5 0C10.2239 0 10 0.223858 10 0.5V15.5C10 15.7761 10.2239 16 10.5 16C10.7761 16 11 15.7761 11 15.5V0.5Z" fill="currentColor"></path>
+          </svg>
+        </span>
+      </button>
+    </m-image-comparison>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Before/after image slider",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Before/after image slider"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "horizontal",
+      "options": [
+        {
+          "value": "horizontal",
+          "label": "Horizontal"
+        },
+        {
+          "value": "vertical",
+          "label": "Vertical"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "image_height",
+      "label": "Image height",
+      "default": "adapt",
+      "options": [
+        {
+          "label": "Adapt to image",
+          "value": "adapt"
+        },
+        {
+          "label": "Small",
+          "value": "small"
+        },
+        {
+          "label": "Medium",
+          "value": "medium"
+        },
+        {
+          "label": "Large",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_preload_image",
+      "label": "Enable preload image",
+      "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+    }
+  ],
+  "max_blocks": 2,
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Before/after image slider",
+      "settings": [
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "image"
+        },
+        {
+          "type": "image_picker",
+          "label": "Image mobile",
+          "id": "image_mobile"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Before/after image slider",
+      "blocks": [
+        {
+          "type": "image",
+          "settings": {
+            "heading": "Before"
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "heading": "After"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

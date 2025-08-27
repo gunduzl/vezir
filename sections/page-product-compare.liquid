@@ -1,0 +1,15 @@
+{% render 'page-title', title: page.title, container: 'container' %}
+
+<div class="container">
+  <div class="m-page-content m-compare-page-content">
+    <div class="m-compare-page-content__wrapper m:grid m:grid-2-cols md:m:grid-3-cols xl:m:grid-4-cols"></div>
+  </div>
+  <div class="m-page-content m-compare-no-products m:hidden">
+    <h3>
+      {{ 'layout.compare.no_products' | t }}
+      <a class="m-text-link" href="{{ routes.all_products_collection_url }}">
+        {{ 'layout.back_to_shopping' | t }}
+      </a>
+    </h3>
+  </div>
+</div>

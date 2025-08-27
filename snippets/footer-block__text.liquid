@@ -1,0 +1,12 @@
+<div class="{% if block.settings.title != blank %}m-accordion--item-content{% endif %} m-footer--block-content">
+  {% if block.settings.image != blank %}
+    <div class="block-image m:blocks-radius-md" style="max-width: {{ block.settings.image_max }}">
+      {% render 'responsive-image', image: block.settings.image %}
+    </div>
+  {% endif %}
+  {% if block.settings.description != blank %}
+    <div class="block-text">
+      {{ block.settings.description }}
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,258 @@
+<link rel="stylesheet" href="{{ 'age-verifier.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'age-verifier.css' | asset_url | stylesheet_tag }}</noscript>
+
+{%- liquid
+  assign design_mode = section.settings.design_mode
+  assign bg_image = section.settings.bg_image
+  assign bg_blur = section.settings.bg_blur
+  assign enable = section.settings.enable
+-%}
+<m-age-verifier-popup
+  id="{{ section.id }}"
+  class="m-age-verifier"
+  data-section-id="{{ section.id }}"
+  data-design-mode="{{ design_mode }}"
+  data-enable="{{ enable }}"
+>
+  <div class="m-modal m-modal--wrapper">
+    <div class="m-modal--content">
+      <div class="m-modal--content-inner">
+        {% if section.settings.bg_image != blank %}
+          {% assign bg_height = bg_image.width | divided_by: bg_image.aspect_ratio | round %}
+          <div class="m-age-verifier__bg{% if bg_blur %} m-age-verifier__bg-blur{% endif %}">
+            {{
+              bg_image
+              | image_url: width: 2000
+              | image_tag: loading: 'lazy', sizes: '100vw', width: bg_image.width, height: bg_height, alt: bg_image.alt
+              | escape
+            }}
+          </div>
+        {% endif %}
+        <div class="m-age-verifier__wrapper m:text-center">
+          <div class="m-age-verifier__content m-age-verifier__content-active" data-age-verifier-content>
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'subheading' -%}
+                  <h3 class="m-age-verifier__subtitle">{{ block.settings.subheading }}</h3>
+                {%- when 'heading' -%}
+                  <h2 class="m-age-verifier__title font-medium">{{ block.settings.heading }}</h2>
+                {%- when 'text' -%}
+                  <div class="rte m-age-verifier__text rte">{{ block.settings.text }}</div>
+                {%- when 'image' -%}
+                  {%- if block.settings.image != blank -%}
+                    <div
+                      {% if block.settings.use_custom_image_width %}
+                        style="--image-width: {{ block.settings.custom_image_width }}px;"
+                      {% endif %}
+                      {{ block.shopify_attributes }}
+                    >
+                      {%- render 'responsive-image', image: block.settings.image, wrapper_class: 'm:blocks-radius' -%}
+                    </div>
+                  {%- else -%}
+                    <div
+                      class="m-image"
+                      {% if block.settings.use_custom_image_width %}
+                        style="--image-width: {{ block.settings.custom_image_width }}px; margin-left: auto; margin-right: auto;"
+                      {% endif %}
+                      {{ block.shopify_attributes }}
+                    >
+                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg m:blocks-radius' }}
+                    </div>
+                  {%- endif -%}
+                {%- else -%}
+                  <div class="m-age-verifier__button-wrapper" {{ block.shopify_attributes }}>
+                    {% if block.settings.decline_button != blank %}
+                      <button class="m-button m-button--secondary" data-age-verifier-decline-button>
+                        {{ block.settings.decline_button }}
+                      </button>
+                    {% endif %}
+                    {% if block.settings.approve_button != blank %}
+                      <button class="m-button m-button--primary" data-age-verifier-agree-button>
+                        {{ block.settings.approve_button }}
+                      </button>
+                    {% endif %}
+                  </div>
+              {%- endcase -%}
+            {%- endfor -%}
+          </div>
+          <div class="m-age-verifier__decline-content m:hidden" data-age-verifier-decline-content>
+            {% if section.settings.decline_heading != blank %}
+              <h2 class="m-age-verifier__title font-medium">{{ section.settings.decline_heading }}</h2>
+            {% endif %}
+            {% if section.settings.decline_content != blank %}
+              <div class="rte m-age-verifier__text rte">{{ section.settings.decline_content }}</div>
+            {% endif %}
+            {% if section.settings.return_button != blank %}
+              <button class="m-button m-button--secondary" data-age-verifier-return-button>
+                {{ section.settings.return_button }}
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</m-age-verifier-popup>
+<script src="{{ 'age-verifier.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Age verifier popup",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Design mode"
+    },
+    {
+      "type": "paragraph",
+      "content": "Enable design mode to make popup always displays during setup on the customize page. Ensure 'Design mode' is disabled when launching your store."
+    },
+    {
+      "type": "checkbox",
+      "id": "design_mode",
+      "label": "Design mode",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable",
+      "label": "Enable",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Background image"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Image",
+      "info": "2000 x 800px recommended"
+    },
+    {
+      "type": "checkbox",
+      "id": "bg_blur",
+      "label": "Blur the image",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Decline content"
+    },
+    {
+      "type": "paragraph",
+      "content": "This content will display if the user does not meet the age verifier requirements."
+    },
+    {
+      "type": "text",
+      "id": "decline_heading",
+      "label": "Heading",
+      "default": "Come back when you're older"
+    },
+    {
+      "type": "richtext",
+      "id": "decline_content",
+      "label": "Text",
+      "default": "<p>Sorry, the content of this store can't be seen by a younger audience. Come back when you're older.</p>"
+    },
+    {
+      "type": "text",
+      "id": "return_button",
+      "label": "Return button text",
+      "default": "Oops, I entered incorrectly"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Confirm your age"
+        }
+      ]
+    },
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Subheading text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Content",
+          "default": "<p>Are you 18 years old or older?</p>"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_custom_image_width",
+          "label": "Use custom image width",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "custom_image_width",
+          "label": "Custom image width (PX)",
+          "unit": "PX",
+          "min": 50,
+          "max": 350,
+          "step": 5,
+          "default": 175
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "Buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "decline_button",
+          "label": "Decline button text",
+          "default": "No, I'm not"
+        },
+        {
+          "type": "text",
+          "id": "approve_button",
+          "label": "Approve button text",
+          "default": "Yes, I am"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

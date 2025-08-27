@@ -1,0 +1,93 @@
+{% liquid
+  assign show_cookie_consent = settings.show_cookie_consent
+  assign cookie_consent_message = settings.cookie_consent_message
+  assign cookie_consent_allow = settings.cookie_consent_allow
+  assign cookie_consent_decline = settings.cookie_consent_decline
+  assign cookie_consent_learnmore = settings.cookie_consent_learnmore
+  assign cookie_consent_learnmore_link = settings.cookie_consent_learnmore_link
+  assign cookie_consent_placement = settings.cookie_consent_placement
+  assign cookie_consent_theme = settings.cookie_consent_theme
+  assign cookie_design_mode = settings.cookie_design_mode
+
+  assign should_show = show_cookie_consent
+
+  if cookie_design_mode and request.design_mode
+    assign should_show = true
+  endif
+%}
+
+{% if should_show %}
+{{ 'cookie-banner.css' | asset_url | stylesheet_tag }}
+<div id="m-cookie-banner" class="m-cookie-banner m-cookie-banner--{{ cookie_consent_placement }} m-cookie-banner--{{ cookie_consent_theme }}" {% if cookie_design_mode and request.design_mode %}style="display: flex;"{% endif %}>
+  {% if cookie_consent_message != blank %}
+  <span class="m-cookie-banner__message">
+    {{ cookie_consent_message }}
+    {% if cookie_consent_learnmore != blank %}
+      <a class="m-cookie-banner__learn-more" href="{{ cookie_consent_learnmore_link | default: "#" }}">{{ cookie_consent_learnmore }}</a>
+    {% endif %}
+  </span>
+  {% endif %}
+  <div class="m-cookie-banner__buttons">
+    {% if cookie_consent_decline != blank %}
+      <button class="cookie-action--decline" onclick="handleDecline()">{{ cookie_consent_decline }}</button>
+    {% endif %}
+    {% if cookie_consent_allow != blank %}
+      <button class="cookie-action--accept" onclick="handleAccept()">{{ cookie_consent_allow }}</button>
+    {% endif %}
+  </div>
+</div>
+<script>
+  function getBannerEl() {
+      return document.getElementById('m-cookie-banner');
+    }
+
+    function hideBanner(res) {
+      getBannerEl().classList.remove('show')
+      setTimeout(() => {
+          getBannerEl().style.display = 'none';
+      }, 500)
+    }
+
+    function showBanner() {
+     getBannerEl().style.display = 'flex';
+     setTimeout(() => {
+          getBannerEl().classList.add('show')
+     }, 500)
+    }
+
+    function handleAccept(e) {
+      window.Shopify.customerPrivacy.setTrackingConsent(true, hideBanner);
+
+      document.addEventListener('trackingConsentAccepted',function() {
+        console.log('trackingConsentAccepted event fired');
+      });
+    }
+
+    function handleDecline() {
+      window.Shopify.customerPrivacy.setTrackingConsent(false, hideBanner);
+    }
+
+    function initCookieBanner() {
+      const userCanBeTracked = window.Shopify.customerPrivacy.userCanBeTracked();
+      const userTrackingConsent = window.Shopify.customerPrivacy.getTrackingConsent();
+
+      if(!userCanBeTracked && userTrackingConsent === 'no_interaction') {
+        showBanner();
+      }
+    }
+
+    window.Shopify.loadFeatures([
+      {
+        name: 'consent-tracking-api',
+        version: '0.1',
+      }
+    ],
+    function(error) {
+      if (error) {
+        throw error;
+      }
+
+      initCookieBanner();
+    });
+</script>
+{% endif %}

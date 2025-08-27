@@ -1,0 +1,134 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "header",
+  "name": "Header",
+  "sections": {
+    "annoucement": {
+      "type": "annoucement",
+      "blocks": {
+        "item_dGj4GU": {
+          "type": "item",
+          "settings": {
+            "message": "☀️ Summer Sale: Up to 60% Off + Free Shipping!",
+            "message_link": ""
+          }
+        },
+        "item_6Ycmkw": {
+          "type": "item",
+          "settings": {
+            "message": "🏡 Discover the Perfect Touch for Your Home",
+            "message_link": ""
+          }
+        },
+        "item_3KJMXR": {
+          "type": "item",
+          "settings": {
+            "message": "👑 Experience Shopping Like Royalty",
+            "message_link": ""
+          }
+        },
+        "item_AtKYPc": {
+          "type": "item",
+          "settings": {
+            "message": "💎 Exclusive Deals You Can’t Miss",
+            "message_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "item_dGj4GU",
+        "item_6Ycmkw",
+        "item_3KJMXR",
+        "item_AtKYPc"
+      ],
+      "custom_css": [
+        ".m-announcement-bar__container {--container-width: 600px;}"
+      ],
+      "settings": {
+        "container": "w-full",
+        "color_scheme": "badge-hot",
+        "show_announcement": true,
+        "homepage_only": true,
+        "show_close": true,
+        "show_divider": false,
+        "show_nav": false,
+        "autorotate": true,
+        "autorotate_speed": 3
+      }
+    },
+    "header": {
+      "type": "header",
+      "blocks": {
+        "5e153016-a9d7-46c9-a10e-30d16446793d": {
+          "type": "topbar",
+          "settings": {
+            "color_scheme": "default",
+            "show_divider": true,
+            "transparent_on_top": false,
+            "show_phone_numb": false,
+            "show_email": false,
+            "show_social_links": false,
+            "show_stores_page": false,
+            "show_currency_switcher": false,
+            "show_country_selector": true,
+            "show_language_switcher": true,
+            "alert_message": ""
+          }
+        }
+      },
+      "block_order": [
+        "5e153016-a9d7-46c9-a10e-30d16446793d"
+      ],
+      "custom_css": [
+        ".m-topbar a[href*=\"facebook\"] {order: 2;}",
+        ".social-media-links {column-gap: 30px;}"
+      ],
+      "settings": {
+        "color_scheme": "default",
+        "color_scheme_menu": "default",
+        "header_design": "logo-left__2l",
+        "container": "w-full",
+        "sticky_header": "on_scroll_up",
+        "transparent_on_top": false,
+        "transparent_text_color": "#ffffff",
+        "logo_text": "VEZİR Online",
+        "logo": "shopify://shop_images/vezir_6.png",
+        "logo_mobile": "shopify://shop_images/vezir_6.png",
+        "logo_svg": "",
+        "logo_mobile_svg": "",
+        "logo_transparent_svg": "",
+        "logo_max_width": 100,
+        "sticky_logo_max_width": 80,
+        "mobile_logo_max_width": 60,
+        "main_menu": "main-menu",
+        "secondary_menu": "",
+        "mobile_menu": "main-menu",
+        "uppercase_parent_level": false,
+        "show_menu_column_divider": true,
+        "search": "show_full",
+        "show_account_icon": true,
+        "show_cart_icon": true,
+        "show_wishlist_icon": true,
+        "show_compare_icon": true,
+        "show_currency_switcher": true,
+        "show_country_selector": false,
+        "show_language_switcher": false,
+        "mb_show_currency_switcher": true,
+        "mb_show_country_selector": true,
+        "mb_show_language_switcher": true
+      }
+    }
+  },
+  "order": [
+    "annoucement",
+    "header"
+  ]
+}

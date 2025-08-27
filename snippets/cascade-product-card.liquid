@@ -1,0 +1,39 @@
+{% liquid
+  assign preview_image = product.media[0].preview_image
+  assign second_image = ''
+  if settings.show_second_img and product.images.size > 1 and product.images[1] != blank
+    assign second_image = product.images[1]
+  endif
+%}
+<div class="m-cascading-product-card m:relative{% if second_image != blank %} m-cascading-product-card--has-second-image{% endif %}">
+  {% if product != blank %}
+    <a class="m-link-absolute" href="{{ product.url }}">
+      <span class="m:sr-only">{{ product.title }}</span>
+    </a>
+  {% endif %}
+  <div class="m-cascading-product-card__wrapper">
+    <div class="m-cascading-product-card__image m:relative m:overflow-hidden">
+      <div class="m-cascading-product-card__image-main">
+        {% if product.images.size > 0 and preview_image != blank %}
+          {% render 'responsive-image', image: preview_image %}
+        {% else %}
+          {{ 'product-1' | placeholder_svg_tag: 'm-placeholder-svg m-image' }}
+        {% endif %}
+      </div>
+      {% if second_image != blank %}
+        <div class="m-cascading-product-card__image-hover">
+          {% render 'responsive-image', image: second_image %}
+        </div>
+      {% endif %}
+    </div>
+    <div class="m-cascading-product-card__content m:text-left">
+      <a
+        class="m-cascading-product-card__title"
+        href="{{ product.url | default: "#" }}"
+      >
+        <h4 class="h6">{{ product.title | default: 'Product title' }}</h4>
+      </a>
+      <div class="m-cascading-product-card__price">{% render 'product-prices', product: product %}</div>
+    </div>
+  </div>
+</div>

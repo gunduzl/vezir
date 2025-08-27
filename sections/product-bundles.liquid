@@ -1,0 +1,490 @@
+{{ 'component-product-bundles.css' | asset_url | stylesheet_tag }}
+{{ 'product-bundles.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-bundles.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign section_header_empty = true
+
+  if section.settings.heading != 'blank' or section.settings.subheading != 'blank' or section.settings.description != 'blank'
+    assign section_header_empty = false
+  endif
+%}
+{%- capture select_options -%}
+  {%- render 'new-locale', key: 'products.product.select_options' -%}
+{%- endcapture -%}
+<style>
+  #m-product-bundles-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --column-gap: 30px;
+    --column-gap-mobile: 0px;
+    --row-gap-mobile: 0px;
+    --blocks-count: {% if section_header_empty %}2{% else %}3{% endif %};
+  }
+</style>
+<section
+  id="m-product-bundles-{{ section.id }}"
+  class="m-product-bundles m-product-bundles--layout-{{ section.settings.layout }} m-product-bundles--image-{{ section.settings.image_position }} m-gradient m-color-{{ section.settings.color_scheme }} {{ section.settings.custom_class }}"
+  data-section-type="product-bundles"
+  data-section-id="{{ section.id }}"
+>
+  <div class="{{ section.settings.container }} m-section-my m-section-py">
+    {% render 'index-section-header', section_settings: section.settings, custom_classes: 'lg:m:hidden' %}
+    <div class="m-product-bundles__wrapper m:flex m:flex-col lg:m:flex-row">
+      <div class="m-product-bundles__col-left m:column m:w-full lg:w-1/2">
+        {% if section.settings.layout == '1' %}
+          {% render 'index-section-header', section_settings: section.settings, custom_classes: 'm:hidden lg:m:block' %}
+        {% endif %}
+        <m-product-bundle
+          class="product-bundles{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+          data-section-id="{{ section.id }}"
+        >
+          <div class="product-bundles__list">
+            {% liquid
+              assign total_price = 0
+              assign has_product = false
+              assign show_reviews = section.settings.show_reviews
+            %}
+            {% for block in section.blocks %}
+              {% liquid
+                assign product = block.settings.product
+                assign selected_variant = product.selected_or_first_available_variant
+              %}
+              {% if product != empty %}
+                {% liquid
+                  assign has_product = true
+                  if selected_variant.available
+                    assign total_price = total_price | plus: selected_variant.price
+                  endif
+                %}
+                {% render 'product-card-bundle',
+                  product: product,
+                  image_ratio: section.settings.image_ratio,
+                  show_reviews: show_reviews,
+                  block_id: block.id,
+                  index: forloop.index
+                %}
+              {% endif %}
+            {% endfor %}
+
+            {% unless has_product %}
+              {% for i in (1..3) %}
+                <div
+                  class="product-bundles__item m:display-flex m:items-center{% if show_reviews %} product-bundles__item--has-reviews{% endif %}"
+                  data-index="{{ forloop.index0 }}"
+                >
+                  <span class="product-bundles__item-index m:inline-flex m:justify-center m:items-center">
+                    {{- forloop.index -}}
+                  </span>
+                  <div class="product-bundles__item-image m:blocks-radius-md">
+                    {{ 'product-' | append: forloop.index | placeholder_svg_tag: 'm-placeholder-svg' }}
+                  </div>
+                  <div class="product-bundles__item-info m:display-flex m:flex-wrap md:m:flex-nowrap">
+                    <div class="product-bundles__item-details m:w-full">
+                      <h3 class="h6">{{ 'homepage.onboarding.product_title' | t }}</h3>
+                    </div>
+                    <div class="product-bundles__item-prices md:m:text-right m:color-price-regular">
+                      <p>
+                        <span data-regular-price>{{ 1999 | money }}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endunless %}
+          </div>
+          <div class="product-bundles__cta" id="Total-{{ section.id }}">
+            {%- liquid
+              assign bundle_price = '$59.97'
+              if has_product
+                assign bundle_price = total_price | money
+              endif
+            -%}
+            <button
+              class="m-button m-button--primary m-spinner-button m:w-full m:display-flex m:justify-center m:items-center"
+              data-add-bundle
+              {% unless has_product %}
+                disabled
+              {% endunless %}
+            >
+              <span>{{ 'products.product.add_to_cart' | t }}</span>
+              <span class="m-button-word-separator">|</span>
+              <span data-total-price="{{ total_price }}">{{ bundle_price }}</span>
+              <span class="m-spinner-icon">
+                <svg
+                  class="animate-spin m-svg-icon--medium"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle  cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+          <div class="product-bundles__error"></div>
+        </m-product-bundle>
+      </div>
+      <div class="m-product-bundles__col-right m-product-bundles__image m:relative m:column m:w-full lg:w-1/2{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+        <div class="m-product-bundles__image-wrapper m:sticky-element">
+          {% if section.settings.image != blank %}
+            {% render 'responsive-image',
+              image: section.settings.image,
+              wrapper_class: 'm:blocks-radius',
+              section_index: section.index,
+              index: 1,
+              enable_preload_image: section.settings.enable_preload_image
+            %}
+          {% else %}
+            {{
+              'product-1'
+              | placeholder_svg_tag: 'placeholder-svg m-placeholder-svg m-placeholder-svg--no-border m:blocks-radius'
+            }}
+          {% endif %}
+
+          {% for block in section.blocks %}
+            {% liquid
+              assign product = block.settings.product
+            %}
+            {% if product != empty %}
+              <span
+                class="product-bundles__item-index m:inline-flex m:justify-center m:items-center cursor-pointer"
+                style="top:{{ block.settings.top }}%; left: {{ block.settings.left }}%;"
+                data-index="{{ forloop.index }}"
+              >
+                {{- forloop.index -}}
+              </span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Product bundles",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/oyn5fn)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "container-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "1",
+      "options": [
+        {
+          "value": "1",
+          "label": "Layout 1"
+        },
+        {
+          "value": "2",
+          "label": "Layout 2"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Product bundles"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "html",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Text alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Image settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "default": "right",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Product settings"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image aspect ratio",
+      "default": "original",
+      "options": [
+        {
+          "value": "original",
+          "label": "Original aspect ratio"
+        },
+        {
+          "value": "1/1",
+          "label": "1:1"
+        },
+        {
+          "value": "3/4",
+          "label": "3:4"
+        },
+        {
+          "value": "4/3",
+          "label": "4:3"
+        },
+        {
+          "value": "16/9",
+          "label": "16:9"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reviews",
+      "label": "Show reviews badge"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_preload_image",
+      "label": "Enable preload image",
+      "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Select product"
+        },
+        {
+          "type": "header",
+          "content": "Hotspot position"
+        },
+        {
+          "type": "range",
+          "id": "top",
+          "label": "Vertical",
+          "min": 10,
+          "max": 90,
+          "unit": "%",
+          "step": 1,
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "left",
+          "label": "Horizontal",
+          "min": 10,
+          "max": 90,
+          "unit": "%",
+          "step": 1,
+          "default": 48
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product bundles",
+      "category": "Product",
+      "blocks": [
+        {
+          "type": "product",
+          "settings": {
+            "top": 30,
+            "left": 48
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "top": 75,
+            "left": 40
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "top": 60,
+            "left": 64
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

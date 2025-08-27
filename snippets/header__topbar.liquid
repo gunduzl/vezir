@@ -1,0 +1,95 @@
+{% for block in header.blocks %}
+  {% liquid
+    assign show_phone_numb = block.settings.show_phone_numb
+    assign show_email = block.settings.show_email
+    assign show_social_links = block.settings.show_social_links
+    assign show_stores_page = block.settings.show_stores_page
+    assign show_language_switcher = block.settings.show_language_switcher
+    assign show_currency_switcher = block.settings.show_currency_switcher
+    assign show_country_selector = block.settings.show_country_selector
+    assign show_divider = block.settings.show_divider
+    assign message = block.settings.alert_message
+    assign container = section.settings.container
+    assign transparent_on_top = block.settings.transparent_on_top
+
+    if container == 'w-full'
+      assign container = 'container-full'
+    endif
+  %}
+  {% if block.type == 'topbar' %}
+    <div class="m-topbar{% if show_divider %} m-topbar--show-divider{% endif %}{% unless transparent_on_top %} m-gradient m-color-{{ block.settings.color_scheme }}{% else %} transparent-on-top{% endunless %}">
+      <div class="{{ container }}">
+        <div class="m-topbar__inner m:flex m:justify-between m:items-center">
+          <div class="m-topbar__left m:w-4/12 m:flex m:items-center">
+            {% if show_phone_numb %}
+              <a href="tel:{{ settings.contact_phone_number }}" class="m-topbar__link m-topbar__phone">
+                <svg
+                  class="m-svg-icon"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 512 512"
+                >
+                  <path fill="currentColor" d="M493.09 351.3L384.7 304.8a31.36 31.36 0 0 0-36.5 8.9l-44.1 53.9A350 350 0 0 1 144.5 208l53.9-44.1a31.35 31.35 0 0 0 8.9-36.49l-46.5-108.5A31.33 31.33 0 0 0 125 .81L24.2 24.11A31.05 31.05 0 0 0 0 54.51C0 307.8 205.3 512 457.49 512A31.23 31.23 0 0 0 488 487.7L511.19 387a31.21 31.21 0 0 0-18.1-35.7zM456.89 480C222.4 479.7 32.3 289.7 32.1 55.21l99.6-23 46 107.39-72.8 59.5C153.3 302.3 209.4 358.6 313 407.2l59.5-72.8 107.39 46z" class=""></path>
+                </svg>
+                <span>{{ settings.contact_phone_number }}</span>
+              </a>
+            {% endif %}
+            {% if show_email %}
+              <a href="mailto:{{ settings.contact_email }}" class="m-topbar__link m-topbar__mail">
+                <svg
+                  class="m-svg-icon"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 512 512"
+                >
+                  <path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"/>
+                </svg>
+                <span>{{ settings.contact_email }}</span>
+              </a>
+            {% endif %}
+            {% if show_social_links %}
+              {% render 'social-media-links', show_label: true %}
+            {% endif %}
+          </div>
+          {% if message != blank %}
+            <div class="m-topbar__center m:w-4/12 m:flex m:items-center m:justify-center">{{ message }}</div>
+          {% endif %}
+          <div class="m-topbar__right m:w-4/12 m:flex m:items-center m:justify-end">
+            {% if show_stores_page %}
+              <a
+                href="{{ pages[settings.find_store].url | default: '#' }}"
+                class="m-topbar__link m-topbar__store"
+              >
+                <svg
+                  class="m-svg-icon"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 384 512"
+                >
+                  <path d="M192 96c-52.935 0-96 43.065-96 96s43.065 96 96 96 96-43.065 96-96-43.065-96-96-96zm0 160c-35.29 0-64-28.71-64-64s28.71-64 64-64 64 28.71 64 64-28.71 64-64 64zm0-256C85.961 0 0 85.961 0 192c0 77.413 26.97 99.031 172.268 309.67 9.534 13.772 29.929 13.774 39.465 0C357.03 291.031 384 269.413 384 192 384 85.961 298.039 0 192 0zm0 473.931C52.705 272.488 32 256.494 32 192c0-42.738 16.643-82.917 46.863-113.137S149.262 32 192 32s82.917 16.643 113.137 46.863S352 149.262 352 192c0 64.49-20.692 80.47-160 281.931z"/>
+                </svg>
+                <span>{{ 'pages.find_a_store' | t }}</span>
+              </a>
+            {% endif %}
+
+            {% liquid
+              if show_country_selector
+                render 'country-selector'
+              endif
+              if show_language_switcher
+                render 'language-switcher'
+              endif
+
+              if show_currency_switcher
+                render 'currency-switcher'
+              endif
+            %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% break %}
+  {% endif %}
+{% endfor %}

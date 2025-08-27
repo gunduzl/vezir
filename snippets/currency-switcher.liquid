@@ -1,0 +1,50 @@
+{%- liquid 
+  unless form_id
+    assign form_id = 'currency-form'
+  endunless
+  assign show_currency_selector = true
+-%}
+
+{% if show_currency_selector %}
+  {% liquid
+    assign min = 65
+    assign max = 80
+    assign diff = max | minus: min
+    assign randomNumber = "now" | date: "%N" | modulo: diff | plus: min
+    assign form_id = form_id | append: randomNumber
+  %}
+  {% if shop.enabled_currencies.size > 1 %}
+    <div class="m-switcher-dropdown m-currency-switcher {{ box_size }}">
+      {%- capture form_id -%}localization_form{{ product.id }}__{{ "now" | date: "%L" }}{%- endcapture -%}
+
+      {% form 'localization', data-localization-form: '', id: form_id %}
+        <input type="hidden" name="currency_code" value="{{ form.current_currency.iso_code }}" data-localization-input/>
+        <m-select-component>
+          <m-localization-form>
+            <select class="js-selectNative" data-localization-select>
+              {% for currency in form.available_currencies %}
+                <option
+                    value="{{ currency.iso_code }}"
+                    {% if form.current_currency.iso_code == currency.iso_code %}selected="selected"{% endif %}
+                >
+                  {{ currency.iso_code }}
+                </option>
+              {% endfor %}
+            </select>
+          </m-localization-form>
+          <div class="m-select-custom js-selectCustom" aria-hidden="true">
+            <div class="m-select-custom--trigger">
+              <span class="m-select-custom--trigger-text"></span>
+              <span class="m-select-custom--trigger-icon"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M441.9 167.3l-19.8-19.8c-4.7-4.7-12.3-4.7-17 0L224 328.2 42.9 147.5c-4.7-4.7-12.3-4.7-17 0L6.1 167.3c-4.7 4.7-4.7 12.3 0 17l209.4 209.4c4.7 4.7 12.3 4.7 17 0l209.4-209.4c4.7-4.7 4.7-12.3 0-17z"/></svg></span>
+            </div>
+            <div class="m-select-custom--options m-select-custom--options-{{ pos }}">
+              {% for currency in form.available_currencies %}
+                <div class="m-select-custom--option" data-value="{{ currency.iso_code }}">{{ currency.iso_code }}</div>
+              {%- endfor -%}
+            </div>
+          </div>
+        </m-select-component>
+      {% endform %}
+    </div>
+  {% endif %}
+{% endif %}

@@ -1,0 +1,71 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+ {
+  "sections": {
+    "main": {
+      "type": "article",
+      "blocks": {
+        "50469c40-b191-4cca-ac7c-6a6cd0c7b8b4": {
+          "type": "categories",
+          "settings": {
+            "title": "Categories",
+            "list_blog": "collections"
+          }
+        },
+        "bb3e6ad7-c917-47d9-9bce-5edf5ff286f6": {
+          "type": "recent_post",
+          "settings": {
+            "title": "Recent Post",
+            "sidebar_recent_blog_name": "",
+            "sidebar_recent_blog_count": "3",
+            "blog_show_tags": true,
+            "blog_show_author": false,
+            "blog_show_date": false,
+            "show_excerpt": false,
+            "truncate_excerpt": false,
+            "truncate": "15",
+            "truncate_last_symbols": "..."
+          }
+        },
+        "36be080e-5b28-4b62-b5a9-478c96b656e7": {
+          "type": "tags",
+          "settings": {
+            "title": "Tags"
+          }
+        }
+      },
+      "block_order": [
+        "50469c40-b191-4cca-ac7c-6a6cd0c7b8b4",
+        "bb3e6ad7-c917-47d9-9bce-5edf5ff286f6",
+        "36be080e-5b28-4b62-b5a9-478c96b656e7"
+      ],
+      "settings": {
+        "container": "container",
+        "sidebar_show": true,
+        "sidebar_position": "right_column",
+        "design": "layout1",
+        "blog_show_author": true,
+        "blog_show_date": true,
+        "blog_show_tags": true,
+        "blog_show_social": true,
+        "blog_show_comment": true,
+        "show_related_articles": true,
+        "article_align_content": "text-left",
+        "article_show_tags": false,
+        "article_show_date": false,
+        "article_show_excerpt": false,
+        "article_show_button": false
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

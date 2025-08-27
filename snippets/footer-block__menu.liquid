@@ -1,0 +1,14 @@
+{% assign menu = linklists[block.settings.menu] %}
+{% if menu.links != blank %}
+    <ul class="{% if block.settings.title != blank or block_title != blank %}m-accordion--item-content{% endif %} sf__footer-block-content">
+        <div class="pb-5 md:pb-0">
+            {% for link in menu.links %}
+                <li class="link-lv2 leading-8 hover-underline">
+                    <a href="{{ link.url }}">
+                        {{ link.title }}
+                    </a>
+                </li>
+            {% endfor %}
+        </div>
+    </ul>
+{% endif %}

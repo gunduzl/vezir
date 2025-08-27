@@ -1,0 +1,539 @@
+{%- liquid
+  if linklists['gift-wrapping'].links != blank and linklists['gift-wrapping'].links.first.type == 'product_link'
+    assign gift_wrapping = linklists['gift-wrapping'].links.first
+
+    assign gift_wrap_id = gift_wrapping.object.variants.first.id
+    assign gift_wraps_in_cart = 0
+    for item in cart.items
+      if item.id == gift_wrap_id
+        assign gift_wraps_in_cart = item.quantity
+        break
+      endif
+    endfor
+    assign items_in_cart = cart.item_count | minus: gift_wraps_in_cart
+  endif
+
+  assign has_qty_rules = false
+  if item.variant.quantity_rule.increment > 1 or item.variant.quantity_rule.min > 1 or item.variant.quantity_rule.max != null
+    assign has_qty_rules = true
+  endif
+
+  assign has_vol_pricing = false
+  if item.variant.quantity_price_breaks.size > 0
+    assign has_vol_pricing = true
+  endif
+-%}
+
+{%- if has_qty_rules or has_vol_pricing -%}
+  {%- capture qty_rules_vol_pricing -%}
+      {%- if has_qty_rules -%}
+        <div class="quantity__rules m:text-sm m:flex-wrap">
+          {%- if item.variant.quantity_rule.increment > 1 -%}
+            <span class="divider">
+              {%- render 'new-locale',
+                key: 'products.product.quantity_multiples_of',
+                param: '{{ quantity }}',
+                value: item.variant.quantity_rule.increment
+              -%}
+            </span>
+          {%- endif -%}
+          {%- if item.variant.quantity_rule.min > 1 -%}
+            <span class="divider">
+              {%- render 'new-locale',
+                key: 'products.product.quantity_minimum_of',
+                param: '{{ quantity }}',
+                value: item.variant.quantity_rule.min
+              -%}
+            </span>
+          {%- endif -%}
+          {%- if item.variant.quantity_rule.max != null -%}
+            <span class="divider">
+              {%- render 'new-locale',
+                key: 'products.product.quantity_maximum_of',
+                param: '{{ quantity }}',
+                value: item.variant.quantity_rule.max
+              -%}
+            </span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      {%- if has_vol_pricing -%}
+        {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+        <volume-pricing
+          class="volume-pricing m:block parent-display{% unless has_qty_rules %} volume-pricing--empty-header{% endunless %}"
+          id="Volume-{{ section.id }}"
+        >
+          <ul class="list-unstyled volume-pricing__list">
+            <li class="volume-pricing__item">
+              <span>{{ item.variant.quantity_rule.min }}+</span>
+              {%- liquid
+                if settings.currency_code_enabled
+                  assign price = item.variant.price | money_with_currency
+                else
+                  assign price = item.variant.price | money
+                endif
+              -%}
+              {%- capture price_at_each -%}
+                {%- render 'new-locale',
+                  key: 'products.product.volume_pricing.price_at_each',
+                  param: '{{ price }}',
+                  value: price
+                -%}
+              {%- endcapture -%}
+              <span data-text="{{ price_at_each | strip_html }}">
+                {%- render 'new-locale',
+                  key: 'products.product.volume_pricing.each_html',
+                  param: '{{ money }}',
+                  value: price
+                -%}
+              </span>
+            </li>
+            {%- for price_break in item.variant.quantity_price_breaks -%}
+              {%- liquid
+                if settings.currency_code_enabled
+                  assign price_break_price = price_break.price | money_with_currency
+                else
+                  assign price_break_price = price_break.price | money
+                endif
+              -%}
+              <li class="volume-pricing__item">
+                <span>
+                  {{- price_break.minimum_quantity -}}
+                  <span aria-hidden="true">+</span></span
+                >
+                {%- capture price_at_each -%}
+                  {%- render 'new-locale',
+                    key: 'products.product.volume_pricing.price_at_each',
+                    param: '{{ price }}',
+                    value: price_break_price
+                  -%}
+                {%- endcapture -%}
+                <span data-text="{{ price_at_each | strip_html }}">
+                  {%- render 'new-locale',
+                    key: 'products.product.volume_pricing.each_html',
+                    param: '{{ money }}',
+                    value: price_break_price
+                  -%}
+                </span>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </volume-pricing>
+      {%- endif -%}
+    {%- endcapture -%}
+{%- endif -%}
+
+<div
+  class="m-cart-item m:flex"
+  data-index="{{ forloop.index }}"
+  data-product-id="{{- item.product_id -}}"
+  data-cart-item
+  id="MinimogCart-Item-{{ item.index | plus: 1 }}"
+>
+  <div class="m-cart__column m-cart__column--product">
+    <div class="m-cart-item__product">
+      <div class="m-cart-item__image m:blocks-radius-md">
+        {%- if item.image -%}
+          {% render 'responsive-image', image: item.image, wrapper_class: 'm-cart-item__image' %}
+        {%- else -%}
+          {{- 'image' | placeholder_svg_tag: 'm-placeholder-svg' -}}
+        {%- endif -%}
+      </div>
+
+      <div class="m-cart-item__info">
+        <a class="m-cart-item__title" href="{{ item.url }}" data-role="product-title">
+          {{ item.product.title }}
+        </a>
+        {%- liquid
+          assign variant_options = 'template ' | split: ' '
+          if item.product.has_only_default_variant != true
+            assign variant_options = item.options_with_values
+          endif
+          assign property_size = item.properties | size
+
+          assign line_item_detail_class = ''
+          if item.product.has_only_default_variant and property_size == 0 and item.selling_plan_allocation == null
+            assign line_item_detail_class = 'm:hidden'
+          endif
+        -%}
+        <ul
+          class="m:text-color-subtext{{ line_item_detail_class | prepend: ' ' }}"
+          data-cart-item-details
+          aria-label="{{ 'cart.label.product_details' | t }}"
+        >
+          {%- for option in variant_options -%}
+            <li
+              class="m-cart-item__option m:text-sm{% if item.product.has_only_default_variant %} m:hidden{% endif %}"
+              data-cart-item-option
+            >
+              <span class="m:font-medium">{{ option.name }}</span>: {{ option.value }}
+            </li>
+          {%- endfor -%}
+
+          <li
+            class="m-cart-item__selling-plan m:text-sm{% if item.selling_plan_allocation == empty %} m:hidden {% endif %}"
+            data-cart-item-selling-plan-name
+          >
+            {{ item.selling_plan_allocation.selling_plan.name }}
+          </li>
+
+          {%- comment -%}
+            Optional, loop through custom product line items if available
+
+            Line item properties come in as having two parts. The first part will be passed with the default form,
+            but p.last is the actual custom property and may be blank. If it is, don't show it.
+
+            For more info on line item properties, visit:
+              - http://docs.shopify.com/support/your-store/products/how-do-I-collect-additional-information-on-the-product-page-Like-for-a-monogram-engraving-or-customization
+          {%- endcomment -%}
+          {%- liquid
+            assign properties = 'template ' | split: ' '
+            if property_size > 0
+              assign properties = item.properties
+            endif
+          -%}
+          {%- for p in properties -%}
+            {%- assign property_first_char = p.first | slice: 0 -%}
+            <li
+              class="m-cart-item__property m:text-sm{% if property_size == 0 or p.last == blank or property_first_char == '_' %} m:hidden{% endif %}"
+              data-cart-item-property
+            >
+              <span class="m:font-medium" data-cart-item-property-name>{{ p.first }}: </span>
+
+              {%- comment -%}
+                Check if there was an uploaded file associated
+              {%- endcomment -%}
+              <span data-cart-item-property-value>
+                {%- if p.last contains '/uploads/' -%}
+                  <a href="{{ p.last }}" data-role="product-upload" target="_blank">{{ p.last | split: '/' | last }}</a>
+                {%- else -%}
+                  {{ p.last }}
+                {%- endif -%}
+              </span>
+            </li>
+            {%- if p.first contains 'optionSetId' -%}
+              <li class="m-cart-item__property tpo-product-option">
+                <div
+                  data-edit-product-option="{{ p.last }}"
+                  data-item-key="{{ item.key }}"
+                  data-product-id="{{ item.product.id }}"
+                  data-variant-id="{{ item.id }}"
+                  data-item-quantity="{{ item.quantity }}"
+                  data-customizer-item-key="{{ item.properties['_itemKey'] }}"
+                ></div>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+        {%- if item.properties._parentKey == blank -%}
+          <m-cart-remove-button
+            id="MinimogCart-Remove-{{ item.index | plus: 1 }}"
+            data-index="{{ item.index | plus: 1 }}"
+          >
+            <span class="m-cart-item__remove m-button--link{% unless gift_wrap_id == nil or item.id != gift_wrap_id %} m:hidden{% endunless %}">
+              {{ 'cart.general.remove' | t }}
+            </span>
+          </m-cart-remove-button>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <div class="m-cart__column m-cart__column--price">
+    {%- assign has_discount = false -%}
+    {%- if item.original_price != item.final_price -%}
+      {%- assign has_discount = true -%}
+    {%- endif -%}
+
+    <div class="m-cart-item__price">
+      {%- comment -%}
+        Markup template for discount item
+      {%- endcomment -%}
+      <div class="m-cart-item__price-discounted m:justify-end md:m:justify-start{% unless has_discount %} m:hidden{% endunless %}">
+        <p class="m-cart-item__price--regular">
+          <span class="m:visually-hidden">{{ 'products.product.regular_price' | t }}</span>
+          {%- if settings.currency_code_enabled -%}
+            <s>{{ item.original_price | money_with_currency }}</s>
+          {%- else -%}
+            <s>{{ item.original_price | money }}</s>
+          {%- endif -%}
+        </p>
+        <p class="m-cart-item__price--final">
+          <span class="m:visually-hidden">{{ 'products.product.sale_price' | t }}</span>
+          {%- if settings.currency_code_enabled -%}
+            <span>{{ item.final_price | money_with_currency }}</span>
+          {%- else -%}
+            <span>{{ item.final_price | money }}</span>
+          {%- endif -%}
+        </p>
+      </div>
+
+      {%- comment -%}
+        Markup template for regular price item
+      {%- endcomment -%}
+      <div class="m-cart-item__price--regular m:text-right md:m:text-left{% if has_discount %} m:hidden{% endif %}">
+        <p>
+          <span class="m:visually-hidden">{{ 'products.product.regular_price' | t }}</span>
+          {%- if settings.currency_code_enabled -%}
+            {{ item.original_price | money_with_currency }}
+          {%- else -%}
+            {{ item.original_price | money }}
+          {%- endif -%}
+        </p>
+      </div>
+
+      {%- comment -%}
+        Markup template for unit price
+      {%- endcomment -%}
+      <div class="m-cart-item__unit-price m:text-right md:m:text-left{% unless item.unit_price_measurement %} m:hidden{% endunless %}">
+        <span class="m:visually-hidden m:visually-hidden--inline">{{ 'products.product.unit_price_label' | t }}</span>
+        <span class="m:text-sm m:text-color-subtext">
+          {%- capture unit_price_separator -%}
+            <span aria-hidden="true">/</span>
+            <span class="m:visually-hidden">{{ 'general.accessibility.unit_price_separator' | t }}&nbsp;</span>
+          {%- endcapture -%}
+
+          {%- capture unit_price_base_unit -%}
+            {%- if item.unit_price_measurement.reference_value != 1 -%}
+              {{- item.unit_price_measurement.reference_value -}}
+            {%- endif -%}
+            {{ item.unit_price_measurement.reference_unit }}
+          {%- endcapture -%}
+
+          {%- if settings.currency_code_enabled -%}
+            <span data-unit-price>{{ item.unit_price | money_with_currency }}</span>
+          {%- else -%}
+            <span data-unit-price>{{ item.unit_price | money }}</span>
+          {%- endif -%}
+          {{- unit_price_separator -}}
+          <span data-unit-price-base-unit>{{- unit_price_base_unit -}}</span>
+        </span>
+      </div>
+    </div>
+
+    {%- assign item_discounts = 'template ' | split: ' ' -%}
+    {%- if item.line_level_discount_allocations != blank -%}
+      {%- assign item_discounts = item.line_level_discount_allocations -%}
+    {%- endif -%}
+
+    <ul
+      class="m-cart__discount{% if item.line_level_discount_allocations == blank %} m:hidden{% endif %}"
+      aria-label="{{ 'customer.order.discount' | t }}"
+      data-cart-item-discount-list
+    >
+      {%- for discount_allocation in item_discounts -%}
+        <li class="m-cart__discount--item m:justify-end md:m:justify-start" data-cart-item-discount>
+          {%- liquid
+            assign discount_amount = discount_allocation.amount | money
+            if settings.currency_code_enabled
+              assign discount_amount = discount_allocation.amount | money_with_currency
+            endif
+          -%}
+          <svg aria-hidden="true" width="20" height="20" focusable="false" role="presentation" viewBox="0 0 12 13">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M7 .5h3a2 2 0 0 1 2 2v3a.995.995 0 0 1-.293.707l-6 6a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 0-1.414l6-6A.995.995 0 0 1 7 .5zm2 2a1 1 0 1 0 2 0 1 1 0 0 0-2 0z" fill="currentColor"></path>
+          </svg>
+          <span data-cart-item-discount-title>
+            {{- discount_allocation.discount_application.title -}}
+            <span data-cart-item-discount-amount>(-{{ discount_amount }})</span></span
+          >
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+
+  <div class="m-cart__column m-cart__column--quantity m:display-flex m:items-center">
+    {%- if gift_wrap_id == null or item.id != gift_wrap_id -%}
+      {%- if item.properties._parentKey == blank -%}
+        <m-quantity-input class="m-quantity">
+          <button
+            class="m-quantity__button"
+            name="minus"
+            type="button"
+            aria-label="{{ 'products.product.decrease_quantity' | t: title: item.product.title }}"
+          >
+            <svg
+              fill="currentColor"
+              stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 384 512"
+            >
+              <path d="M376 232H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h368c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </button>
+          <input
+            class="m-quantity__input form-field form-field--no-border MinimogQuantity-{{ item.index | plus: 1 }} MinimogQuantity-desktop"
+            type="number"
+            data-quantity-variant-id="{{ item.variant.id }}"
+            name="updates[]"
+            value="{{ item.quantity }}"
+            {% # theme-check-disable %}
+            data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+            min="{{ item.variant.quantity_rule.min }}"
+            {% if item.variant.quantity_rule.max != null %}
+              max="{{ item.variant.quantity_rule.max }}"
+            {% endif %}
+            step="{{ item.variant.quantity_rule.increment }}"
+            {% # theme-check-enable %}
+            id="MinimogQuantity-{{ item.index | plus: 1 }}"
+            data-index="{{ item.index | plus: 1 }}"
+          >
+          <button
+            class="m-quantity__button"
+            name="plus"
+            type="button"
+            aria-label="{{ 'products.product.increase_quantity' | t: title: item.product.title }}"
+          >
+            <svg
+              fill="currentColor"
+              stroke="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 384 512"
+            >
+              <path d="M376 232H216V72c0-4.42-3.58-8-8-8h-32c-4.42 0-8 3.58-8 8v160H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h160v160c0 4.42 3.58 8 8 8h32c4.42 0 8-3.58 8-8V280h160c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </button>
+        </m-quantity-input>
+        {%- if has_qty_rules or has_vol_pricing -%}
+          <quantity-popover class="quantity-popover m:block m:relative">
+            <button
+              class="quantity-popover__button volume-pricing-toggle m-button m-button--blank"
+              aria-label="Open Volume Pricing"
+            >
+              <svg
+                class="m-svg-icon"
+                viewBox="0 0 25 24"
+                stroke="currentColor"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12.5 16V11M13 8C13 8.27614 12.7761 8.5 12.5 8.5C12.2239 8.5 12 8.27614 12 8M13 8C13 7.72386 12.7761 7.5 12.5 7.5C12.2239 7.5 12 7.72386 12 8M13 8H12M22.5 12C22.5 17.5228 18.0228 22 12.5 22C6.97715 22 2.5 17.5228 2.5 12C2.5 6.47715 6.97715 2 12.5 2C18.0228 2 22.5 6.47715 22.5 12Z"></path>
+              </svg>
+            </button>
+            <div class="quantity-popover__wrapper m:blocks-radius-md" hidden>
+              <button class="quantity-popover__close" aria-label="Close">
+                <svg
+                  class="m-svg-icon"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 320 512"
+                >
+                  <path d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"></path>
+                </svg>
+              </button>
+              {{ qty_rules_vol_pricing }}
+            </div>
+          </quantity-popover>
+        {% endif %}
+      {%- endif -%}
+    {%- else -%}
+      <m-gift-wrapping-input
+        class="m-quantity"
+        data-product-id="{{ product_id | default: item.product.id }}"
+        cart-items-size="{{ cart.items.size }}"
+        gift-wraps-in-cart="{{ gift_wraps_in_cart }}"
+        items-in-cart="{{ items_in_cart }}"
+      >
+        <button
+          class="m-quantity__button"
+          type="button"
+          name="minus"
+          disabled
+          aria-label="{{ 'products.product.decrease_quantity' | t: title: item.product.title }}"
+        >
+          <svg
+            fill="currentColor"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 384 512"
+          >
+            <path d="M376 232H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h368c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+          </svg>
+        </button>
+        <input
+          class="m-quantity__input form-field form-field--no-border"
+          type="number"
+          data-quantity-variant-id="{{ item.variant.id }}"
+          name="updates[]"
+          value="{{ item.quantity }}"
+          {% # theme-check-disable %}
+          data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
+          min="{{ item.variant.quantity_rule.min }}"
+          {% if item.variant.quantity_rule.max != null %}
+            max="{{ item.variant.quantity_rule.max }}"
+          {% endif %}
+          step="{{ item.variant.quantity_rule.increment }}"
+          {% # theme-check-enable %}
+          id="MinimogQuantity-{{ item.index | plus: 1 }}"
+          data-index="{{ item.index | plus: 1 }}"
+          disabled="disabled"
+        >
+        <button
+          class="m-quantity__button"
+          type="button"
+          name="plus"
+          disabled
+          aria-label="{{ 'products.product.increase_quantity' | t: title: item.product.title }}"
+        >
+          <svg
+            fill="currentColor"
+            stroke="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 384 512"
+          >
+            <path d="M376 232H216V72c0-4.42-3.58-8-8-8h-32c-4.42 0-8 3.58-8 8v160H8c-4.42 0-8 3.58-8 8v32c0 4.42 3.58 8 8 8h160v160c0 4.42 3.58 8 8 8h32c4.42 0 8-3.58 8-8V280h160c4.42 0 8-3.58 8-8v-32c0-4.42-3.58-8-8-8z"/>
+          </svg>
+        </button>
+      </m-gift-wrapping-input>
+    {%- endif -%}
+  </div>
+
+  <div class="m-cart__column m-cart__column--subtotal m:text-right m:hidden md:m:block">
+    {%- comment -%}
+      Markup template for discount item
+    {%- endcomment -%}
+    <div class="m-cart-item__price-discounted m:justify-end{% unless item.original_line_price != item.final_line_price %} m:hidden{% endunless %}">
+      <p class="m-cart-item__price--regular">
+        <span class="m:visually-hidden">{{ 'cart.label.regular_total' | t }}</span>
+        {%- if settings.currency_code_enabled -%}
+          <s data-cart-item-original-price>{{ item.original_line_price | money_with_currency }}</s>
+        {%- else -%}
+          <s data-cart-item-original-price>{{ item.original_line_price | money }}</s>
+        {%- endif -%}
+      </p>
+      <p class="m-cart-item__price--final">
+        <span class="m:visually-hidden">{{ 'cart.label.discounted_total' | t }}</span>
+        {%- if settings.currency_code_enabled -%}
+          <span data-cart-item-final-price>{{ item.final_line_price | money_with_currency }}</span>
+        {%- else -%}
+          <span data-cart-item-final-price>{{ item.final_line_price | money }}</span>
+        {%- endif -%}
+      </p>
+    </div>
+
+    {%- comment -%}
+      Markup template for regular price item
+    {%- endcomment -%}
+    <div class="m-cart-item__price--regular m:text-right{% if item.original_line_price != item.final_line_price %} m:hidden{% endif %}">
+      <span class="m:font-medium" data-cart-item-original-price>
+        {%- if settings.currency_code_enabled -%}
+          {{ item.original_line_price | money_with_currency }}
+        {%- else -%}
+          {{ item.original_line_price | money }}
+        {%- endif -%}
+      </span>
+    </div>
+  </div>
+  {% comment %}Custom element for FoxKit In-cart upsells{% endcomment %}
+  {% liquid
+    assign collections = ''
+    for collection in item.product.collections
+      assign collections = collections | append: collection.id | append: ','
+    endfor
+  %}
+  <foxkit-incart-upsell
+    data-collections="{{ collections | remove_last: ',' }}"
+    data-product-title="{{ item.product.title }}"
+    data-product-id="{{ item.product_id }}"
+  ></foxkit-incart-upsell>
+</div>

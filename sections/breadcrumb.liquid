@@ -1,0 +1,109 @@
+{% liquid
+  assign container = section.settings.container
+  assign class = ''
+  if section.settings.hide_on_mb
+    assign class = 'm:hidden md:m:block'
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+%}
+
+{% render 'breadcrumb', 
+  container: container, 
+  justify: section.settings.text_alignment, 
+  class: class, 
+  hide_current: section.settings.hide_current,
+  animated: animated, 
+  animation_effect: animation_effect
+%}
+{% schema %}
+{
+  "name": "Breadcrumb",
+  "enabled_on": {
+    "templates": [
+      "product",
+      "page",
+      "collection"
+    ]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_current",
+      "label": "Hide current page",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_mb",
+      "label": "Hide on mobile",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {"value": "inherit", "label": "Inherit global setting"},
+        {"value": "fade-in", "label": "Fade in"},
+        {"value": "fade-in-up", "label": "Fade in up"},
+        {"value": "fade-in-left", "label": "Fade in left"},
+        {"value": "fade-in-right", "label": "Fade in right"}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Breadcrumb"
+    }
+  ]
+}
+{% endschema %}

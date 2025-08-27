@@ -1,0 +1,312 @@
+{% comment %}
+  Renders product variant options
+
+  Accepts:
+  - product: {Object} product object.
+  - option: {Object} current product_option object.
+  - picker_type: {String} type of picker to dispay
+
+
+  Usage:
+  {% render 'product-variant-options',
+    product: product,
+    option: option,
+    picker_type: picker_type
+  %}
+{% endcomment %}
+{%- liquid
+  assign product_form_id = 'product-form-' | append: section.id
+  assign image_size = 100
+-%}
+
+{%- for value in option.values -%}
+  {%- liquid
+    assign option_disabled = true
+    if value.available
+      assign option_disabled = false
+    endif
+
+    assign value_downcase = value | downcase | strip
+    assign product_colors = settings.product_colors | split: ','
+    assign selected_color = value_downcase | split: ' ' | last | handle
+    assign selected_image = ''
+
+    for product_color in product_colors
+      assign parts = product_color | strip | split: ':'
+      assign name = parts.first | downcase | strip
+      assign color = parts.last | strip
+      if name == value_downcase
+        assign selected_color = color
+      endif
+    endfor
+
+    for i in (1..100)
+      assign key = 'filter_color' | append: i
+      assign key_second = 'filter_color' | append: i | append: '.png'
+      assign setting_value = settings[key] | downcase | strip
+
+      if texture_style != '' and setting_value == value_downcase
+        assign selected_image = key_second | asset_url
+      endif
+    endfor
+  -%}
+
+  {%- capture input_id -%}
+    {{ section.id }}-{{ option.position }}-{{ forloop.index0 -}}
+  {%- endcapture -%}
+
+  {%- capture input_name -%}
+    {{ option.name }}-{{ option.position }}
+  {%- endcapture -%}
+
+  {%- capture label_unavailable -%}
+    <span class="m:visually-hidden label-unavailable">
+      {%- render 'new-locale', key: 'products.product.variant_sold_out_or_unavailable' -%}
+    </span>
+  {%- endcapture -%}
+
+  {%- capture input_dataset -%}
+    data-product-url="{{ value.product_url }}"
+    data-option-value-id="{{ value.id }}"
+  {%- endcapture -%}
+
+  {%- case picker_type -%}
+    {%- when 'swatch_color' -%}
+      <div
+        class="m-product-option--node m-tooltip m-tooltip--top{% if option_disabled %} m-product-option--node__unavailable{% endif %}"
+        data-option-type="{{ picker_type }}"
+        data-option-position="{{ option.position }}"
+        data-value="{{- value | escape -}}"
+      >
+        {%- capture help_text -%}
+          <span class="m:visually-hidden">{{ value | escape }}</span>
+          {{ label_unavailable }}
+        {%- endcapture -%}
+        {% render 'swatch-input',
+          id: input_id,
+          name: input_name,
+          value: value,
+          swatch: value.swatch,
+          product_form_id: product_form_id,
+          checked: value.selected,
+          visually_disabled: option_disabled,
+          help_text: help_text,
+          additional_props: input_dataset,
+          image_size: image_size
+        %}
+      </div>
+    {%- when 'button' -%}
+      <div
+        class="m-product-option--node{% if option_disabled %} m-product-option--node__unavailable{% endif %}"
+        data-option-type="{{ picker_type }}"
+        data-option-position="{{ option.position }}"
+        data-value="{{- value | escape -}}"
+      >
+        <input
+          data-option-type="{{ picker_type }}"
+          type="radio"
+          id="{{ input_id }}"
+          name="{{ input_name }}"
+          value="{{ value }}"
+          form="{{ product_form_id }}"
+          class="m-product-option__input{% if option_disabled %} disabled{% endif %}"
+          {% if value.selected %}
+            checked
+          {% endif %}
+          {% if disabled %}
+            disabled
+          {% endif %}
+          {{ input_dataset }}
+        >
+        <label for="{{ input_id }}" class="m-product-option--node__label" data-option-type="{{ picker_type }}">
+          {{ value -}}
+          {{ label_unavailable }}
+        </label>
+      </div>
+    {%- when 'color' -%}
+      {% liquid
+        assign style = 'background-color: ' | append: selected_color | append: ';'
+      %}
+      <div
+        class="m-product-option--node m-tooltip m-tooltip--top{% if option_disabled %} m-product-option--node__unavailable{% endif %}"
+        data-option-type="{{ picker_type }}"
+        data-option-position="{{ option.position }}"
+        data-value="{{- value | escape -}}"
+      >
+        <div class="m-product-option--swatch">
+          <input
+            type="radio"
+            id="{{ input_id }}"
+            name="{{ input_name }}"
+            value="{{ value }}"
+            form="{{ product_form_id }}"
+            class="m-product-option__input{% if option_disabled %} disabled{% endif %}"
+            {% if value.selected %}
+              checked
+            {% endif %}
+            {% if disabled %}
+              disabled
+            {% endif %}
+            {{ input_dataset }}
+          >
+          <label
+            for="{{ input_id }}"
+            class="m-product-option--node__label"
+            data-option-type="{{ picker_type }}"
+            {% if style %}
+              style="{{ style }}"
+            {% endif %}
+          >
+            {{- value -}}
+          </label>
+        </div>
+        <span class="m-tooltip__content">{{- value -}}</span>
+      </div>
+    {%- when 'image' -%}
+      {% liquid
+        assign label_class = 'm-product-option--node__label'
+        assign style = ''
+        if value.variant.image != blank
+          assign image_url = value.variant.image | image_url: width: image_size
+          assign style = style | append: 'background-image: url(' | append: image_url | append: ');'
+        elsif selected_image != blank
+          assign style = style | append: 'background-image: url(' | append: selected_image | append: ');'
+        else
+          if value.swatch.color
+            assign style = style | append: 'background-color: ' | append: value.swatch.color | append: ';'
+          else
+            assign style = style | append: 'background-color: ' | append: selected_color | append: ';'
+          endif
+        endif
+
+        if style
+          assign label_class = label_class | append: ' has-bg-img'
+        endif
+      %}
+      <div
+        class="m-product-option--node m-tooltip m-tooltip--top{% if option_disabled %} m-product-option--node__unavailable{% endif %}"
+        data-option-type="{{ picker_type }}"
+        data-option-position="{{ option.position }}"
+        data-value="{{- value | escape -}}"
+      >
+        <input
+          type="radio"
+          id="{{ input_id }}"
+          name="{{ input_name }}"
+          value="{{ value }}"
+          form="{{ product_form_id }}"
+          class="m-product-option__input{% if option_disabled %} disabled{% endif %}"
+          {% if value.selected %}
+            checked
+          {% endif %}
+          {% if disabled %}
+            disabled
+          {% endif %}
+          {{ input_dataset }}
+        >
+        <label
+          for="{{ input_id }}"
+          class="{{ label_class }}"
+          data-option-type="image"
+          {% if style %}
+            style="{{ style }}"
+          {% endif %}
+        >
+          {{- value -}}
+        </label>
+        <span class="m-tooltip__content">{{- value -}}</span>
+      </div>
+    {%- when 'default' -%}
+      {% comment %}Custom Image{% endcomment %}
+      {% liquid
+        assign label_class = 'm-product-option--node__label'
+        assign style = ''
+        if selected_image != blank
+          assign label_class = label_class | append: ' has-bg-img'
+          assign style = style | append: 'background-image: url(' | append: selected_image | append: ');'
+        else
+          assign style = style | append: 'background-color: ' | append: selected_color | append: ';'
+        endif
+      %}
+      <div
+        class="m-product-option--node m-tooltip m-tooltip--top{% if option_disabled %} m-product-option--node__unavailable{% endif %}"
+        data-option-type="color"
+        data-option-position="{{ option.position }}"
+        data-value="{{- value | escape -}}"
+      >
+        <div class="m-product-option--swatch">
+          <input
+            type="radio"
+            id="{{ input_id }}"
+            name="{{ input_name }}"
+            value="{{ value }}"
+            form="{{ product_form_id }}"
+            class="m-product-option__input{% if option_disabled %} disabled{% endif %}"
+            {% if value.selected %}
+              checked
+            {% endif %}
+            {% if disabled %}
+              disabled
+            {% endif %}
+            {{ input_dataset }}
+          >
+          <label
+            for="{{ input_id }}"
+            class="{{ label_class }}"
+            data-option-type="color"
+            {% if style %}
+              style="{{ style }}"
+            {% endif %}
+          >
+            {{- value -}}
+          </label>
+        </div>
+        <span class="m-tooltip__content">{{- value -}}</span>
+      </div>
+    {%- else -%}
+      {% liquid
+        assign swatch_value = null
+        assign swatch_focal_point = null
+
+        if value.swatch == blank
+          assign value_downcase = value | downcase | strip
+          assign product_colors = settings.product_colors | split: ','
+          assign swatch_value = value | split: ' ' | last | handle
+
+          for product_color in product_colors
+            assign parts = product_color | strip | split: ':'
+            assign name = parts.first | downcase | strip
+            assign color = parts.last | strip
+            if name == value_downcase
+              assign swatch_value = color
+            endif
+          endfor
+        else
+          if value.swatch.image
+            assign image_url = value.swatch.image | image_url: width: 52
+            assign swatch_value = 'url(' | append: image_url | append: ')'
+            assign swatch_focal_point = value.swatch.image.presentation.focal_point
+          elsif value.swatch.color
+            assign swatch_value = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+          endif
+        endif
+      %}
+      <option
+        id="{{ input_id }}"
+        class="m-product-option--node"
+        value="{{ value | escape }}"
+        {% if value.selected %}
+          selected="selected"
+        {% endif %}
+        {% if swatch_value and picker_type == 'swatch_dropdown' %}
+          data-option-swatch-value="{{ swatch_value }}"
+          {% if swatch_focal_point %}
+            data-option-swatch-focal-point="{{ swatch_focal_point }}"
+          {% endif %}
+        {% endif %}
+        {{ input_dataset }}
+      >
+        {{- value -}}
+      </option>
+  {%- endcase -%}
+{%- endfor -%}

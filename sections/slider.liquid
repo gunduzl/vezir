@@ -1,0 +1,1103 @@
+{{ 'slideshow.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'slideshow.js' | asset_url }}" defer="defer"></script>
+{% liquid
+  assign first_block = section.blocks[0]
+  assign aspect_ratio = first_block.settings.background.aspect_ratio | default: 2.333
+  assign aspect_ratio_mobile = first_block.settings.mb_background.aspect_ratio | default: aspect_ratio
+
+  assign use_content_above = section.settings.use_content_above
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign slider_pagination_class = 'm-dot-circle m-dot-circle--' | append: section.settings.dots_color
+  if section.settings.dots_position != 'bottom'
+    assign slider_pagination_class = slider_pagination_class | append: ' swiper-pagination--vertical'
+  endif
+  assign slider_controls_position = section.settings.dots_position | replace: 'bottom', 'bottom-center' | replace: 'left', 'middle-left' | replace: 'right', 'middle-right'
+
+  assign slider_controls_class = ''
+  if section.settings.show_arrows
+    assign slider_controls_class = slider_controls_class | append: ' m-slider-controls--show-nav'
+  endif
+
+  if section.settings.show_dots
+    assign slider_controls_class = slider_controls_class | append: ' m-slider-controls--show-pagination'
+    assign slider_controls_class = slider_controls_class | append: ' m-slider-controls--pagination-' | append: section.settings.dots_position
+  endif
+
+  assign dots_color = '#222222'
+  if section.settings.dots_color == 'light'
+    assign dots_color = '#ffffff'
+  endif
+%}
+
+<section
+  id="m-slider-{{ section.id }}"
+  class="m-section m-slider m-slideshow-section m-slider--{{ section.settings.slideshow_height }} {% unless use_content_above %} m-slider--content-stack{% endunless %} {{ section.settings.custom_class }}"
+  data-section-type="slider"
+  data-section-id="{{ section.id }}"
+  style="--data-autoplay-speed: {{ section.settings.autorotate_speed }}s;"
+>
+  <div class="{{ container }}">
+    <m-slideshow
+      class="m:block {{ slider_controls_class }}"
+      data-id="{{ section.id }}"
+      data-autoplay="{% if request.design_mode %}false{% else %}{{ section.settings.autorotate }}{% endif %}"
+      data-autoplay-speed="{{ section.settings.autorotate_speed }}"
+      data-enable-arrows="{{ section.settings.show_arrows }}"
+      data-enable-dots="{{ section.settings.show_dots }}"
+      data-slide-height="{{ section.settings.slideshow_height }}"
+    >
+      <div class="swiper-container">
+        <div class="swiper-wrapper">
+          {% for block in section.blocks %}
+            {% liquid
+              assign enable_preload_image = block.settings.enable_preload_image
+              assign content_positions = block.settings.content_position | split: ' '
+              assign text_alignment = block.settings.text_alignment
+              assign text_horizontal_alignment = content_positions.first
+              assign text_vertical_alignment = content_positions.last | strip
+              assign footer_alignment = block.settings.footer_alignment
+              assign image_link = block.settings.image_link
+              assign should_show_content = false
+              if block.settings.title != blank or block.settings.subheading != blank or block.settings.description != blank or block.settings.button_text != blank
+                assign should_show_content = true
+              endif
+
+              assign content_container = 'container-fluid'
+              if block.settings.content_in_container == true
+                assign content_container = 'container'
+              endif
+
+              assign video_urls = block.settings.video | newline_to_br | split: '<br />'
+
+              assign bg_image = block.settings.background
+              if block.settings.mb_background != blank
+                assign bg_image = block.settings.mb_background
+              endif
+
+              assign text_size = block.settings.text_size
+              assign sub_text_size = 'h6'
+              assign heading_text_size = 'h2'
+              if text_size == 'large'
+                assign sub_text_size = 'h5'
+                assign heading_text_size = 'h1'
+              endif
+
+              assign text_color = block.settings.text_color
+              if text_color == 'black'
+                assign color_btn = '#000'
+                assign color_btn_hover = '#FFF'
+              else
+                assign color_btn = '#FFF'
+                assign color_btn_hover = '#000'
+              endif
+            %}
+
+            {% capture video_bg %}
+            <video playsinline muted autoplay loop preload="auto">
+              {% for video in video_urls %}
+                {% liquid
+                  assign video_url = video | split: '?v='
+                  assign video_url = video_url | first | strip_newlines
+                  assign format = 'mp4'
+                  if video_url contains '.webm' or video_url contains '.WEBM'
+                  assign format = 'webm'
+                  endif
+
+                  if video_url contains '.mov' or video_url contains '.MOV'
+                  assign format = 'mp4'
+                  endif
+                %}
+                {% comment %}theme-check-disable RemoteAsset{% endcomment %}
+                <source src="{{ video_url }}" type="video/{{ format }}">
+                {% comment %}theme-check-enable RemoteAsset{% endcomment %}
+              {% endfor %}
+              {{ 'sections.slider.video.notice' }}
+            </video>
+            {% endcapture %}
+
+            <div
+              {{ block.shopify_attributes }}
+              data-slide="{{ forloop.index0 }}"
+              class="swiper-slide"
+              data-slide-type="{{ block.type }}"
+            >
+              <div class="m-slide m-slide--{{ text_vertical_alignment }}-{{ text_horizontal_alignment }} m-slide--text-{{ block.settings.text_size }}{% if image_link != blank %} m-slide--has-link{% endif %}">
+                <div
+                  class="m-slide__media{% if container != 'container-full' %} m:blocks-radius{% endif %}"
+                  {% if section.settings.slideshow_height == 'adapt' %}
+                    style="--aspect-ratio: {{ aspect_ratio }}; --aspect-ratio-mobile: {{ aspect_ratio_mobile }}"
+                  {% endif %}
+                >
+                  {% if image_link != blank %}
+                    <a href="{{ image_link }}" class="m-hidden-link"></a>
+                  {% endif %}
+
+                  <div class="m-slide__bg{% if block.settings.background == blank and block.settings.video == blank %} m-slide__placeholder{% endif %}">
+                    {%- capture sizes -%}{% if container == 'container-full' or container == 'w-full' %}100vw{% elsif container == 'container-fluid' %}min({{ settings.container_fluid_width }}px, 100vw){% else %}min({{ settings.container_width }}px, 100vw){%  endif %}{%- endcapture -%}
+                    {% if block.settings.background == blank and block.settings.video == blank %}
+                      {% capture current %}{% cycle 1, 2 %}{% endcapture %}
+                      {{ 'lifestyle-' | append: current | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full' }}
+                    {% else %}
+                      {% if block.type == 'video_slide' %}
+                        {{ video_bg }}
+                      {% else %}
+                        {%- liquid
+                          assign image_height = block.settings.background.width | divided_by: block.settings.background.aspect_ratio | round
+                          assign loading = 'lazy'
+                          assign fetchpriority = 'low'
+                          if forloop.index == 1 and section.index < 2 or enable_preload_image
+                            assign loading = 'eager'
+                            assign fetchpriority = 'high'
+                          endif
+                          assign image_alt = bg_image.alt | default: 'slider image ' | append: block.id
+                        -%}
+                        <picture>
+                          {%- if block.settings.mb_background -%}
+                            <source
+                              media="(max-width: 767px)"
+                              srcset="{{ block.settings.mb_background | image_url: width: '400x' }} 400w, {{ block.settings.mb_background | image_url: width: '600x' }} 600w, {{ block.settings.mb_background | image_url: width: '800x' }} 800w, {{ block.settings.mb_background | image_url: width: '1000x' }} 1000w"
+                              width="{{ block.settings.mb_background.width }}"
+                              height="{{ block.settings.mb_background.height }}"
+                            >
+                          {%- endif %}
+                          {{
+                            block.settings.background
+                            | image_url: width: 3840
+                            | image_tag:
+                              loading: loading,
+                              fetchpriority: fetchpriority,
+                              width: block.settings.background.width,
+                              height: image_height,
+                              sizes: sizes,
+                              widths: '300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200',
+                              alt: image_alt
+                          }}
+                        </picture>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+
+                  {% if section.settings.show_overlay %}
+                    <div class="m-slide__overlay"></div>
+                  {% endif %}
+                </div>
+
+                {% if should_show_content %}
+                  {%- liquid
+                    assign button_style = block.settings.button_style | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-white', 'm-button--white' | replace: 'sf__btn-link', 'm-button--link'
+                    assign second_button_style = block.settings.second_button_style | replace: 'sf__btn-secondary', 'm-button--secondary' | replace: 'sf__btn-primary', 'm-button--primary' | replace: 'sf__btn-white', 'm-button--white' | replace: 'sf__btn-link', 'm-button--link'
+                  -%}
+                  <div
+                    class="m-slide__wrapper {{ content_container }} {% if animated %} m-slide-animate--{{ animation_effect }}{% endif %}"
+                    style="--btn-color: {{ color_btn }};--btn-color-hover: {{ color_btn_hover }};"
+                  >
+                    <div class="m-slide__content m-richtext m:text-{{ text_alignment }}">
+                      {% if block.settings.subheading != blank %}
+                        <div class="m-richtext__subtitle m-slide__subtitle m:text-{{ text_color }} {{ sub_text_size }}">
+                          {{ block.settings.subheading }}
+                        </div>
+                      {% endif %}
+
+                      {% if block.settings.title != blank %}
+                        <h2 class="m-richtext__title m-slide__title m:text-{{ text_color }} {{ heading_text_size }}">
+                          {{ block.settings.title }}
+                        </h2>
+                      {% endif %}
+
+                      {% if block.settings.description != blank %}
+                        <div class="m-richtext__description m-slide__description rte m:text-{{ text_color }} {{ sub_text_size }}">
+                          {{ block.settings.description }}
+                        </div>
+                      {% endif %}
+
+                      {% if block.settings.button_text != blank or block.settings.second_button_text != blank %}
+                        <div class="m-richtext__button m-slide__button m:display-flex m:flex-wrap m:items-center m:justify-{{ text_alignment | replace: 'left', 'start' | replace: 'right', 'end' }}">
+                          {% if block.settings.button_text != blank %}
+                            <a
+                              href="{{ block.settings.button_link | default: "#" }}"
+                              class="m-slide__button-first m-button {{ button_style }} {{ block.settings.button_size }}"
+                            >
+                              {{- block.settings.button_text -}}
+                            </a>
+                          {% endif %}
+                          {% if block.settings.second_button_text != blank %}
+                            <a
+                              href="{{ block.settings.second_button_link | default: "#" }}"
+                              class="m-slide__button-second m-button {{ second_button_style }} {{ block.settings.second_button_size }}"
+                            >
+                              {{- block.settings.second_button_text -}}
+                            </a>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+
+                {% if block.settings.show_footer %}
+                  <div
+                    class="m-slider__footer m-slider__footer--{{ footer_alignment }} {{ content_container }} m:flex m:items-center m:justify-{{ footer_alignment }} m:text-{{ block.settings.text_color }}"
+                    style="--btn-color: {{ color_btn }};"
+                  >
+                    <span>{{ block.settings.footer_text }}</span>
+                    {% if block.settings.footer_link != blank %}
+                      <span>|</span>
+                      <a href="{{ block.settings.footer_link | default: "#" }}" class="m-button m-button--link">
+                        {{ block.settings.footer_button }}
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        {% if section.blocks.size > 1 %}
+          {% if section.settings.show_dots or section.settings.show_arrows %}
+            <div
+              class="m-slider-controls m-slider-controls--absolute {{ slider_controls_class }} m-slider-controls--{{ slider_controls_position }}"
+              style="--swiper-controls-color: {{ dots_color }};"
+            >
+              <div class="m-slider-controls__wrapper">
+                {% if section.settings.show_arrows %}
+                  <button
+                    class="m-slider-controls__button m-slider-controls__button-prev swiper-button-prev"
+                    aria-label="Previous"
+                  >
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M25 30L15 20L25 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                {% endif %}
+                {% if section.settings.show_dots %}
+                  <div class="swiper-pagination m:w-full {{ slider_pagination_class }}"></div>
+                {% endif %}
+                {% if section.settings.show_arrows %}
+                  <button
+                    class="m-slider-controls__button m-slider-controls__button-next swiper-button-next"
+                    aria-label="Next"
+                  >
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 30L25 20L15 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </m-slideshow>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Slideshow",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Watch tutorial](https://foxecom.link/WhIEIt)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "w-full",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "slideshow_height",
+      "label": "Slide height",
+      "default": "adapt",
+      "options": [
+        {
+          "label": "Adapt to first slide image",
+          "value": "adapt"
+        },
+        {
+          "label": "Small",
+          "value": "small"
+        },
+        {
+          "label": "Medium",
+          "value": "medium"
+        },
+        {
+          "label": "Large",
+          "value": "large"
+        },
+        {
+          "label": "Full screen",
+          "value": "fullscreen"
+        }
+      ],
+      "info": "Only applies to screens > 767px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show overlay",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "dots_position",
+      "label": "Pagination position",
+      "default": "bottom",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "dots_color",
+      "label": "Controls color",
+      "default": "dark",
+      "options": [
+        {
+          "value": "dark",
+          "label": "Dark"
+        },
+        {
+          "value": "light",
+          "label": "Light"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show pagination",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "autorotate",
+      "label": "Auto-rotate slides",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autorotate_speed",
+      "label": "Change slides every",
+      "info": "Work when auto-rotate",
+      "max": 10,
+      "min": 2,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Mobile settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_content_above",
+      "label": "Use content above the image",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slider_item",
+      "name": "Image slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Background settings"
+        },
+        {
+          "type": "image_picker",
+          "id": "background",
+          "label": "Image on desktop",
+          "info": "1920 x 900px recommended"
+        },
+        {
+          "type": "image_picker",
+          "id": "mb_background",
+          "label": "Image on mobile",
+          "info": "600 x 480px recommended"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "checkbox",
+          "id": "content_in_container",
+          "label": "Content in container box",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "default": "center middle",
+          "options": [
+            {
+              "label": "Top left",
+              "value": "left top"
+            },
+            {
+              "label": "Top center",
+              "value": "center top"
+            },
+            {
+              "label": "Top right",
+              "value": "right top"
+            },
+            {
+              "label": "Middle left",
+              "value": "left middle"
+            },
+            {
+              "label": "Middle center",
+              "value": "center middle"
+            },
+            {
+              "label": "Middle right",
+              "value": "right middle"
+            },
+            {
+              "label": "Bottom left",
+              "value": "left bottom"
+            },
+            {
+              "label": "Bottom center",
+              "value": "center bottom"
+            },
+            {
+              "label": "Bottom right",
+              "value": "right bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Content alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "default": "medium",
+          "options": [
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "black",
+          "options": [
+            {
+              "value": "black",
+              "label": "Dark"
+            },
+            {
+              "value": "white",
+              "label": "Light"
+            }
+          ]
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading",
+          "info": "Allow custom HTML"
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "New Collection",
+          "info": "Allow custom HTML"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Tell your campaign through images</p>"
+        },
+        {
+          "type": "url",
+          "id": "image_link",
+          "label": "Image link",
+          "info": "Link to image"
+        },
+        {
+          "type": "header",
+          "content": "First Button"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button label",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Second Button"
+        },
+        {
+          "type": "text",
+          "id": "second_button_text",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "second_button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "second_button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "second_button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Footer"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_footer",
+          "default": false,
+          "label": "Show footer"
+        },
+        {
+          "type": "select",
+          "id": "footer_alignment",
+          "label": "Footer alignment",
+          "options": [
+            {
+              "value": "start",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "end",
+              "label": "Right"
+            }
+          ],
+          "default": "end"
+        },
+        {
+          "type": "text",
+          "id": "footer_text",
+          "label": "Footer text",
+          "default": "New Collection"
+        },
+        {
+          "type": "text",
+          "id": "footer_button",
+          "label": "Footer button",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "footer_link",
+          "label": "Footer link"
+        },
+        {
+          "type": "header",
+          "content": "Advanced"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_preload_image",
+          "label": "Enable preload image",
+          "info": "If this section is visible when the page loads, enabling this setting can reduce LCP and may improve site speed scores."
+        }
+      ]
+    },
+    {
+      "type": "video_slide",
+      "name": "Video slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Background settings"
+        },
+        {
+          "type": "textarea",
+          "id": "video",
+          "label": "Video",
+          "default": "https://cdn.shopify.com/videos/c/o/v/fbb140fd46e3429eba459e1549dbbe38.mp4",
+          "info": "Allow multiple format, each video in a new line. MP4, MOV and WEBM supported."
+        },
+        {
+          "type": "image_picker",
+          "id": "mb_background",
+          "label": "Image on mobile",
+          "info": "600 x 480px recommended"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "checkbox",
+          "id": "content_in_container",
+          "label": "Content in container box",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "default": "center middle",
+          "options": [
+            {
+              "label": "Top left",
+              "value": "left top"
+            },
+            {
+              "label": "Top center",
+              "value": "center top"
+            },
+            {
+              "label": "Top right",
+              "value": "right top"
+            },
+            {
+              "label": "Middle left",
+              "value": "left middle"
+            },
+            {
+              "label": "Middle center",
+              "value": "center middle"
+            },
+            {
+              "label": "Middle right",
+              "value": "right middle"
+            },
+            {
+              "label": "Bottom left",
+              "value": "left bottom"
+            },
+            {
+              "label": "Bottom center",
+              "value": "center bottom"
+            },
+            {
+              "label": "Bottom right",
+              "value": "right bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Content alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text size",
+          "default": "medium",
+          "options": [
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "black",
+          "options": [
+            {
+              "value": "black",
+              "label": "Dark"
+            },
+            {
+              "value": "white",
+              "label": "Light"
+            }
+          ]
+        },
+        {
+          "type": "textarea",
+          "id": "subheading",
+          "label": "Subheading",
+          "info": "Allow custom HTML"
+        },
+        {
+          "type": "textarea",
+          "id": "title",
+          "label": "Heading",
+          "default": "New Collection",
+          "info": "Allow custom HTML"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Tell your campaign through images</p>"
+        },
+        {
+          "type": "url",
+          "id": "image_link",
+          "label": "Image link",
+          "info": "Link to image"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button label",
+          "default": "Shop now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--primary"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        },
+        {
+          "type": "header",
+          "content": "Footer"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_footer",
+          "default": false,
+          "label": "Show footer"
+        },
+        {
+          "type": "select",
+          "id": "footer_alignment",
+          "label": "Footer alignment",
+          "options": [
+            {
+              "value": "start",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "end",
+              "label": "Right"
+            }
+          ],
+          "default": "end"
+        },
+        {
+          "type": "text",
+          "id": "footer_text",
+          "label": "Footer text",
+          "default": "New Collection"
+        },
+        {
+          "type": "text",
+          "id": "footer_button",
+          "label": "Footer button",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "footer_link",
+          "label": "Footer link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Slideshow",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "slider_item"
+        },
+        {
+          "type": "slider_item"
+        },
+        {
+          "type": "slider_item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

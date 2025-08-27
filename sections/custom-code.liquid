@@ -1,0 +1,35 @@
+{% if section.settings.custom_css != blank %}
+  <style type="text/css">
+    {{ section.settings.custom_css }}
+  </style>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Custom css code",
+  "disabled_on": {
+    "groups": [
+      "header",
+      "footer"
+    ]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/MheFBS)"
+    },
+    {
+      "type": "textarea",
+      "id": "custom_css",
+      "label": "Enter your code here",
+      "info": "Note: Drag this section, and drop it at the top of the page's list of sections."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom css code",
+      "category": "Advanced"
+    }
+  ]
+}
+{% endschema %}

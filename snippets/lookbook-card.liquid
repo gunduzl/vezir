@@ -1,0 +1,118 @@
+{% liquid
+  assign total_products = 0
+  for i in (1..5)
+    assign product__ = 'product_' | append: i
+    assign product = block.settings[product__]
+    if product != blank
+      assign total_products = total_products | plus: 1
+    endif
+  endfor
+%}
+<div
+  class="m-lookbook-card{% if block.settings.button_text == blank %} m-lookbook-card--hide-title{% endif %}"
+  data-id="{{ block.id }}"
+>
+  <div
+    class="m-lookbook-card__image{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+    {% if animated %}
+      data-cascade
+      style="--animation-order: {{ index }};"
+    {% endif %}
+  >
+    {% if block.settings.image != blank %}
+      {%- liquid
+        assign image_height = block.settings.image.width | divided_by: block.settings.image.aspect_ratio
+        if image_aspect_ratio == 'original'
+          assign image_aspect_ratio = block.settings.image.aspect_ratio
+        endif
+        assign loading = 'lazy'
+        assign fetchpriority = 'low'
+        if section.index < 2 or enable_preload_image
+          assign loading = 'eager'
+          assign fetchpriority = 'high'
+        endif
+      -%}
+      <div class="m-image m:blocks-radius" style="--aspect-ratio: {{ image_aspect_ratio }};">
+        {{
+          block.settings.image
+          | image_url: width: 1500
+          | image_tag:
+            loading: loading,
+            fetchpriority: fetchpriority,
+            width: block.settings.image.width,
+            height: image_height,
+            sizes: '100vw',
+            widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840',
+            alt: block.settings.image.alt
+          | escape
+        }}
+      </div>
+    {% else %}
+      {% liquid
+        capture current
+          cycle 1, 2, 3, 4, 5, 6
+        endcapture
+      %}
+      {{ 'product-' | append: current | placeholder_svg_tag: 'm-placeholder-svg m:w-full m:h-full' }}
+    {% endif %}
+
+    {% for i in (1..5) %}
+      {% liquid
+        assign top__ = 'top_' | append: i
+        assign top = block.settings[top__]
+        assign left__ = 'left_' | append: i
+        assign left = block.settings[left__]
+        assign product__ = 'product_' | append: i
+        assign product = block.settings[product__]
+      %}
+
+      {% if product != blank %}
+        {%- assign prod = product -%}
+        {% assign index = index | plus: 1 %}
+        <div
+          class="m-lookbook-icon m-lookbook-icon--{{ block.settings.button_style }}"
+          style="top: {{ top }}%; left: {{ left }}%;"
+          data-id="{{ block.id }}-{{ i }}"
+          data-index="{{ index }}"
+        >
+          <span class="m-lookbook-icon__wrapper">
+            <span class="m-lookbook-icon__main"></span>
+          </span>
+          {% liquid
+            assign y_pos = ' m-lookbook-product__top'
+            if top > 50
+              assign y_pos = ' m-lookbook-product__bottom'
+            endif
+            assign x_pos = ' m-lookbook-product__left'
+            if left > 50
+              assign x_pos = ' m-lookbook-product__right'
+            endif
+
+            assign classes = 'm-lookbook-product'
+            assign classes = classes | append: y_pos | append: x_pos | append: ' m-gradient' | append: ' m-color-' | append: block.settings.color_scheme
+          %}
+          <div
+            class="{{ classes }} m:blocks-radius-md"
+            data-id="{{ block.id }}-{{ i }}-content"
+          >
+            <a href="{{ prod.url }}" class="m-lookbook-product__thumb m:blocks-radius-md" aria-label="{{ prod.title }}">
+              {% render 'responsive-image',
+                image: prod.featured_image,
+                aspect_ratio: prod.featured_image.aspect_ratio
+              %}
+            </a>
+            <a href="{{ prod.url }}" class="m-lookbook-product__title">{{ prod.title }}</a>
+            <p class="m-lookbook-product__price">{{ prod.price | money }}</p>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% if block.settings.button_text != blank %}
+    <h3 class="m-lookbook-card__heading h4">
+      <a href="{{ block.settings.button_link | default: "#" }}">
+        {{ block.settings.button_text }}
+      </a>
+    </h3>
+  {% endif %}
+</div>

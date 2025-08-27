@@ -1,0 +1,138 @@
+{% if settings.page_transition %}
+  <style>
+    .m-page-transition {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999999;
+        background: #fff;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 100vw;
+        max-height: 100vh;
+				transition-property: opacity, visibility;
+				transition-duration: var(--m-duration-default);
+				transition-timing-function: ease;
+      }
+      .m-page-transition.fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+			.m-page-transition.m-page-transition--design-mode {
+				opacity: 1;
+				visibility: visible;
+			}
+      .m-page-transition.fade-in {
+        opacity: 1;
+        visibility: visible;
+      }
+      .m-page-transition.fade-out .m-page-transition__spinner-content {
+        display: none;
+      }
+			.m-page-transition.m-page-transition--design-mode .m-page-transition__spinner-content {
+				display: block;
+			}
+      @keyframes pageTransitionSpinner {
+        0% {
+          -webkit-transform: rotate3d(0, 0, 1, 0deg);
+          transform: rotate3d(0, 0, 1, 0deg);
+        }
+        25% {
+          -webkit-transform: rotate3d(0, 0, 1, 90deg);
+          transform: rotate3d(0, 0, 1, 90deg);
+        }
+        50% {
+          -webkit-transform: rotate3d(0, 0, 1, 180deg);
+          transform: rotate3d(0, 0, 1, 180deg);
+        }
+        75% {
+          -webkit-transform: rotate3d(0, 0, 1, 270deg);
+          transform: rotate3d(0, 0, 1, 270deg);
+        }
+        100% {
+          -webkit-transform: rotate3d(0, 0, 1, 360deg);
+          transform: rotate3d(0, 0, 1, 360deg);
+        }
+      }
+			@keyframes m-blink {
+				25% {
+					opacity: 0.5;
+				}
+				50% {
+					opacity: 0;
+				}
+				75% {
+					opacity: 0.5;
+				}
+			}
+      .m-page-transition__loading {
+        position: absolute;
+        animation: pageTransitionSpinner 1.5s linear infinite;
+        width: var(--loading-size);
+        height: var(--loading-size);
+        top: 10px;
+        left: 10px;
+        border-radius: 50%;
+        box-shadow: 0 2px 0 0 var(--loading-color);
+        transform-origin: calc(var(--loading-size) / 2) calc(var(--loading-size) / 2 + 1px);
+      }
+      .m-page-transition__logo {
+        animation: m-blink 1.5s linear infinite;
+        position: absolute;
+        width: var(--loading-size);
+        height: var(--loading-size);
+        top: 10px;
+        left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .m-page-transition__spinner {
+        width: var(--loading-size);
+        height: var(--loading-size);
+        display: inline-block;
+        overflow: hidden;
+        background: transparent;
+      }
+      .m-page-transition__spinner-content {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform: translateZ(0) scale(0.8);
+        backface-visibility: hidden;
+        transform-origin: 0 0;
+      }
+      .m-page-transition__spinner-content div {
+        box-sizing: content-box;
+      }
+  </style>
+  <div
+    class="m-page-transition"
+		data-design-mode="{{ settings.loading_design_mode }}"
+    style="--loading-size: {{ settings.loading_size }}px; --loading-color: {{ settings.loading_color }};"
+  >
+    <div class="m-page-transition__spinner">
+      <div class="m-page-transition__spinner-content">
+        <div class="m-page-transition__loading"></div>
+        {% if settings.loading_logo != blank %}
+          <div class="m-page-transition__logo">
+            {% liquid
+              assign logo_width = settings.loading_size | divided_by: 2.5
+              assign logo_height = logo_width | divided_by: settings.loading_logo.aspect_ratio
+              assign logo_alt = settings.loading_logo.alt | default: shop.name | escape
+            %}
+            {{
+              settings.loading_logo
+              | image_url: width: 100
+              | image_tag: height: logo_height, width: logo_width, alt: logo_alt, preload: true
+            }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}

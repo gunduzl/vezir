@@ -1,0 +1,399 @@
+{{ 'rich-text.css' | asset_url | stylesheet_tag }}
+{% liquid
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign show_image = false
+  if section.settings.image_1 != blank or section.settings.image_2 != blank or section.settings.image_3 != blank
+    assign show_image = true
+  endif
+%}
+
+{%- style -%}
+  #m-section-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<section
+  id="m-section-{{ section.id }}"
+  class="m-section m-rich-text{% if show_image %} m-rich-text--show-images{% endif %} m-gradient m-color-{{ section.settings.color_scheme }} {{ section.settings.custom_class }}"
+>
+  <div class="{{ section.settings.container }} m-section-my m-section-py">
+    <div class="m-richtext m:text-{{ section.settings.content_alignment }}">
+      {%- for block in section.blocks -%}
+        {% case block.type %}
+          {%- when 'heading' -%}
+            {%- if block.settings.heading != blank -%}
+              <h2
+                class="m-richtext__title {{ block.settings.heading_size }}{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                {% if animated %}
+                  data-cascade
+                  style="--animation-order: {{ forloop.index }};"
+                {% endif %}
+                {{ block.shopify_attributes }}
+              >
+                {{ block.settings.heading }}
+              </h2>
+            {% endif %}
+          {%- when 'subheading' -%}
+            {%- if block.settings.subheading != blank -%}
+              <p
+                class="m-richtext__subtitle{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                {% if animated %}
+                  data-cascade
+                  style="--animation-order: {{ forloop.index }};"
+                {% endif %}
+                {{ block.shopify_attributes }}
+              >
+                {{ block.settings.subheading }}
+              </p>
+            {% endif %}
+          {%- when 'text' -%}
+            {%- if block.settings.text != blank -%}
+              <div
+                class="m-richtext__description rte{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                {% if animated %}
+                  data-cascade
+                  style="--animation-order: {{ forloop.index }};"
+                {% endif %}
+                {{ block.shopify_attributes }}
+              >
+                {{ block.settings.text }}
+              </div>
+            {% endif %}
+          {%- when 'button' -%}
+            {%- if block.settings.button_label != blank -%}
+              <div
+                class="m-richtext__button{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}"
+                {% if animated %}
+                  data-cascade
+                  style="--animation-order: {{ forloop.index }};"
+                {% endif %}
+              >
+                <a
+                  href="{{ block.settings.button_link }}"
+                  class="m-button {{ block.settings.button_style }} {{ block.settings.button_size }}"
+                  {{ block.shopify_attributes }}
+                >
+                  {{- block.settings.button_label -}}
+                </a>
+              </div>
+            {%- endif -%}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+  {% if show_image %}
+    <div class="m-rich-text__images">
+      <div class="{{ section.settings.container }} m-rich-text__images-container">
+        <div class="m-rich-text__images-wrapper">
+          {% if section.settings.image_1 != blank %}
+            <div class="m-rich-text__image m-rich-text__image-1">
+              {% render 'responsive-image', image: section.settings.image_1, section_index: section.index, index: 1 %}
+            </div>
+          {% endif %}
+          {% if section.settings.image_2 != blank %}
+            <div class="m-rich-text__image m-rich-text__image-2">
+              {% render 'responsive-image', image: section.settings.image_2, section_index: section.index, index: 1 %}
+            </div>
+          {% endif %}
+          {% if section.settings.image_3 != blank %}
+            <div class="m-rich-text__image m-rich-text__image-3">
+              {% render 'responsive-image', image: section.settings.image_3, section_index: section.index, index: 1 %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% schema %}
+{
+  "name": "Rich text",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "container-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Settings"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Image settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 52,
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 52,
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Subheading text"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Talk about your brand"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": "h2",
+          "options": [
+            {
+              "label": "Medium",
+              "value": "h3"
+            },
+            {
+              "label": "Large",
+              "value": "h2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Pair text with an image to focus on your chosen product, collection, or blog post.<br> Add details on availability, style, or even provide a review.</p>"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop Collection"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            {
+              "value": "m-button--primary",
+              "label": "Primary button"
+            },
+            {
+              "value": "m-button--secondary",
+              "label": "Secondary button"
+            },
+            {
+              "value": "m-button--white",
+              "label": "White button"
+            },
+            {
+              "value": "m-button--link",
+              "label": "Underline button"
+            }
+          ],
+          "default": "m-button--link"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "options": [
+            {
+              "value": "m-button--small",
+              "label": "Button small"
+            },
+            {
+              "value": "",
+              "label": "Button medium"
+            },
+            {
+              "value": "m-button--large",
+              "label": "Button large"
+            }
+          ],
+          "default": ""
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rich text",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "button"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

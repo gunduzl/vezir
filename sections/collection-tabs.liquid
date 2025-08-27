@@ -1,0 +1,462 @@
+{{ 'collection-tabs.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'collection-tabs.js' | asset_url }}" defer="defer"></script>
+
+{% liquid
+  assign container = section.settings.container
+  if container == 'w-full'
+    assign container = 'container-full'
+  endif
+
+  assign image_width = 'm:w-full md:m:w-1/2 lg:m:w-1/2'
+
+  assign image_aspect_ratio = section.settings.image_ratio
+  if section.settings.image_ratio == 'adapt'
+    assign first_block = section.blocks | first
+    assign first_image = blank
+
+    if first_block.settings.image != blank
+      assign first_image = first_block.settings.image
+    else
+      assign first_collection = collections[first_block.settings.collection]
+      if first_collection.image != blank
+        assign first_image = first_collection.image
+      elsif first_collection.products.first and first_collection.products.first.images != empty
+        assign first_image = first_collection.products.first.featured_image
+      endif
+    endif
+
+    if first_image != blank
+      assign image_aspect_ratio = first_image.aspect_ratio
+    else
+      assign image_aspect_ratio = '1/1'
+    endif
+  endif
+
+  assign animation_effect = settings.animations
+  assign animated = false
+  if animation_effect != 'none'
+    assign animated = true
+    if section.settings.animations != 'inherit'
+      assign animation_effect = section.settings.animations
+    endif
+  endif
+
+  assign classes = 'm-section m-collection-tabs'
+  if section.settings.custom_class != blank
+    assign classes = classes | append: ' ' | append: section.settings.custom_class
+  endif
+  assign classes = classes | append: ' m-collection-tabs--image-' | append: section.settings.image_position | append: ' m-gradient' | append: ' m-color-' | append: section.settings.color_scheme
+%}
+
+<style>
+  #m-collection-tabs--{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px ;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+<section
+  id="m-collection-tabs--{{ section.id }}"
+  class="{{ classes }}"
+  data-section-id="{{ section.id }}"
+>
+  <div class="{{ container }} m-section-my m-section-py">
+    {% render 'index-section-header',
+      animation_effect: animation_effect,
+      section_settings: section.settings,
+      custom_classes: 'm:flex m:flex-col md:m:hidden'
+    %}
+    <div class="{% if animated %} m-scroll-trigger animate--{{ animation_effect }}{% endif %}">
+      <collection-tabs
+        class="m:flex items-center flex-wrap{% if section.settings.image_position == 'right' %} m:flex-row-reverse{% endif %}"
+        data-autoplay="{{ section.settings.autoplay }}"
+        data-autoplay-duration="{{ section.settings.autoplay_duration | default: 5 }}"
+        data-trigger-behavior="{{ section.settings.trigger_behavior | default: 'hover' }}"
+      >
+        <div class="m-collection-tab__images {{ image_width }}" style="--aspect-ratio: {{ image_aspect_ratio }}">
+          {%- for block in section.blocks %}
+            {% liquid
+              assign collection = collections[block.settings.collection]
+
+              assign tab_image = blank
+              if block.settings.image != blank
+                assign tab_image = block.settings.image
+              elsif collection.image != blank
+                assign tab_image = collection.image
+              elsif collection.products.first and collection.products.first.images != empty
+                assign tab_image = collection.products.first.featured_image
+              endif
+            %}
+            <div
+              class="m-collection-tab__image m:blocks-radius m-card m:block{% if forloop.first %} is-active{% endif %}"
+              data-block-id="{{ block.id }}"
+            >
+              {%- if tab_image != blank -%}
+                {% render 'responsive-image', image: tab_image, aspect_ratio: image_aspect_ratio, section_index: section.index, index: forloop.index %}
+              {%- else -%}
+                <div class="m-image" style="--aspect-ratio: {{ image_aspect_ratio }}">
+                  {% capture current %}{% cycle 1, 2, 3 %}{% endcapture %}
+                  {{ 'collection-' | append: current | placeholder_svg_tag: 'm-placeholder-svg' }}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+        <div class="m-collection-tab__content flex-1">
+          {% render 'index-section-header',
+            animation_effect: animation_effect,
+            section_settings: section.settings,
+            custom_classes: 'm:hidden md:m:flex md:m:flex-col'
+          %}
+          <div class="m-collection-tab__content-wrap" data-first-level>
+            {% for block in section.blocks %}
+              {% render 'collection-tab',
+                block_settings: block.settings,
+                icon: block.settings.icon,
+                open: forloop.first,
+                id: block.id,
+                attrs: block.shopify_attributes,
+                index: forloop.index,
+                animated: animated,
+                animation_effect: animation_effect
+              %}
+            {% endfor %}
+          </div>
+        </div>
+      </collection-tabs>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection tabs",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "[Read How-to](https://foxecom.link/xt3rHt)"
+    },
+    {
+      "type": "header",
+      "content": "General"
+    },
+    {
+      "type": "select",
+      "id": "container",
+      "label": "Container type",
+      "default": "container-fluid",
+      "options": [
+        {
+          "value": "container-fluid",
+          "label": "Default"
+        },
+        {
+          "value": "w-full",
+          "label": "Full width"
+        },
+        {
+          "value": "container",
+          "label": "Use container box"
+        }
+      ]
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "header",
+      "content": "Section header"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Heading alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Collection tabs"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Section header",
+      "default": "h3",
+      "options": [
+        {
+          "label": "Medium",
+          "value": "h3"
+        },
+        {
+          "label": "Large",
+          "value": "h2"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Tab settings"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "info": "Position is automatically optimized for mobile.",
+      "label": "Desktop image position",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "default": "1/1",
+      "options": [
+        {
+          "label": "Adapt to first image",
+          "value": "adapt"
+        },
+        {
+          "label": "Square (1:1)",
+          "value": "1/1"
+        },
+        {
+          "label": "Portrait (3:4)",
+          "value": "3/4"
+        },
+        {
+          "label": "Lanscape (4:3)",
+          "value": "4/3"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "prefix_header",
+      "label": "Prefix header",
+      "default": "ordinal_number",
+      "options": [
+        {
+          "value": "ordinal_number",
+          "label": "Ordinal number"
+        },
+        {
+          "value": "icon",
+          "label": "Icon"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "trigger_behavior",
+      "label": "Trigger open tab",
+      "default": "hover",
+      "options": [
+        {
+          "value": "click",
+          "label": "Click"
+        },
+        {
+          "value": "hover",
+          "label": "Hover"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "default": false,
+      "label": "Auto-rotate content"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_duration",
+      "label": "Change content every",
+      "max": 10,
+      "min": 2,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom",
+      "default": 50,
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Custom Attributes"
+    },
+    {
+      "type": "text",
+      "id": "custom_class",
+      "label": "Custom classes"
+    },
+    {
+      "type": "header",
+      "content": "Animations"
+    },
+    {
+      "type": "select",
+      "id": "animations",
+      "label": "Visible in the view animation",
+      "default": "inherit",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Inherit global setting"
+        },
+        {
+          "value": "fade-in",
+          "label": "Fade in"
+        },
+        {
+          "value": "fade-in-up",
+          "label": "Fade in up"
+        },
+        {
+          "value": "fade-in-left",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fade-in-right",
+          "label": "Fade in right"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "id": "collection",
+          "type": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Leave blank to use collection's image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "info": "Leave blank to use collection's title"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": "h4",
+          "options": [
+            {
+              "label": "Extra small",
+              "value": "h5"
+            },
+            {
+              "label": "Small",
+              "value": "h4"
+            },
+            {
+              "label": "Medium",
+              "value": "h3"
+            },
+            {
+              "label": "Large",
+              "value": "h2"
+            },
+            {
+              "label": "Extra large",
+              "value": "h1"
+            }
+          ]
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "info": "Leave blank to use collection's description"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "Icon"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection tabs",
+      "blocks": [
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

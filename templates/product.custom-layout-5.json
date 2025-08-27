@@ -1,0 +1,385 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "7e718e08-9f95-4ef8-ba62-8265bcfb25e8": {
+      "type": "custom-code",
+      "settings": {
+        "custom_css": ".sf__custom-images .m-section-py {\n  padding-top: 0;\n}\n.sf__custom-text .m-section-py {\n  padding-top: 20px;\n}\n.sf__custom-text .m-section-py .m-section__header {\n  margin-bottom: 0;\n}\n.sf__custom-icon .m-section-py {\n  padding-bottom: 0;\n  padding-top: 0;\n}\n.sf__custom-5-section-collapse .sf__tab-item-label {\n  font-size: 1.5rem;\n  font-weight: normal;\n  line-height: 1.5;\n  border-bottom-color: #cccccc;\n  font-family: 'SF-Heading-font';\n  padding: 0;\n  margin: 1rem 0;\n}\n.sf__custom-5-section-collapse .sf__tab-item-content .text-color-subtext {\n  font-size: 15px;\n  line-height: 1.6;\n  margin-bottom: 1.25rem;\n}\n.sf__custom-5-section-collapse .sf__tabs-custom .sf__tab-item {\n  margin-bottom: 0;\n}\n.sf__custom-5-section-collapse .sf__tab-item-label:before {\n  right: 5px;\n}"
+      }
+    },
+    "16341808481d69045d": {
+      "type": "breadcrumb",
+      "settings": {
+        "container": "container",
+        "text_alignment": "center",
+        "hide_current": false,
+        "hide_on_mb": false,
+        "animations": "inherit"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_saving": false,
+            "sale_badge_type": "percentage"
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "a7c33681-2e92-4afe-af6c-09be8f611b30": {
+          "type": "short_description",
+          "settings": {}
+        },
+        "ecf54c3f-3da0-4922-8917-196d012654a8": {
+          "type": "foxkit_countdown_timer",
+          "settings": {}
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "show_atc_button": true,
+            "show_dynamic_checkout": false,
+            "show_gift_card_recipient": true
+          }
+        },
+        "addons": {
+          "type": "addons",
+          "settings": {
+            "show_atcp": true,
+            "show_ask_a_question": true,
+            "show_social": true
+          }
+        }
+      },
+      "block_order": [
+        "price",
+        "title",
+        "a7c33681-2e92-4afe-af6c-09be8f611b30",
+        "ecf54c3f-3da0-4922-8917-196d012654a8",
+        "buy_buttons",
+        "addons"
+      ],
+      "settings": {
+        "container": "container",
+        "layout": "layout-6",
+        "show_atwl": false,
+        "enable_history_state": true,
+        "enable_variant_group_images": false,
+        "show_featured_media": true,
+        "show_zoom_button": true,
+        "enable_video_autoplay": false,
+        "show_nav_media_mobile": false,
+        "show_pagination_mobile": true,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
+        "enable_dynamic_checkout": false,
+        "sticky_atc_compare": false
+      }
+    },
+    "product-details-tabs": {
+      "type": "product-details-tabs",
+      "blocks": {
+        "description": {
+          "type": "description",
+          "settings": {
+            "header": "Product description"
+          }
+        },
+        "tab": {
+          "type": "tab",
+          "settings": {
+            "header": "Shipping & Return",
+            "content": "<p>Shipping cost is based on weight. Just add products to your cart and use the Shipping Calculator to see the shipping price.</p><p>We want you to be 100% satisfied with your purchase. Items can be returned or exchanged within 30 days of delivery.</p>",
+            "content_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "description",
+        "tab"
+      ],
+      "disabled": true,
+      "settings": {
+        "container": "container",
+        "default_open": true,
+        "animations": "inherit"
+      }
+    },
+    "custom-content": {
+      "type": "custom-content",
+      "blocks": {
+        "d58d90b1-a098-4835-b1fe-9f7ecb7f48e6": {
+          "type": "html",
+          "settings": {
+            "code": "<div class=\"sf__tabs-custom\">\n  <div class=\"sf__tab-item\">\n    <input type=\"checkbox\" id=\"chck1\" checked>\n    <label class=\"sf__tab-item-label\" for=\"chck1\">Product detail</label>\n    <ul class=\"sf__tab-item-content\">\n      <li class=\"flex text-color-subtext medium:mb-5\">\n        <img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">\n        All paper products and packaging are made with 100% PCW paper with FSC certification, promoting responsible forestry practices\n      </li>\n      <li class=\"flex text-color-subtext medium:mb-5\">\n        <img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">\n        Our paper is created using biogas energy, which is captured from decomposing landfill waste and used for production at the paper mill\n      </li>\n      <li class=\"flex text-color-subtext medium:mb-5\">\n        <img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">\n        Eco-inks and non-toxic digital toners are used for printing\n      </li>\n      <li class=\"flex text-color-subtext medium:mb-5\">\n        <img class=\"mr-5\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-product.svg?v=1632122102\">\n        Plastic-free shipping\n      </li>\n    </ul>\n  </div>\n  <div class=\"sf__tab-item\">\n    <input type=\"checkbox\" id=\"chck2\">\n    <label class=\"sf__tab-item-label\" for=\"chck2\">Details &amp; specs</label>\n    <ul class=\"sf__tab-item-content\">\n      <li class=\"flex text-color-subtext\">Format: 5 x 7 (12,7 cm x 17,78 cm)</li>\n      <li class=\"flex text-color-subtext\">Blank inside</li>\n      <li class=\"flex text-color-subtext\">Made from recycled paper</li>\n      <li class=\"flex text-color-subtext\">Comes in a white envelope</li>\n      <li class=\"flex text-color-subtext\">Compostable packaging</li>\n      <li class=\"flex text-color-subtext\">Thick matte cardstock</li>\n    </ul>\n  </div>\n  <div class=\"sf__tab-item\">\n    <input type=\"checkbox\" id=\"chck3\">\n    <label class=\"sf__tab-item-label\" for=\"chck3\">Shipping &amp; return</label>\n    <ul class=\"sf__tab-item-content text-color-subtext\">\n      <p class=\"text-color-subtext\">Your chair will arrive via UPS Ground in 2 boxes. It’s designed to ship flat-pack which for you means zero back pain, FREE shipping, no scuffs to your doorway (or your security deposit), and it packs up in a jiff when you’re ready to move.</p>\n    </ul>\n  </div>\n</div>",
+            "width": "50%",
+            "block_custom_class": "sf__custom-collapse",
+            "animations": "inherit"
+          }
+        },
+        "1632060681ed6277b4-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "d58d90b1-a098-4835-b1fe-9f7ecb7f48e6",
+        "1632060681ed6277b4-1"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container",
+        "gap": 100,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 100,
+        "padding_bottom": 0,
+        "custom_class": "sf__custom-5-section-collapse"
+      }
+    },
+    "1632219950128bb020": {
+      "type": "custom-content",
+      "blocks": {
+        "a6518e34-91a9-4554-9859-3f56eafef74c": {
+          "type": "html",
+          "settings": {
+            "code": "<img class=\"mx-auto\" src=\"https://cdn.shopify.com/s/files/1/0595/7291/2305/files/icon-2.svg?v=1632067410\">",
+            "width": "100%",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "a6518e34-91a9-4554-9859-3f56eafef74c"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "sf__custom-icon"
+      }
+    },
+    "163212177275e99b4c": {
+      "type": "custom-content",
+      "settings": {
+        "heading": "Made from 100% post-consumer waste.Packaged and shipped plastic-free",
+        "subheading": "",
+        "description": "Orders are typically shipped within 1-2 business days. Tracking information is <br>provided for all orders EXCEPT orders of single cards",
+        "header_alignment": "center",
+        "container": "container",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 40,
+        "custom_class": "sf__custom-text"
+      }
+    },
+    "16322217957dfd92bd": {
+      "type": "icon-box",
+      "blocks": {
+        "16322217957dfd92bd-0": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Free shipping",
+            "description": "<p>Deliver a smile to yourself or someone special with one of our sustainable favorites.</p>",
+            "link": "",
+            "button_label": "",
+            "button_link": "",
+            "button_style": "sf__btn-link",
+            "button_size": ""
+          }
+        },
+        "16322217957dfd92bd-1": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "Plastic free",
+            "description": "<p>From sourcing recycled paper, to printing with eco-friendly inks and shipping orders in post-consumer-waste mailers.</p>",
+            "link": "",
+            "button_label": "",
+            "button_link": "",
+            "button_style": "sf__btn-link",
+            "button_size": ""
+          }
+        },
+        "16322217957dfd92bd-2": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "100% recycable",
+            "description": "<p>Orders are secured in our sturdy, 100% PCW packaging, which is fully recyclable biodegradable, and compostable</p>",
+            "link": "",
+            "button_label": "",
+            "button_link": "",
+            "button_style": "sf__btn-link",
+            "button_size": ""
+          }
+        },
+        "0a2e3180-8b86-4e33-b40f-b246bd764d03": {
+          "type": "iconbox",
+          "settings": {
+            "image_by_url": "",
+            "title": "High-quality materials",
+            "description": "<p>Orders are secured in our sturdy, 100% PCW packaging, which is fully recyclable biodegradable, and compostable</p>",
+            "link": "",
+            "button_label": "",
+            "button_link": "",
+            "button_style": "sf__btn-link",
+            "button_size": ""
+          }
+        }
+      },
+      "block_order": [
+        "16322217957dfd92bd-0",
+        "16322217957dfd92bd-1",
+        "16322217957dfd92bd-2",
+        "0a2e3180-8b86-4e33-b40f-b246bd764d03"
+      ],
+      "settings": {
+        "container": "container-fluid",
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "item_per_row": 4,
+        "item_gap": 40,
+        "item_gap_mobile": 10,
+        "card_style": "vertical",
+        "image_max_width": "60px",
+        "content_alignment": "start",
+        "hover_effect": "none",
+        "enable_slider": false,
+        "show_pagination": false,
+        "show_navigation": false,
+        "use_scroll_mobile": true,
+        "use_grid_column_mb": false,
+        "padding_top": 0,
+        "padding_bottom": 100,
+        "custom_class": "",
+        "animations": "inherit"
+      }
+    },
+    "1632221802903645b4": {
+      "type": "custom-content",
+      "blocks": {
+        "1632221802903645b4-1": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        },
+        "638bb96f-9ffc-4904-ac75-0ec454ce2aa4": {
+          "type": "image",
+          "settings": {
+            "link": "",
+            "width": "50%",
+            "alignment": "center",
+            "block_custom_class": "",
+            "animations": "inherit"
+          }
+        }
+      },
+      "block_order": [
+        "1632221802903645b4-1",
+        "638bb96f-9ffc-4904-ac75-0ec454ce2aa4"
+      ],
+      "settings": {
+        "heading": "",
+        "subheading": "",
+        "description": "",
+        "header_alignment": "center",
+        "container": "container-fluid",
+        "gap": 30,
+        "gap_mobile": 16,
+        "use_scroll_mobile": false,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "custom_class": "sf__custom-images"
+      }
+    },
+    "product-recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "container": "container",
+        "heading": "May you like this",
+        "text_align": "left",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true,
+        "use_scroll_mobile": true,
+        "animations": "inherit"
+      }
+    },
+    "16321491731d2c8073": {
+      "type": "product-reviews",
+      "settings": {
+        "container": "container-narrow",
+        "heading": "Reviews",
+        "custom_liquid": ""
+      }
+    },
+    "recent-viewed-products": {
+      "type": "recent-viewed-products",
+      "settings": {
+        "container": "container",
+        "heading": "Recently Viewed Products",
+        "limit": 8,
+        "columns": 4,
+        "column_gap": 30,
+        "enable_slider": true
+      }
+    }
+  },
+  "order": [
+    "7e718e08-9f95-4ef8-ba62-8265bcfb25e8",
+    "16341808481d69045d",
+    "main",
+    "product-details-tabs",
+    "custom-content",
+    "1632219950128bb020",
+    "163212177275e99b4c",
+    "16322217957dfd92bd",
+    "1632221802903645b4",
+    "product-recommendations",
+    "16321491731d2c8073",
+    "recent-viewed-products"
+  ]
+}
