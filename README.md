@@ -1,6 +1,6 @@
-# Vezir E-ticaret Teması
+# Vezir E-commerce Project
 
-Bu depo, Vezir e-ticaret sitesinin Shopify temasını içermektedir.
+This repository contains the codebase for the Vezir e-commerce website, built with modern web technologies.
 
 ## Canlı Site
 
@@ -16,27 +16,27 @@ Canlı sitenin bir önizlemesi:
 
 *Not: Yukarıdaki görsel, canlı sitenin bir ekran görüntüsüdür. En güncel görünüm için lütfen canlı siteyi ziyaret edin.*
 
-## Kurulum ve Geliştirme
+## Setup and Development
 
-Bu temayı yerel olarak çalıştırmak ve geliştirmek için Shopify CLI'ı kullanmanız gerekmektedir.
+To run and develop this project locally, follow these steps:
 
-1. Depoyu klonlayın:
+1. Clone the repository:
    ```bash
    git clone git@github.com:gunduzl/vezir.git
    cd vezir
    ```
 
-2. Shopify CLI ile temayı bağlayın ve yerel sunucuyu başlatın:
+2. Install dependencies (if any, e.g., `npm install` or `yarn install` for a JS project). For this project, you'll use the Shopify CLI to serve the theme:
    ```bash
    shopify theme dev
    ```
 
-3. Tarayıcınızda `http://127.0.0.1:9000` (veya CLI'ın size verdiği port) adresine giderek temayı önizleyin.
+3. Open your browser and navigate to `http://127.0.0.1:9000` (or the port provided by the CLI) to preview the application.
 
-## Katkıda Bulunma
+## Contributing
 
-Katkıda bulunmak isterseniz, lütfen bir pull request açmadan önce değişikliklerinizi açıklayan bir issue oluşturun.
+If you'd like to contribute, please open an issue to discuss your proposed changes before submitting a pull request.
 
-## Lisans
+## License
 
-Bu proje açık kaynaklı değildir ve tüm hakları saklıdır.
+This project is not open-source; all rights are reserved.
