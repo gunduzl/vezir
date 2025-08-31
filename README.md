@@ -2,19 +2,19 @@
 
 This repository contains the codebase for the Vezir e-commerce website, built with modern web technologies.
 
-## Canlı Site
+## Live Site
 
-Projenin canlı versiyonuna aşağıdaki linkten ulaşabilirsiniz:
+You can access the live version of the project at the following link:
 
 [vezironline.com](https://vezironline.com)
 
-## Önizleme
+## Preview
 
-Canlı sitenin bir önizlemesi:
+A preview of the live site:
 
 ![Vezir Online Store Preview](https://vezironline.com/cdn/shop/files/vezir-preview.png?v=1700000000) 
 
-*Not: Yukarıdaki görsel, canlı sitenin bir ekran görüntüsüdür. En güncel görünüm için lütfen canlı siteyi ziyaret edin.*
+*Note: The image above is a screenshot of the live site. Please visit the live site for the most up-to-date appearance.*
 
 ## Setup and Development
 
